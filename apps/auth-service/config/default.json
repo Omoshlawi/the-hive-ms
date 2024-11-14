@@ -1,0 +1,6 @@
+{
+  "name": "The hive auth services",
+  "port": null,
+  "db": "",
+  "jwt": "JWT_TOKEN"
+}

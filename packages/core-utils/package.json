@@ -1,0 +1,26 @@
+{
+  "name": "@hive/core-utils",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "dependencies": {
+    "lodash": "^4.17.7",
+    "winston": "^3.14.1"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "@hive/eslint-config": "workspace:*",
+    "@hive/typescript-config": "workspace:*",
+    "@prisma/client": "^5.18.0",
+    "@turbo/gen": "^1.12.4",
+    "@types/node": "^20.11.24",
+    "@types/eslint": "^8.56.5",
+     "eslint": "^8.57.0",
+    "eslint-config-turbo": "^2.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-only-warn": "^1.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "typescript": "5.5.4"
+  }
+}
