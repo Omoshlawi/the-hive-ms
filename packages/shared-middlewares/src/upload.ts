@@ -2,9 +2,8 @@ import slugify from "slugify";
 import multer, { FileFilterCallback } from "multer";
 import path from "path";
 import fs from "fs";
-import { MEDIA_ROOT, configuration } from "../utils";
 import { Request } from "express";
-import { APIException } from "../shared/exceprions";
+import { APIException, type ServiceIdentity } from "@hive/core-utils";
 
 export const ensureFolderExists = (folderPath: string) => {
   if (!fs.existsSync(folderPath)) {
@@ -34,18 +33,12 @@ const filter = (
 };
 
 export const renameFile = (fileName: string) =>
-  slugify(configuration.name) +
-  "-" +
-  slugify(configuration.version) +
-  "-" +
-  Date.now() +
-  "-" +
-  slugify(fileName, { lower: true, trim: true });
+  Date.now() + "-" + slugify(fileName, { lower: true, trim: true });
 
-const diskFile = ({ dest }: { dest: string }) => {
+const diskFile = ({ dest, mediaRoot }: { dest: string; mediaRoot: string }) => {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      const destinationFolder = path.join(MEDIA_ROOT, dest);
+      const destinationFolder = path.join(mediaRoot, dest);
       ensureFolderExists(destinationFolder);
       cb(null, destinationFolder);
     },

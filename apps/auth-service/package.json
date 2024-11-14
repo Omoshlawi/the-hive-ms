@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@hive/typescript-config": "workspace:*",
+    "@hive/core-utils": "workspace:*",
     "@types/bcrypt": "^5.0.2",
     "@types/config": "^3.3.3",
     "@types/cors": "^2.8.17",

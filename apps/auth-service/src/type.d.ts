@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { type User } from "@prisma/client";
 import { Request } from "express";
 
 export interface Service {
@@ -7,10 +7,6 @@ export interface Service {
   name: string;
   version: string;
   timestamp?: number;
-}
-
-export interface UserRequest extends Request {
-  user: User;
 }
 
 export interface Entity {
@@ -28,30 +24,6 @@ export interface Repository<T> {
   deleteById(id: string): Promise<void>;
 }
 
-export abstract class BaseEntity implements Entity {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt?: Date | null;
-
-  constructor(id: string) {
-    this.id = id;
-    this.createdAt = new Date();
-    this.updatedAt = new Date();
-  }
-}
-
-export interface NotFoundException {
-  status: 404;
-  errors: {
-    detail: string;
-  };
-}
-export interface ValidationException {
-  status: 400;
-  errors: Record<string, any>;
-}
-
 export interface TokenPayload {
   id: string;
   name?: string;
@@ -60,4 +32,12 @@ export interface TokenPayload {
   phoneNumber?: string;
   image?: string;
   type: "refresh" | "access";
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User;
+    }
+  }
 }

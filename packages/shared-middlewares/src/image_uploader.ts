@@ -1,13 +1,12 @@
 import multer, { Field, FileFilterCallback } from "multer";
 import { NextFunction, Request, Response } from "express";
-import { APIException } from "@/shared/exceprions";
 import path from "path/posix";
 import fs from "fs";
-import { configuration, MEDIA_ROOT } from "@/utils";
 import slugify from "slugify";
 import { isEmpty, zip } from "lodash";
 import sharp from "sharp";
-import { addRollBackTaskToQueue } from "@/shared/tasks";
+import { addRollBackTaskToQueue } from "./tasks";
+import { APIException } from "@hive/core-utils";
 
 const filter = (
   req: Request,
@@ -43,13 +42,7 @@ export const ensureFolderExists = (folderPath: string) => {
 };
 
 export const renameFile = (fileName: string) =>
-  slugify(configuration.name) +
-  "-" +
-  slugify(configuration.version) +
-  "-" +
-  Date.now() +
-  "-" +
-  slugify(fileName, { lower: true, trim: true });
+  Date.now() + "-" + slugify(fileName, { lower: true, trim: true });
 
 const generateFilePath = (filePath: string) => {
   const fileNameWithoutExtension = filePath.slice(0, filePath.lastIndexOf("."));
@@ -62,6 +55,7 @@ const generateFilePath = (filePath: string) => {
 const saveImages = async (
   files: Express.Multer.File[],
   savePathRelative: string,
+  mediaRoot: string,
   options?: {
     width: number;
     height: number;
@@ -79,14 +73,14 @@ const saveImages = async (
       .jpeg({ mozjpeg: true, quality: options?.quality ?? 80 }) // Adjust quality
       .resize(options?.width, options?.height, { fit: options?.fit })
       .grayscale(options?.isGrayScale ?? false)
-      .toFile(path.join(MEDIA_ROOT, path_!))
+      .toFile(path.join(mediaRoot, path_!))
   );
 
   const saved = await Promise.all(uploadTasks);
   return saved.map((outputInfo, index) => ({
     outputInfo,
     relative: filePaths[index],
-    absolute: path.join(MEDIA_ROOT, filePaths[index]),
+    absolute: path.join(mediaRoot, filePaths[index]),
   }));
 };
 
@@ -106,16 +100,20 @@ const rollBackFileUploads = async (absolutePaths: string[]) => {
 };
 
 const imageUploader = {
-  postImageUpload: (uploadPath?: string) => {
+  postImageUpload: (mediaRoot: string, uploadPath?: string) => {
     // Ensure folder exist
-    ensureFolderExists(path.join(MEDIA_ROOT, uploadPath ?? ""));
+    ensureFolderExists(path.join(mediaRoot, uploadPath ?? ""));
 
     return {
       single(fieldName: string) {
         return async (req: Request, res: Response, next: NextFunction) => {
           try {
             if (req.file) {
-              const uploaded = await saveImages([req.file], uploadPath ?? "");
+              const uploaded = await saveImages(
+                [req.file],
+                uploadPath ?? "",
+                mediaRoot
+              );
               req.body[fieldName] = uploaded[0].relative;
               addRollBackTaskToQueue(req, async () => {
                 await rollBackFileUploads([uploaded[0].absolute]);
@@ -140,7 +138,8 @@ const imageUploader = {
             if ((req.files as any)?.length > 0) {
               const uploaded = await saveImages(
                 req.files as any,
-                uploadPath ?? ""
+                uploadPath ?? "",
+                mediaRoot
               );
               req.body[fieldName] = uploaded.map((o) => o.relative);
             } else {
@@ -162,7 +161,8 @@ const imageUploader = {
               for (const field of fields) {
                 const uploaded = await saveImages(
                   files[field.name],
-                  uploadPath ?? ""
+                  uploadPath ?? "",
+                  mediaRoot
                 );
                 req.body[field.name] = uploaded.map((o) => o.relative);
               }

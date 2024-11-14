@@ -1,15 +1,15 @@
 import multer, { Field, FileFilterCallback, DiskStorageOptions } from "multer";
 import { NextFunction, Request, Response } from "express";
-import { APIException } from "@/shared/exceprions";
 import path from "path/posix";
 import fs from "fs";
-import { configuration, MEDIA_ROOT } from "@/utils";
 import slugify from "slugify";
 import { isEmpty } from "lodash";
 import sharp from "sharp";
-import { addRollBackTaskToQueue } from "@/shared/tasks";
-import logger from "@/shared/logger";
+import { addRollBackTaskToQueue } from "./tasks";
 import { promisify } from "util";
+import { APIException, createLogger } from "@hive/core-utils";
+
+const logger = createLogger({ name: "file-service", version: "*" });
 
 const readFileAsync = promisify(fs.readFile);
 
@@ -21,10 +21,10 @@ const filter = (
   cb(null, true);
 };
 
-const diskStorage = (uploadPath: string) => {
+const diskStorage = (uploadPath: string, mediaRoot: string) => {
   const storage: DiskStorageOptions = {
     destination: (req, file, cb) => {
-      const destinationFolder = path.join(MEDIA_ROOT, uploadPath);
+      const destinationFolder = path.join(mediaRoot, uploadPath);
       ensureFolderExists(destinationFolder);
       cb(null, destinationFolder);
     },
@@ -44,22 +44,17 @@ export const ensureFolderExists = (folderPath: string) => {
 };
 
 export const renameFile = (fileName: string) =>
-  slugify(configuration.name) +
-  "-" +
-  slugify(configuration.version) +
-  "-" +
-  Date.now() +
-  "-" +
-  slugify(fileName, { lower: true, trim: true });
+  Date.now() + "-" + slugify(fileName, { lower: true, trim: true });
 
 const saveFile = async (
   file: Express.Multer.File,
-  relativeSavePath: string
+  relativeSavePath: string,
+  mediaRoot: string
 ) => {
   try {
     const { fieldname, filename, originalname, path: filePath } = file;
 
-    const saveAbsolutePath = path.join(MEDIA_ROOT, relativeSavePath, filename);
+    const saveAbsolutePath = path.join(mediaRoot, relativeSavePath, filename);
     const saveRelativePath = path.join(relativeSavePath, filename);
 
     await fs.promises.rename(filePath, saveAbsolutePath);
@@ -104,6 +99,7 @@ const deleteFileAsync = (filePath: string, delayed = 3000, retryCount = 3) => {
 const saveImage = async (
   image: Express.Multer.File,
   relativeSavePath: string,
+  mediaRoot: string,
   options?: {
     width: number;
     height: number;
@@ -122,7 +118,7 @@ const saveImage = async (
     const newFileName = `${fileNameWithoutExtension}.jpeg`;
 
     const saveAbsolutePath = path.join(
-      MEDIA_ROOT,
+      mediaRoot,
       relativeSavePath,
       newFileName
     );
@@ -154,8 +150,8 @@ const saveImage = async (
 };
 
 const fileUploader = {
-  postUpload: (uploadPath?: string) => {
-    const storagePath = path.join(MEDIA_ROOT, uploadPath ?? "");
+  postUpload: (mediaRoot: string, uploadPath?: string) => {
+    const storagePath = path.join(mediaRoot, uploadPath ?? "");
     ensureFolderExists(storagePath);
     return {
       fields(fields: (Field & { mode?: "single" | "array" })[]) {
@@ -171,7 +167,6 @@ const fileUploader = {
 
                 // TODO Add Rollbacks to handle early errors
 
-
                 // Assertain that if mode is single only one file is provded
                 if (_mode == "single" && fileList.length > 1)
                   throw new APIException(400, {
@@ -185,9 +180,9 @@ const fileUploader = {
                 for (const file of fileList) {
                   let _file: { absolute: string; relative: string };
                   if (file.mimetype.split("/")[0] === "image") {
-                    _file = await saveImage(file, uploadPath ?? "");
+                    _file = await saveImage(file, uploadPath ?? "", mediaRoot);
                   } else {
-                    _file = await saveFile(file, uploadPath ?? "");
+                    _file = await saveFile(file, uploadPath ?? "", mediaRoot);
                   }
                   if (_mode == "single") {
                     req.body[field.name] = _file.relative;
