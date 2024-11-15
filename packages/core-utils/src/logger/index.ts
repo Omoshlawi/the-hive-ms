@@ -1,8 +1,10 @@
-import { type ServiceIdentity } from "@/types";
+import { type ServiceIdentity, Logger } from "@/types";
 import winston from "winston";
 
-export const createLogger = (serviceId: ServiceIdentity) => {
-  const logger = winston.createLogger({
+export const createLogger: (service: ServiceIdentity) => Logger = (
+  serviceId: ServiceIdentity
+) => {
+  const logger:Logger = winston.createLogger({
     // level: "info",
     format: winston.format.json(),
     defaultMeta: { service: `${serviceId.name}:${serviceId.version}` },
@@ -23,5 +25,5 @@ export const createLogger = (serviceId: ServiceIdentity) => {
       })
     );
   }
-  return logger;
+  return logger as Logger;
 };

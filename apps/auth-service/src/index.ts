@@ -1,11 +1,11 @@
 import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
-import logger from "@/shared/logger";
 import { configuration, MEDIA_ROOT } from "@/utils";
-import handleErrors from "./middlewares/handleErrors";
 import morgan from "morgan";
 import cors from "cors";
+
+
 
 const startServer = async () => {
   const app = express();

@@ -1,5 +1,5 @@
-import { type User } from "@prisma/client";
 import { Request } from "express";
+import {type User} from "@prisma/client"
 
 export interface Service {
   host: string;
