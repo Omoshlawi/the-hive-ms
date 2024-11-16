@@ -1,26 +1,17 @@
 {
   "extends": "@hive/typescript-config/express.json",
   "compilerOptions": {
-    "composite": false,
-    "target": "ES2020",
+    "composite": true,
+    "emitDeclarationOnly": true,
     "module": "commonjs",
     "outDir": "./dist",
     "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
     "baseUrl": "./",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@hive/*": [
-        "./node_modules/@hive/*"
-      ]
-    }
+    "resolveJsonModule": true
   },
   "references": [
     {
-      "path": "../../packages/core-utils"
+      "path": "../../packages/shared-middlewares"
     },
     {
       "path": "../../packages/core-utils"

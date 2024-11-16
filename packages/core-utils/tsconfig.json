@@ -21,6 +21,11 @@
       ]
     },
   },
+  "references": [
+    {
+      "path": "../../packages/shared-middlewares"
+    }
+  ],
   "include": [
     "src/**/*"
   ],

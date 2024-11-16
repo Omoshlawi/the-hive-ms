@@ -3,7 +3,7 @@
   "display": "Default",
   "compilerOptions": {
     "target": "ES2020",
-    "composite": false,
+    "composite": true,
     "declaration": false,
     "declarationMap": false,
     "esModuleInterop": true,
@@ -12,12 +12,16 @@
     "isolatedModules": true,
     "moduleResolution": "node",
     "noUnusedLocals": false,
+    "resolveJsonModule": true,
+    "lib": [
+      "ES2020"
+    ],
     "noUnusedParameters": false,
     "preserveWatchOutput": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
     "strict": true,
-    "emitDeclarationOnly": false,
+    "emitDeclarationOnly": true,
     "baseUrl": "./",
     "paths": {
       "@/*": [
