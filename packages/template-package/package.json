@@ -1,5 +1,5 @@
 {
-  "name": "@hive/core-utils",
+  "name": "@hive/template-package",
   "version": "1.0.0",
   "private": true,
   "main": "./dist/index.js",
