@@ -90,10 +90,20 @@ echo -e "Available space: $space_freed"
 
 # Optional: Add git clean for untracked files
 echo
+# Prompt user to clean untracked files
+# This section asks the user if they want to remove files not tracked by git
+# The -p flag allows showing a prompt message
+# -n 1 means read only 1 character
+# -r prevents backslash from being interpreted as an escape character
 read -p "Do you want to clean untracked files? (y/N) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
+    # If user enters 'y' or 'Y':
     echo -e "${BLUE}→${NC} Cleaning untracked files..."
+    # git clean removes untracked files:
+    # -f force
+    # -x remove ignored files too
+    # -d remove untracked directories too
     git clean -fxd
     echo -e "$TICK Untracked files removed"
 fi
