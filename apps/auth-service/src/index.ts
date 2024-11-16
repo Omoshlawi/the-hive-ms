@@ -13,9 +13,9 @@ const startServer = async () => {
 
   if (app.get("env") === "development") {
     app.use(morgan("tiny"));
-    // logger.info(
-    //   `[+]${configuration.name}:${configuration.version} enable morgan`
-    // );
+    logger.info(
+      `[+]${configuration.name}:${configuration.version} enable morgan`
+    );
   }
   app.use(cors());
   app.use(express.static(MEDIA_ROOT));
@@ -33,14 +33,19 @@ const startServer = async () => {
   //-------------------end routes-----------------------------
 
   //---------------- error handler -----------------------
-  // app.use(handleErrorsMiddleWare);
+  app.use(handleErrorsMiddleWare);
   app.use((req, res) => {
     res.status(404).json({ detail: "Not Found" });
   });
 
   const port = configuration.port ?? 0;
   httpServer.listen(port, () => {
-    // logger.info("App listening in port port: " + port + "....");
+    const address: any = httpServer.address();
+    const bind =
+      typeof address === "string" ? `pipe ${address}` : `port ${address?.port}`;
+    logger.info(
+      `[+]${configuration.name}:${configuration.version} listening on ${bind}`
+    );
   });
 };
 
