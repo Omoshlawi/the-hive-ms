@@ -1,12 +1,10 @@
 {
   "extends": "@hive/typescript-config/packages.json",
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2022",
     "module": "commonjs",
     "outDir": "./dist",
     "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
     "baseUrl": "./",
     "paths": {
       "@/*": [
@@ -16,9 +14,6 @@
         "./node_modules/winston",
         "../../node_modules/winston"
       ],
-      "@hive/*": [
-        "./node_modules/@hive/*"
-      ]
     },
   },
   "include": [

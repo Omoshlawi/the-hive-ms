@@ -28,9 +28,6 @@
     "paths": {
       "@/*": [
         "src/*"
-      ],
-      "@hive/*": [
-        "./node_modules/@hive/*"
       ]
     },
   },

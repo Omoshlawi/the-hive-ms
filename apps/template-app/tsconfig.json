@@ -1,7 +1,7 @@
 {
   "extends": "@hive/typescript-config/express.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "CommonJS",
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": "./"
