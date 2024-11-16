@@ -1,0 +1,6 @@
+{
+  "name": "The hive template service",
+  "port": null,
+  "db": "",
+  "jwt": "JWT_TOKEN"
+}

@@ -1,0 +1,36 @@
+{
+  "extends": "@hive/typescript-config/express.json",
+  "compilerOptions": {
+    "composite": false,
+    "target": "ES2020",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@hive/*": [
+        "./node_modules/@hive/*"
+      ]
+    }
+  },
+  "references": [
+    {
+      "path": "../../packages/core-utils"
+    },
+    {
+      "path": "../../packages/core-utils"
+    }
+  ],
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
