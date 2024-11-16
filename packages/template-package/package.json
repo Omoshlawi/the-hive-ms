@@ -1,0 +1,41 @@
+{
+  "name": "@hive/core-utils",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "dev": "tsc -w && tsc-alias -w && node dist/index.js",
+    "build": "tsc && tsc-alias",
+    "clean": "rimraf dist",
+    "lint": "eslint src/",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@hive/eslint-config": "workspace:*",
+    "@hive/typescript-config": "workspace:*",
+    "@turbo/gen": "^1.12.4",
+    "@types/eslint": "^8.56.5",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "^20.11.24",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-turbo": "^2.0.0",
+    "eslint-plugin-only-warn": "^1.1.0",
+    "rimraf": "^6.0.1",
+    "tsc-alias": "^1.8.10",
+    "typescript": "5.5.4"
+  }
+}
