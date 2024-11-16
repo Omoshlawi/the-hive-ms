@@ -4,7 +4,7 @@ import { createServer } from "http";
 import { configuration, MEDIA_ROOT } from "@/utils";
 import morgan from "morgan";
 import cors from "cors";
-// import logger from "@/services/logger";
+import logger from "@/services/logger";
 import { handleErrorsMiddleWare } from "@hive/shared-middlewares";
 
 const startServer = async () => {
@@ -33,7 +33,7 @@ const startServer = async () => {
   //-------------------end routes-----------------------------
 
   //---------------- error handler -----------------------
-  app.use(handleErrorsMiddleWare);
+  // app.use(handleErrorsMiddleWare);
   app.use((req, res) => {
     res.status(404).json({ detail: "Not Found" });
   });

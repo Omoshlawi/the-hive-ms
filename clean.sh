@@ -70,7 +70,7 @@ echo
 
 # Create array of directories and files to clean
 directories=("dist" "node_modules" ".turbo" ".cache" ".next" "build")
-files=(".DS_Store" "package-lock.json" "yarn.lock" "pnpm-lock.yaml")
+files=(".DS_Store" "package-lock.json" "yarn.lock" "pnpm-lock.yaml" "tsconfig.tsbuildinfo")
 
 # Clean directories
 for dir in "${directories[@]}"; do
@@ -104,6 +104,6 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     # -f force
     # -x remove ignored files too
     # -d remove untracked directories too
-    git clean -fxd
+    git clean -fxd -e "*.env" -e ".env.*"
     echo -e "$TICK Untracked files removed"
 fi

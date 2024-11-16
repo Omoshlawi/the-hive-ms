@@ -16,7 +16,8 @@
     "skipLibCheck": true,
     "strictNullChecks": true,
     "strict": true,
-    "emitDeclarationOnly": true,
+    "emitDeclarationOnly": false,
+    "resolveJsonModule": true,
     "baseUrl": "./",
     "paths": {
       "@/*": [

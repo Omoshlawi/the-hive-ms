@@ -16,7 +16,7 @@
     "skipLibCheck": true,
     "strictNullChecks": true,
     "strict": true,
-    "emitDeclarationOnly": true,
+    "emitDeclarationOnly": false,
     "baseUrl": "./",
     "paths": {
       "@/*": [

@@ -1,6 +1,6 @@
 {
-    "extends": "@hive/typescript-config/packages.json",
-    "compilerOptions": {
+  "extends": "@hive/typescript-config/packages.json",
+  "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
     "outDir": "./dist",
@@ -8,9 +8,6 @@
     "strict": true,
     "esModuleInterop": true,
     "baseUrl": "./",
-    "paths": {
-      "@/*": ["src/*"]
-    },
   },
   "include": [
     "src/**/*"
