@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -24,15 +24,15 @@
     }
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch tsc",
+    "dev": "tsc -w && tsc-alias -w && node dist/index.js",
+    "build": "tsc && tsc-alias",
     "clean": "rimraf dist",
     "lint": "eslint src/",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "lodash": "^4.17.7",
-    "winston": "^3.14.1"
+    "lodash": "^4.17.21",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@hive/eslint-config": "workspace:*",
@@ -50,7 +50,7 @@
     "eslint-plugin-only-warn": "^1.1.0",
     "prisma": "^5.18.0",
     "rimraf": "^6.0.1",
-    "tsup": "^6.7.0",
+    "tsc-alias": "^1.8.10",
     "typescript": "5.5.4"
   }
 }

@@ -14,12 +14,9 @@
     "noUnusedParameters": false,
     "preserveWatchOutput": true,
     "skipLibCheck": true,
-    "strict": true,
     "strictNullChecks": true,
-    "outDir": "dist",
-    "rootDir": "src",
-    "target": "es6",
-    "module": "commonjs",
+    "strict": true,
+    "emitDeclarationOnly": true,
     "baseUrl": "./",
     "paths": {
       "@/*": [

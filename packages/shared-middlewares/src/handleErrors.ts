@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { createLogger, handlePrismaErrors } from "@hive/core-utils";
 import { type ServiceIdentity } from "@hive/core-utils";
 
-const handleErrorsMiddleWare =
+export const handleErrorsMiddleWare =
   (serviceId: ServiceIdentity) =>
   async (error: any, req: Request, res: Response, next: NextFunction) => {
     executeRollBackTasks(req, serviceId);
@@ -16,4 +16,3 @@ const handleErrorsMiddleWare =
     return res.status(500).json({ detail: "Internal Server Error" });
   };
 
-export default handleErrorsMiddleWare;

@@ -5,11 +5,13 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "clean":"rimraf 'apps/**/node_modules' 'apps/**/dist' 'packages/**/node_modules' 'packages/**/dist'  'node_modules'"
   },
   "devDependencies": {
     "prettier": "^3.2.5",
     "turbo": "^2.2.3",
+    "rimraf": "^6.0.1",
     "typescript": "5.5.4"
   },
   "packageManager": "pnpm@8.15.6",

@@ -1,5 +1,4 @@
 {
-  "extends": "@hive/typescript-config/express.json",
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",

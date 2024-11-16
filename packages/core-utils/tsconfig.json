@@ -1,5 +1,5 @@
 {
-  "extends": "@hive/typescript-config/express.json",
+  // "extends": "@hive/typescript-config/express.json",
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
@@ -7,17 +7,22 @@
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
-    "emitDeclarationOnly": true,
+    "emitDeclarationOnly": false,
     "baseUrl": "./",
     "paths": {
       "@/*": [
         "src/*"
       ],
       "winston": [
-        "./node_modules/winston"
+        "./node_modules/winston",
+        "../../node_modules/winston"
       ],
-      "@hive/*": ["./node_modules/@hive/*"]
+      "@hive/*": [
+        "./node_modules/@hive/*"
+      ]
     },
+    "resolveJsonModule": true,
+    "moduleResolution": "node"
   },
   "include": [
     "src/**/*"

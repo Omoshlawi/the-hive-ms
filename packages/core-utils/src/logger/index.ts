@@ -4,7 +4,7 @@ import winston from "winston";
 export const createLogger: (service: ServiceIdentity) => Logger = (
   serviceId: ServiceIdentity
 ) => {
-  const logger:Logger = winston.createLogger({
+  const logger: Logger = winston.createLogger({
     // level: "info",
     format: winston.format.json(),
     defaultMeta: { service: `${serviceId.name}:${serviceId.version}` },

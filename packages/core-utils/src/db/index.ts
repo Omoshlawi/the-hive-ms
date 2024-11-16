@@ -9,7 +9,22 @@ export const ERROR_CODES = Object.freeze({
   TOO_MANY_DB_CONNECTION_OPEN: "P2037",
 });
 
-export const handlePrismaErrors = (e: any) => {
+export const handlePrismaErrors: (e: any) =>
+  | {
+      status: number;
+      errors: {
+        detail: string;
+      };
+    }
+  | {
+      status: number;
+      errors: {
+        [x: string]: {
+          _errors: string[];
+        };
+      };
+    }
+  | undefined = (e: any) => {
   if (e instanceof Prisma.PrismaClientKnownRequestError) {
     // console.log(
     //   "--------------------------------------->",
@@ -21,7 +36,7 @@ export const handlePrismaErrors = (e: any) => {
 
     if (e.code === ERROR_CODES.NOT_FOUND) {
       if (e.meta?.cause)
-        return { status: 404, errors: { detail: e.meta!.cause } };
+        return { status: 404, errors: { detail: e.meta!.cause as string } };
       return { status: 404, errors: { detail: e.message } };
     } else if (e.code === ERROR_CODES.UNIQUE_CONTRAINT_FAILED) {
       const taget = (e.meta as any).target as string;

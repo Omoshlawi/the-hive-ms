@@ -4,8 +4,8 @@ import { createServer } from "http";
 import { configuration, MEDIA_ROOT } from "@/utils";
 import morgan from "morgan";
 import cors from "cors";
-
-
+// import logger from "@/services/logger";
+import { handleErrorsMiddleWare } from "@hive/shared-middlewares";
 
 const startServer = async () => {
   const app = express();
@@ -13,9 +13,9 @@ const startServer = async () => {
 
   if (app.get("env") === "development") {
     app.use(morgan("tiny"));
-    logger.info(
-      `[+]${configuration.name}:${configuration.version} enable morgan`
-    );
+    // logger.info(
+    //   `[+]${configuration.name}:${configuration.version} enable morgan`
+    // );
   }
   app.use(cors());
   app.use(express.static(MEDIA_ROOT));
@@ -33,14 +33,14 @@ const startServer = async () => {
   //-------------------end routes-----------------------------
 
   //---------------- error handler -----------------------
-  app.use(handleErrors);
+  app.use(handleErrorsMiddleWare);
   app.use((req, res) => {
     res.status(404).json({ detail: "Not Found" });
   });
 
   const port = configuration.port ?? 0;
   httpServer.listen(port, () => {
-    logger.info("App listening in port port: " + port + "....");
+    // logger.info("App listening in port port: " + port + "....");
   });
 };
 

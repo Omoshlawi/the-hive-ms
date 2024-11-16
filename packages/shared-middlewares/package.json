@@ -2,7 +2,16 @@
   "name": "@hive/shared-middlewares",
   "version": "1.0.0",
   "private": true,
-  "main": "src/index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch tsc",
+    "clean": "rimraf dist",
+    "lint": "eslint src/",
+    "type-check": "tsc --noEmit"
+  },
   "dependencies": {
     "lodash": "^4.17.7",
     "slugify": "^1.6.6",
@@ -17,7 +26,7 @@
     "@turbo/gen": "^1.12.4",
     "@types/node": "^20.11.24",
     "@types/eslint": "^8.56.5",
-     "eslint": "^8.57.0",
+    "eslint": "^8.57.0",
     "eslint-config-turbo": "^2.0.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-only-warn": "^1.1.0",
