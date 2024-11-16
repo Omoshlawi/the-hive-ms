@@ -1,22 +1,11 @@
 {
   "extends": "@hive/typescript-config/express.json",
   "compilerOptions": {
-    "composite": true,
-    "emitDeclarationOnly": true,
     "module": "commonjs",
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": "./",
-    "resolveJsonModule": true
+    "baseUrl": "./"
   },
-  "references": [
-    {
-      "path": "../../packages/core-utils"
-    },
-    {
-      "path": "../../packages/core-utils"
-    }
-  ],
   "include": [
     "src/**/*"
   ],
