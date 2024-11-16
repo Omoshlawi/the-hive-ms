@@ -5,7 +5,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "dev": "tsc -w && tsc-alias -w && node dist/index.js",
+    "dev": "concurrently -k \"tsc -w\" \"tsc-alias -w\" \"nodemon dist/index.js\"",
     "build": "tsc && tsc-alias",
     "clean": "rimraf dist",
     "start": "node dist/index.js"
