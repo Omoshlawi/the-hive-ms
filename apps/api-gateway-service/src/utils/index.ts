@@ -1,9 +1,4 @@
 import config from "config";
-import path from "path";
-export const BASE_DIR = process.cwd();
-export const MEDIA_ROOT = path.join(BASE_DIR, "media");
-export const MEDIA_URL = "media";
-export const PROFILE_URL = "uploads";
 
 export const configuration = {
   version: require("./../../package.json").version,
@@ -22,3 +17,5 @@ export const configuration = {
     refresh_token_age: config.get("token.refresh_expiry") as string,
   },
 };
+
+export * from "./constants";

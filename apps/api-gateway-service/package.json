@@ -1,5 +1,5 @@
 {
-  "name": "@hive/auth-service",
+  "name": "@hive/api-gateway-service",
   "version": "1.0.0",
   "main": "dist/index.js",
   "module": "./dist/index.js",
@@ -16,12 +16,14 @@
     "@hive/shared-middlewares": "workspace:*",
     "@prisma/client": "^5.18.0",
     "axios": "^1.7.3",
+    "bcrypt": "^5.1.1",
     "config": "^3.3.12",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.7",
-    "module-alias": "^2.2.3",
     "semver": "^7.6.3",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
@@ -39,11 +41,11 @@
     "@types/node": "^22.2.0",
     "@types/semver": "^7.5.6",
     "concurrently": "^9.1.0",
-    "morgan": "^1.10.0",
-    "nodemon": "^3.1.7",
-    "prisma": "^5.18.0",
-    "rimraf": "^6.0.1",
     "tsc-alias": "^1.8.10",
+    "rimraf": "^6.0.1",
+    "nodemon":"^3.1.7",
+    "morgan": "^1.10.0",
+    "prisma": "^5.18.0",
     "typescript": "^5.5.4"
   }
 }

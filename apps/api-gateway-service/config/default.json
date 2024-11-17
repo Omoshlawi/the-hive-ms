@@ -1,7 +1,8 @@
 {
-  "name": "The hive auth services",
+  "name": "The hive api-gateway service",
   "port": null,
   "db": "",
+  "jwt": "AUTH_SECRET",
   "token": {
     "access_expiry": "2h",
     "refresh_expiry": "1d"

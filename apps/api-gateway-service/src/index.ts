@@ -6,6 +6,7 @@ import morgan from "morgan";
 import cors from "cors";
 import logger from "@/services/logger";
 import { handleErrorsMiddleWare } from "@hive/shared-middlewares";
+import { authRouterMiddleware } from "./routes";
 
 const startServer = async () => {
   const app = express();
@@ -31,9 +32,10 @@ const startServer = async () => {
   // Add routes here
 
   //-------------------end routes-----------------------------
+  app.use("/api/auth", authRouterMiddleware);
 
   //---------------- error handler -----------------------
-  app.use(handleErrorsMiddleWare({ name: "", version: "*" }));
+  app.use(handleErrorsMiddleWare({ name: "", version: "" }));
   app.use((req, res) => {
     res.status(404).json({ detail: "Not Found" });
   });
