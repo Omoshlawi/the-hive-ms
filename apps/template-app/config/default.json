@@ -2,5 +2,9 @@
   "name": "The hive template service",
   "port": null,
   "db": "",
-  "jwt": "JWT_TOKEN"
+  "jwt": "JWT_TOKEN",
+  "registry": {
+    "url": "http://localhost:9000",
+    "version": "*"
+  }
 }

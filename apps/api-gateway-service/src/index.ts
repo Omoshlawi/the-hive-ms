@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
-import { configuration, MEDIA_ROOT } from "@/utils";
+import { configuration } from "@/utils";
 import morgan from "morgan";
 import cors from "cors";
 import logger from "@/services/logger";
@@ -19,8 +19,6 @@ const startServer = async () => {
     );
   }
   app.use(cors());
-  app.use(express.static(MEDIA_ROOT));
-
   // Make sure to use these body parsers so Auth.js can receive data from the client
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));

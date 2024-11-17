@@ -11,7 +11,10 @@ export const configuration = {
   db: config.get("db") as string | undefined | null,
   port: config.get("port") as string | undefined | null,
   backend_url: config.get("backend_url") as string,
-
+  registry: {
+    url: config.get("registry.url") as string,
+    version: config.get("registry.version") as string,
+  },
   auth: {
     google_id: config.get("google_client_id") as string,
     google_secrete: config.get("google_client_secrete") as string,

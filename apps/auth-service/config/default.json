@@ -5,5 +5,9 @@
   "token": {
     "access_expiry": "2h",
     "refresh_expiry": "1d"
+  },
+  "registry": {
+    "url": "http://localhost:9000",
+    "version": "*"
   }
 }

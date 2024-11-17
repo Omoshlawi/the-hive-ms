@@ -6,6 +6,7 @@ import morgan from "morgan";
 import cors from "cors";
 import logger from "@/services/logger";
 import { handleErrorsMiddleWare } from "@hive/shared-middlewares";
+import router from "./routes";
 
 const startServer = async () => {
   const app = express();
@@ -18,6 +19,7 @@ const startServer = async () => {
     );
   }
   app.use(cors());
+
   // Make sure to use these body parsers so Auth.js can receive data from the client
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
@@ -27,6 +29,7 @@ const startServer = async () => {
   //------------------- routes --------------------------------
 
   // Add routes here
+  app.use("/", router);
 
   //-------------------end routes-----------------------------
 
