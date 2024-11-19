@@ -31,9 +31,10 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@prisma/client": "^5.18.0",
+    "axios": "^1.7.3",
     "lodash": "^4.17.21",
-    "winston": "^3.17.0",
-    "@prisma/client": "^5.18.0"
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@hive/eslint-config": "workspace:*",

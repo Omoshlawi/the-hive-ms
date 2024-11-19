@@ -12,7 +12,7 @@ const authenticate = async (
   if (!token)
     return res.status(401).json({ detail: "Unauthorized - Token missing" });
   try {
-    const { id }: any = verify(token, configuration.jwt as string);
+    const { id }: any = verify(token, configuration.auth.auth_secrete as string);
     const user = await UsersModel.findUnique({
       where: { id },
     });

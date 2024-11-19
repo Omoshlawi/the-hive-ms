@@ -1,4 +1,5 @@
 export const BASE_DIR = process.cwd();
+import { RegistryAddress, ServiceIdentity } from "@hive/core-utils";
 import config from "config";
 
 export const configuration = {
@@ -12,4 +13,15 @@ export const configuration = {
     url: config.get("registry.url") as string,
     version: config.get("registry.version") as string,
   },
+};
+
+export const registryAddress: RegistryAddress = {
+  url: configuration.registry.url,
+  version: configuration.registry.version,
+};
+
+export const serviceIdentity: ServiceIdentity = {
+  name: configuration.name,
+  version: configuration.version,
+  
 };

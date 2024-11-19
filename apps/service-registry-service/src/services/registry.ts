@@ -77,6 +77,11 @@ class Registry {
     // Load balance by randomly selecting service
     return candidates[Math.floor(Math.random() * candidates.length)];
   }
+
+  getServices() {
+    this.cleanUp();
+    return this.services;
+  }
 }
 
 export default Registry;

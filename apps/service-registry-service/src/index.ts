@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
-import { configuration } from "@/utils";
+import { configuration, serviceId } from "@/utils";
 import morgan from "morgan";
 import cors from "cors";
 import logger from "@/services/logger";
@@ -34,7 +34,7 @@ const startServer = async () => {
   //-------------------end routes-----------------------------
 
   //---------------- error handler -----------------------
-  app.use(handleErrorsMiddleWare);
+  app.use(handleErrorsMiddleWare(serviceId));
   app.use((req, res) => {
     res.status(404).json({ detail: "Not Found" });
   });
