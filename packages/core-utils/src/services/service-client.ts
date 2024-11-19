@@ -17,8 +17,13 @@ export class ServiceClient {
   onerror(error: any) {
     if (axios.isAxiosError(error)) {
       const axiosError: AxiosError = error;
-      if (axiosError.response?.status === 404) {
-        return new APIException(404, axiosError.response.data as any);
+      if (
+        ["404", "400", "401", "403"].includes(`${axiosError.response?.status}`)
+      ) {
+        return new APIException(
+          axiosError.response!.status,
+          axiosError.response!.data as any
+        );
       }
       return new APIException(axiosError.status ?? 500, {
         detail: axiosError.message,
@@ -46,7 +51,7 @@ export class ServiceClient {
     version?: string
   ) {
     const { host, port } = await this.getService(serviceName, version);
-    requestOptions.url = `http://${host}:${port}/${requestOptions.url}`;
+    requestOptions.url = `http://${host}:${port}${requestOptions.url}`;
     try {
       const response: AxiosResponse<T> = await axios(requestOptions);
       return response.data;

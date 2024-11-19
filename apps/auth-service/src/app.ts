@@ -8,6 +8,7 @@ import { RegistryClient } from "@hive/core-utils";
 import { registryAddress, serviceIdentity } from "@/utils";
 import { toNumber } from "lodash";
 import logger from "@/services/logger";
+import router from "./routes";
 
 export interface ServerAddress {
   address: string;
@@ -41,6 +42,7 @@ export default class ApplicationServer {
 
   private setupRoutes(): void {
     // Add routes here
+    this.app.use("/", router);
 
     // Default 404 handler
     this.app.use((req, res) => {
