@@ -1,52 +1,19 @@
 import "dotenv/config";
-import express from "express";
-import { createServer } from "http";
-import { configuration } from "@/utils";
-import morgan from "morgan";
-import cors from "cors";
+
 import logger from "@/services/logger";
-import { handleErrorsMiddleWare } from "@hive/shared-middlewares";
-import { authRouterMiddleware } from "./routes";
 
+import ApplicationServer from "@/app";
+
+// Start the server
 const startServer = async () => {
-  const app = express();
-  const httpServer = createServer(app);
-
-  if (app.get("env") === "development") {
-    app.use(morgan("tiny"));
-    logger.info(
-      `[+]${configuration.name}:${configuration.version} enable morgan`
-    );
+  try {
+    const server = new ApplicationServer();
+    await server.start();
+  } catch (error) {
+    logger.error("Failed to start server:", error);
+    process.exit(1);
   }
-  app.use(cors());
-  // Make sure to use these body parsers so Auth.js can receive data from the client
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
-
-  // ------------------End middlewares------------------------
-
-  //------------------- routes --------------------------------
-
-  // Add routes here
-
-  //-------------------end routes-----------------------------
-  app.use("/api/auth", authRouterMiddleware);
-
-  //---------------- error handler -----------------------
-  app.use(handleErrorsMiddleWare({ name: "", version: "" }));
-  app.use((req, res) => {
-    res.status(404).json({ detail: "Not Found" });
-  });
-
-  const port = configuration.port ?? 0;
-  httpServer.listen(port, () => {
-    const address: any = httpServer.address();
-    const bind =
-      typeof address === "string" ? `pipe ${address}` : `port ${address?.port}`;
-    logger.info(
-      `[+]${configuration.name}:${configuration.version} listening on ${bind}`
-    );
-  });
 };
 
+// Start the server
 startServer();

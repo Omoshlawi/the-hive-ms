@@ -5,10 +5,7 @@ import {
   generateUserToken,
   hashPassword,
 } from "@/utils/helpers";
-import {
-  APIException,
-  getMultipleOperationCustomRepresentationQeury,
-} from "@hive/core-utils";
+import { APIException } from "@hive/core-utils";
 import { NextFunction, Request, Response } from "express";
 import isEmpty from "lodash/isEmpty";
 
@@ -17,7 +14,7 @@ export const registerUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  try {
+  try {    
     const validation = await Register.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
@@ -44,7 +41,6 @@ export const registerUser = async (
       },
       include: { person: true },
     });
-
     await AccountModel.create({
       data: {
         provider: "Credentials",
@@ -108,21 +104,6 @@ export const loginUser = async (
   }
 };
 
-export const getUserBytoken = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const user = await UsersModel.findUnique({
-      where: { id: req.user?.id },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
-    });
-    return res.json(user);
-  } catch (error) {
-    next(error);
-  }
-};
 export const refreshToken = async (
   req: Request,
   res: Response,

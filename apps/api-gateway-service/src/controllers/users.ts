@@ -1,20 +1,20 @@
 import { NextFunction, Request, Response } from "express";
 import { ServiceClient } from "@hive/core-utils";
-import { registryAddress, serviceId } from "@/utils";
-export const authRouterMiddleware = async (
+import { registryAddress, sanitizeHeaders, serviceIdentity } from "@/utils";
+export const usersRouterMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const serviceClient = new ServiceClient(registryAddress, serviceId);
+    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
     const response = await serviceClient.callService<any>(
       "@hive/auth-service",
       {
         method: req.method,
-        url: req.url,
+        url: `/users${req.url}`,
         data: req.body,
-        params: req.query,
+        headers: sanitizeHeaders(req),
       }
     );
     return res.json(response);

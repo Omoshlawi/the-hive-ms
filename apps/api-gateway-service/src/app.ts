@@ -9,7 +9,6 @@ import { registryAddress, serviceIdentity } from "@/utils";
 import { toNumber } from "lodash";
 import logger from "@/services/logger";
 import router from "./routes";
-import cookieParser from "cookie-parser";
 
 export interface ServerAddress {
   address: string;
@@ -38,13 +37,12 @@ export default class ApplicationServer {
     }
     this.app.use(cors());
     this.app.use(express.json());
-    this.app.use(cookieParser(configuration.auth.auth_secrete));
     this.app.use(express.urlencoded({ extended: true }));
   }
 
   private setupRoutes(): void {
     // Add routes here
-    this.app.use("/", router);
+    this.app.use("/api", router);
 
     // Default 404 handler
     this.app.use((req, res) => {
@@ -161,11 +159,6 @@ export default class ApplicationServer {
           logger.info(
             `[+]${configuration.name}:${configuration.version} listening on ${bind}`
           );
-
-          this.setupRegistryClient(serverAddress);
-
-          // Register service after server is running
-          this.registerService().then(resolve).catch(reject);
         } catch (error) {
           reject(error);
         }

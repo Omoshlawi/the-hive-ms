@@ -28,7 +28,7 @@ export const registryAddress: RegistryAddress = {
   version: configuration.registry.version,
 };
 
-export const serviceId: ServiceIdentity = {
+export const serviceIdentity: ServiceIdentity = {
   name: configuration.name,
   version: configuration.version,
 };

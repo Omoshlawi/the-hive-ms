@@ -17,17 +17,19 @@ export class ServiceClient {
   onerror(error: any) {
     if (axios.isAxiosError(error)) {
       const axiosError: AxiosError = error;
-      if (
-        ["404", "400", "401", "403"].includes(`${axiosError.response?.status}`)
-      ) {
-        return new APIException(
-          axiosError.response!.status,
-          axiosError.response!.data as any
-        );
-      }
-      return new APIException(axiosError.status ?? 500, {
-        detail: axiosError.message,
-      });
+      // if (
+      //   ["404", "400", "401", "403", "500"].includes(
+      //     `${axiosError.response?.status}`
+      //   )
+      // ) {
+      return new APIException(
+        axiosError?.response?.status ?? axiosError?.status ?? 500,
+        axiosError?.response?.data ?? axiosError?.message
+      );
+      // }
+      // return new APIException(axiosError.status ?? 500, {
+      //   detail: axiosError.message,
+      // });
     }
     return new APIException(500, { detail: error.message });
   }
