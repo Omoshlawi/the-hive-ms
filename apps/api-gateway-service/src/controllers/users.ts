@@ -14,7 +14,7 @@ export const usersRouterMiddleware = async (
         method: req.method,
         url: `/users${req.url}`,
         data: req.body,
-        headers: sanitizeHeaders(req),
+        headers: req.headers,
       }
     );
     return res.json(response);

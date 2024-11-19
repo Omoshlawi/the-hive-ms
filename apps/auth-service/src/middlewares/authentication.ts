@@ -29,6 +29,7 @@ const authenticate = async (
     if (!user)
       throw new APIException(401, { detail: "Unauthorized - Invalid Token" });
     req.user = user;
+    req.headers["x-access-token"] = token;
     return next();
   } catch (error: unknown) {
     if (error instanceof TokenExpiredError) {

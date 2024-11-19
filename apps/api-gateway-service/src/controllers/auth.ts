@@ -8,9 +8,7 @@ export const authRouterMiddleware = async (
 ) => {
   try {
     const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
-    console.log(sanitizeHeaders(req), "==============>");
-
-    const response = await serviceClient.callService<any>(
+    const response = await serviceClient.callServiceWithResponse(
       "@hive/auth-service",
       {
         method: req.method,
@@ -19,7 +17,7 @@ export const authRouterMiddleware = async (
         timeout: 5000,
       }
     );
-    return res.json(response);
+    return res.set(response.headers).json(response.data);
   } catch (error) {
     next(error);
   }

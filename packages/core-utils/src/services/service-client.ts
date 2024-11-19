@@ -61,4 +61,19 @@ export class ServiceClient {
       throw this.onerror(error);
     }
   }
+
+  async callServiceWithResponse(
+    serviceName: string,
+    requestOptions: AxiosRequestConfig,
+    version?: string
+  ) {
+    const { host, port } = await this.getService(serviceName, version);
+    requestOptions.url = `http://${host}:${port}${requestOptions.url}`;
+    try {
+      const response: AxiosResponse = await axios(requestOptions);
+      return response;
+    } catch (error: any) {
+      throw this.onerror(error);
+    }
+  }
 }

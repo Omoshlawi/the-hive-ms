@@ -1,5 +1,6 @@
 import { AccountModel, UsersModel } from "@/models";
 import { Login, Register } from "@/schema";
+import { configuration } from "@/utils";
 import {
   checkPassword,
   generateUserToken,
@@ -14,7 +15,7 @@ export const registerUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  try {    
+  try {
     const validation = await Register.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
@@ -54,6 +55,11 @@ export const registerUser = async (
     return res
       .setHeader("x-access-token", token.accessToken)
       .setHeader("x-refresh-token", token.refreshToken)
+      .cookie(
+        configuration.authCookieConfig.name,
+        token.accessToken,
+        configuration.authCookieConfig.config
+      )
       .json({ user, token });
   } catch (error) {
     next(error);
@@ -98,6 +104,11 @@ export const loginUser = async (
     return res
       .setHeader("x-access-token", token.accessToken)
       .setHeader("x-refresh-token", token.refreshToken)
+      .cookie(
+        configuration.authCookieConfig.name,
+        token.accessToken,
+        configuration.authCookieConfig.config
+      )
       .json({ user, token });
   } catch (error) {
     next(error);
