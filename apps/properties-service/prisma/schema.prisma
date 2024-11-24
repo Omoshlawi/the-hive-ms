@@ -8,9 +8,11 @@ datasource db {
 }
 
 model AttributeType {
-  id                 String              @id @default(uuid()) @db.Uuid
-  name               String              @unique
-  organizationId     String?             @db.Uuid // Nullable if global
+  id             String  @id @default(uuid()) @db.Uuid
+  name           String  @unique
+  organizationId String? @db.Uuid // Nullable if global
+  icon           Json? // {name, family}
+
   // organization   Organization? @relation(fields: [organizationId], references: [id])
   voided             Boolean             @default(false)
   createdAt          DateTime            @default(now())
@@ -21,9 +23,11 @@ model AttributeType {
 }
 
 model Amenity {
-  id                 String            @id @default(uuid()) @db.Uuid
-  name               String
-  organizationId     String?           @db.Uuid
+  id             String  @id @default(uuid()) @db.Uuid
+  name           String
+  organizationId String? @db.Uuid
+  icon           Json // {name, family}
+
   // organization   Organization? @relation(fields: [organizationId], references: [id])
   voided             Boolean           @default(false)
   createdAt          DateTime          @default(now())
@@ -37,6 +41,7 @@ model Category {
   id             String             @id @default(uuid()) @db.Uuid
   name           String
   organizationId String?            @db.Uuid
+  icon           Json // {name, family}
   // organization   Organization? @relation(fields: [organizationId], references: [id])
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
@@ -48,17 +53,17 @@ model Category {
 model Property {
   id           String @id @default(uuid()) @db.Uuid
   name         String
-  thumbnailUrl String
+  thumbnail    Json //{id, path}
   organization Json
 
   // Relationships
-  relationshipsAsA  Relationship[]      @relation("PropertyARelationship")
-  relationshipsAsB  Relationship[]      @relation("PropertyBRelationship")
-  attributes        PropertyAttribute[]
-  location          PropertyLocation?
-  media             PropertyMedia[]
-  propertyAmenities PropertyAmenity[]
-  categories        PropertyCategory[]
+  relationshipsAsA Relationship[]      @relation("PropertyARelationship")
+  relationshipsAsB Relationship[]      @relation("PropertyBRelationship")
+  attributes       PropertyAttribute[]
+  location         PropertyLocation?
+  media            PropertyMedia[]
+  amenities        PropertyAmenity[]
+  categories       PropertyCategory[]
 
   voided    Boolean  @default(false)
   createdAt DateTime @default(now())
