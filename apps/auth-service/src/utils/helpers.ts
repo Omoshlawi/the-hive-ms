@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { configuration } from ".";
-import { Person, User } from "@prisma/client";
+import { Person, User } from "../../dist/prisma";
 import { TokenPayload } from "@/types";
 
 export const hashPassword = async (password: string) => {

@@ -22,3 +22,10 @@ export type RegistryAddress = {
   url: string;
   version: string;
 };
+
+export interface PrismaClientKnownRequestError extends Error {
+  code: string;
+  meta?: { cause?: string; target?: string[] };
+  message: string;
+  name: string;
+}

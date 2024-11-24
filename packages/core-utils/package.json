@@ -31,7 +31,6 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@prisma/client": "^5.18.0",
     "axios": "^1.7.3",
     "lodash": "^4.17.21",
     "winston": "^3.17.0"
@@ -49,7 +48,6 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-turbo": "^2.0.0",
     "eslint-plugin-only-warn": "^1.1.0",
-    "prisma": "^5.18.0",
     "rimraf": "^6.0.1",
     "tsc-alias": "^1.8.10",
     "typescript": "5.5.4"

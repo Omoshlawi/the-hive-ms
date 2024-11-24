@@ -1,6 +1,6 @@
 import { APIException } from "@/exceptions";
-import { Prisma } from "@prisma/client";
 import set from "lodash/set";
+import { PrismaClientKnownRequestError } from "@/types";
 
 export const ERROR_CODES = Object.freeze({
   NOT_FOUND: "P2025",
@@ -25,7 +25,7 @@ export const handlePrismaErrors: (e: any) =>
       };
     }
   | undefined = (e: any) => {
-  if (e instanceof Prisma.PrismaClientKnownRequestError) {
+  if (e && "code" in e && "meta" in e && "message" in e && "name" in e) {
     // console.log(
     //   "--------------------------------------->",
     //   e.code,

@@ -1,5 +1,5 @@
 import { UsersModel } from "@/models";
-import { User } from "@prisma/client";
+import { User } from "../../dist/prisma";
 import { NextFunction, Request, Response } from "express";
 import { APIException } from "@hive/core-utils";
 

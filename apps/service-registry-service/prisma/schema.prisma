@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../dist/prisma"
 }
 
 datasource db {
@@ -11,5 +12,5 @@ datasource db {
 }
 
 model TemplateApp {
-  id                String   @id @default(uuid()) @db.Uuid
- }
+  id String @id @default(uuid()) @db.Uuid
+}
