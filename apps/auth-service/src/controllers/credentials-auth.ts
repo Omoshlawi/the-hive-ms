@@ -95,8 +95,8 @@ export const loginUser = async (
       throw {
         status: 400,
         errors: {
-          username: { _errors: ["Invalid username or password"] },
-          password: { _errors: ["Invalid username or password"] },
+          identifier: { _errors: ["Invalid user credentials"] },
+          password: { _errors: ["Invalid user credentials"] },
         },
       };
     const user = users[passwordChecks.findIndex((val) => val)];
