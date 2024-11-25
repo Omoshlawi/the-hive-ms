@@ -93,4 +93,8 @@ export const RelationshipSchema = z.object({
   endDate: z.date({ coerce: true }).optional(),
 });
 
-// Prop
+// Attribute types
+export const AttributeTypeSchema = z.object({
+  name: z.string().min(1, "Required"),
+  icon: IconSchema.optional(),
+});

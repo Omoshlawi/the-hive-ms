@@ -1,2 +1,12 @@
 import db from "@/services/db";
-export const PropertiesModel = db
+export const PropertiesModel = db.property;
+export const AmenitiesModel = db.amenity;
+export const AttributeTypesModel = db.attributeType;
+export const PropertyMediaModel = db.propertyMedia;
+export const PropertyLocationsModel = db.propertyLocation;
+export const PropertyCategoriesModel = db.propertyCategory;
+export const CategoriesModel = db.category;
+export const RelationshipsModel = db.relationship;
+export const RelationshipTypesModel = db.relationshipType;
+export const PropertyAttributesModel = db.propertyAttribute;
+export const PropertyAmenities = db.propertyAmenity;
