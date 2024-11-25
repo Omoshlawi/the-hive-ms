@@ -321,5 +321,39 @@
     ],
     "description": "Express crude handlers"
   }
+
+
+// Express crude routers
+"Express crude routers": {
+		"prefix": "ecrudrouter",
+		"body": [
+			"import { Router } from \"express\";",
+			"import {",
+			"  add$2,",
+			"  delete$2,",
+			"  get$2,",
+			"  get$2s,",
+			"  patch$2,",
+			"  purge$2,",
+			"  update$2,",
+			"} from \"../controllers/$1\";",
+			"import { validateUUIDPathParam } from \"@hive/shared-middlewares\";",
+			"",
+			"const router = Router({ mergeParams: true });",
+			"",
+			"router.get(\"/\", get$2s);",
+			"router.post(\"/\", add$2);",
+			"router.get(\"/:$3\", [validateUUIDPathParam(\"$3\")], get$2);",
+			"router.patch(\"/:$3\", [validateUUIDPathParam(\"$3\")], patch$2);",
+			"router.put(\"/:$3\", [validateUUIDPathParam(\"$3\")], update$2);",
+			"router.delete(\"/:$3\", [validateUUIDPathParam(\"$3\")], delete$2);",
+			"router.purge(\"/:$3\", [validateUUIDPathParam(\"$3\")], purge$2);",
+			"",
+			"export default router;"
+		],
+		"description": "Express crude routers"
+	}
 }
+
+
 ```

@@ -31,6 +31,36 @@ export const CategorySchema = z.object({
   icon: IconSchema,
 });
 
+// Property Media
+export const PropertyMediaSchema = z.object({
+  propertyId: z.string().uuid(),
+  type: z.enum(["Image", "Video", "Document", "Tour_3D"]),
+  url: z.string().min(1, "Required"),
+  title: z.string().min(1, "Required").optional(),
+  description: z.string().min(1, "Required").optional(),
+  order: z.number({ coerce: true }).int().nonnegative(),
+  metadata: z.object({
+    size: z.number({
+      coerce: true,
+    }),
+    memeType: z.string().min(1, "Required").optional(),
+  }),
+});
+
+// Property Location
+export const PropertyLocation = z.object({
+  propertyId: z.string().uuid(),
+  addressLine1: z.string().min(1, "Required"),
+  addressLine2: z.string().min(1, "Required").optional(),
+  city: z.string().min(1, "Required"),
+  state: z.string().min(1, "Required"),
+  country: z.string().min(1, "Required"),
+  postalCode: z.string().min(1, "Required"),
+  latitude: z.number({ coerce: true }).optional(),
+  longitude: z.number({ coerce: true }).optional(),
+  geospatialData: z.record(z.any()),
+});
+
 // Property
 export const PropertySchema = z.object({
   name: z.string(),
@@ -44,36 +74,8 @@ export const PropertySchema = z.object({
       })
     )
     .optional(),
-  location: z
-    .object({
-      addressLine1: z.string().min(1, "Required"),
-      addressLine2: z.string().min(1, "Required").optional(),
-      city: z.string().min(1, "Required"),
-      state: z.string().min(1, "Required"),
-      country: z.string().min(1, "Required"),
-      postalCode: z.string().min(1, "Required"),
-      latitude: z.number({ coerce: true }).optional(),
-      longitude: z.number({ coerce: true }).optional(),
-      geospatialData: z.record(z.any()),
-    })
-    .optional(),
-  media: z
-    .array(
-      z.object({
-        type: z.enum(["Image", "Video", "Document", "Tour_3D"]),
-        url: z.string().min(1, "Required"),
-        title: z.string().min(1, "Required").optional(),
-        description: z.string().min(1, "Required").optional(),
-        order: z.number({ coerce: true }).int().nonnegative(),
-        metadata: z.object({
-          size: z.number({
-            coerce: true,
-          }),
-          memeType: z.string().min(1, "Required").optional(),
-        }),
-      })
-    )
-    .optional(),
+  location: PropertyLocation.omit({ propertyId: true }).optional(),
+  media: z.array(PropertyMediaSchema.omit({ propertyId: true })).optional(),
   amenities: z.array(z.string().uuid()).optional(),
   categories: z.array(z.string().uuid()).optional(),
 });
