@@ -1,11 +1,5 @@
 import { z } from "zod";
 
-//Thumbnail
-export const ThumbnailSchema = z.object({
-  path: z.string().min(1, "Required"),
-  id: z.string().uuid(),
-});
-
 // IconSchema
 const IconSchema = z.object({
   name: z.string().min(1, "Required"),
@@ -64,7 +58,7 @@ export const PropertyLocation = z.object({
 // Property
 export const PropertySchema = z.object({
   name: z.string(),
-  thumbnail: ThumbnailSchema,
+  thumbnail: z.string(),
   organization: OrganixationSchema,
   attributes: z
     .array(
@@ -99,4 +93,23 @@ export const RelationshipSchema = z.object({
 export const AttributeTypeSchema = z.object({
   name: z.string().min(1, "Required"),
   icon: IconSchema.optional(),
+});
+
+// Property Amenity
+export const PropertyAmenitySchema = z.object({
+  propertyId: z.string().uuid(),
+  amenityId: z.string().uuid(),
+});
+
+// property category
+export const PropertyCategorySchema = z.object({
+  propertyId: z.string().uuid(),
+  categoryId: z.string().uuid(),
+});
+
+// Property attribute
+export const PropertyAttributeSchema = z.object({
+  propertyId: z.string().uuid(),
+  attributeId: z.string().uuid(),
+  value: z.string().min(1, "Required"),
 });

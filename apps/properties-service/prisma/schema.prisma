@@ -55,7 +55,7 @@ model Category {
 model Property {
   id           String @id @default(uuid()) @db.Uuid
   name         String
-  thumbnail    Json //{id, path}
+  thumbnail    String 
   organization Json
 
   // Relationships
