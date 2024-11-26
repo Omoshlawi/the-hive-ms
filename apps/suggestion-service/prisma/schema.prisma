@@ -11,6 +11,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model TemplateApp {
-  id String @id @default(uuid()) @db.Uuid
+model IconFamily {
+  id        String   @id @default(uuid()) @db.Uuid
+  family    String   @unique
+  voided    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  icons     Icon[]
+}
+
+model Icon {
+  id        String     @id @default(uuid()) @db.Uuid
+  familyId  String     @db.Uuid
+  family    IconFamily @relation(fields: [familyId], onDelete: Cascade, references: [id])
+  name      String
+  voided    Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([familyId, name])
 }
