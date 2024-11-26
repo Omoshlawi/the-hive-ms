@@ -23,4 +23,8 @@ router.use(
   "/categories",
   serviceRouterMiddleware("@hive/properties-service", "/categories")
 );
+router.use(
+  "/properties",
+  serviceRouterMiddleware("@hive/properties-service", "/properties")
+);
 export default router;
