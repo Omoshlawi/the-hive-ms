@@ -15,28 +15,28 @@ const router = Router({ mergeParams: true });
 router.get("/", getRelationshipTypes);
 router.post("/", addRelationshipType);
 router.get(
-  "/:relationshipTypeId",
-  [validateUUIDPathParam("relationshipTypeId")],
+  "/:relationshipTypeUuid",
+  [validateUUIDPathParam("relationshipTypeUuid")],
   getRelationshipType
 );
 router.patch(
-  "/:relationshipTypeId",
-  [validateUUIDPathParam("relationshipTypeId")],
+  "/:relationshipTypeUuid",
+  [validateUUIDPathParam("relationshipTypeUuid")],
   patchRelationshipType
 );
 router.put(
-  "/:relationshipTypeId",
-  [validateUUIDPathParam("relationshipTypeId")],
+  "/:relationshipTypeUuid",
+  [validateUUIDPathParam("relationshipTypeUuid")],
   updateRelationshipType
 );
 router.delete(
-  "/:relationshipTypeId",
-  [validateUUIDPathParam("relationshipTypeId")],
+  "/:relationshipTypeUuid",
+  [validateUUIDPathParam("relationshipTypeUuid")],
   deleteRelationshipType
 );
 router.purge(
-  "/:relationshipTypeId",
-  [validateUUIDPathParam("relationshipTypeId")],
+  "/:relationshipTypeUuid",
+  [validateUUIDPathParam("relationshipTypeUuid")],
   purgeRelationshipType
 );
 

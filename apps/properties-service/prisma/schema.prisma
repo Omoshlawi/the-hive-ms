@@ -12,7 +12,7 @@ model AttributeType {
   id             String  @id @default(uuid()) @db.Uuid
   name           String  @unique
   organizationId String? @db.Uuid // Nullable if global
-  icon           Json? // {name, family}
+  icon           Json // {name, family}
 
   // organization   Organization? @relation(fields: [organizationId], references: [id])
   voided             Boolean             @default(false)
@@ -55,7 +55,7 @@ model Category {
 model Property {
   id           String @id @default(uuid()) @db.Uuid
   name         String
-  thumbnail    String 
+  thumbnail    String
   organization Json
 
   // Relationships
@@ -73,13 +73,14 @@ model Property {
 }
 
 model RelationshipType {
-  id          String   @id @default(uuid()) @db.Uuid
-  description String?  @db.Text
-  aIsToB      String // e.g., "is parent of", "contains", "has parking"
-  bIsToA      String // e.g., "is child of", "is part of", "belongs to parking"
-  voided      Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String         @id @default(uuid()) @db.Uuid
+  description   String?        @db.Text
+  aIsToB        String // e.g., "is parent of", "contains", "has parking"
+  bIsToA        String // e.g., "is child of", "is part of", "belongs to parking"
+  voided        Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  relationships Relationship[]
 }
 
 model Relationship {
@@ -88,6 +89,9 @@ model Relationship {
   propertyBId String    @db.Uuid
   startDate   DateTime
   endDate     DateTime?
+
+  typeId String           @db.Uuid
+  type   RelationshipType @relation(fields: [typeId], onDelete: Cascade, references: [id])
 
   propertyA Property @relation("PropertyARelationship", fields: [propertyAId], references: [id], onDelete: Cascade)
   propertyB Property @relation("PropertyBRelationship", fields: [propertyBId], references: [id], onDelete: Cascade)

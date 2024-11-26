@@ -92,7 +92,7 @@ export const RelationshipSchema = z.object({
 // Attribute types
 export const AttributeTypeSchema = z.object({
   name: z.string().min(1, "Required"),
-  icon: IconSchema.optional(),
+  icon: IconSchema,
 });
 
 // Property Amenity
