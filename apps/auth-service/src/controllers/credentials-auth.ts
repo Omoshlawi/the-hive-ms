@@ -1,5 +1,6 @@
 import { AccountModel, UsersModel } from "@/models";
 import { Login, Register } from "@/schema";
+import { TokenPayload } from "@/types";
 import { configuration } from "@/utils";
 import {
   checkPassword,
@@ -7,6 +8,7 @@ import {
   hashPassword,
 } from "@/utils/helpers";
 import { APIException } from "@hive/core-utils";
+import { JsonWebTokenError, TokenExpiredError, verify } from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
 import isEmpty from "lodash/isEmpty";
 
@@ -120,12 +122,46 @@ export const refreshToken = async (
   res: Response,
   next: NextFunction
 ) => {
-  const refreshToken = req.header("x-refresh-token");
-  if (!refreshToken)
-    return res.status(401).json({ detail: "Unauthorized - Token missing" });
   try {
-  } catch (err: any) {
-    if (err.status) return res.status(err.status).json({ detail: err.detail });
-    return res.status(401).json({ detail: "Unauthorized - Invalid token" });
+    const refreshToken = req.header("x-refresh-token");
+    if (!refreshToken)
+      throw new APIException(401, { detail: "Unauthorized - Token missing" });
+    const { id, type: tokenType }: TokenPayload = verify(
+      refreshToken,
+      configuration.auth.auth_secrete as string
+    ) as TokenPayload;
+    if (tokenType !== "refresh")
+      throw new APIException(401, {
+        detail: "Unauthorized - Invalid token type",
+      });
+    const user = await UsersModel.findUnique({
+      where: { id },
+      include: { person: true },
+    });
+    if (!user)
+      throw new APIException(401, { detail: "Unauthorized - Invalid Token" });
+    const token = generateUserToken(user as any);
+    return res
+      .setHeader("x-access-token", token.accessToken)
+      .setHeader("x-refresh-token", token.refreshToken)
+      .cookie(
+        configuration.authCookieConfig.name,
+        token.accessToken,
+        configuration.authCookieConfig.config
+      )
+      .json(token);
+  } catch (error: any) {
+    if (error instanceof TokenExpiredError) {
+      return next(
+        new APIException(401, { detail: "Unauthorized - Token expired" })
+      );
+    } else if (error instanceof JsonWebTokenError) {
+      return next(
+        new APIException(401, { detail: "Unauthorized - Invalid Token" })
+      );
+    } else if (error instanceof APIException) {
+      return next(error);
+    }
+    return next(new APIException(500, { detail: "Internal Server Error" }));
   }
 };

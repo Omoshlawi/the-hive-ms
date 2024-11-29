@@ -15,6 +15,7 @@ export const authRouterMiddleware = async (
         url: req.url,
         data: req.body,
         timeout: 5000,
+        headers: sanitizeHeaders(req),
       }
     );
     return res.set(response.headers).json(response.data);

@@ -27,4 +27,12 @@ router.use(
   "/properties",
   serviceRouterMiddleware("@hive/properties-service", "/properties")
 );
+router.use(
+  "/icons",
+  serviceRouterMiddleware("@hive/suggestion-service", "/icons")
+);
+router.use(
+  "/icon-families",
+  serviceRouterMiddleware("@hive/suggestion-service", "/icon-families")
+);
 export default router;
