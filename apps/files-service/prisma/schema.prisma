@@ -1,0 +1,23 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../dist/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model HiveFile {
+  id           String   @id @default(uuid()) @db.Uuid
+  path         String
+  mbSize       Decimal?
+  memeType     String?
+  organization Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  voided       Boolean  @default(false)
+}
