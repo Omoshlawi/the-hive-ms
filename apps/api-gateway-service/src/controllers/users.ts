@@ -9,7 +9,7 @@ export const usersRouterMiddleware = async (
   try {
     const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
     const response = await serviceClient.callService<any>(
-      "@hive/auth-service",
+      "@hive/authentication-service",
       {
         method: req.method,
         url: `/users${req.url}`,

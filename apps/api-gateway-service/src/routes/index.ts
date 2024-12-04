@@ -3,14 +3,18 @@ import {
   authRouterMiddleware,
   usersRouterMiddleware,
 } from "@/controllers";
+import { filesRouterMiddleware } from "@/controllers/files";
 import { serviceRouterMiddleware } from "@/utils";
 import { Router } from "express";
+import mediaAddRouter from "./files";
 
 const router = Router();
 
 router.use("/auth", authRouterMiddleware);
 router.use("/users", usersRouterMiddleware);
 router.use("/amenities", amenitiesRouterMiddleware);
+router.use("/media/upload", mediaAddRouter);
+router.use("/media", filesRouterMiddleware);
 router.use(
   "/relationship-types",
   serviceRouterMiddleware("@hive/properties-service", "/relationship-types")

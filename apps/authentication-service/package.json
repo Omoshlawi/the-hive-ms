@@ -1,5 +1,5 @@
 {
-  "name": "@hive/auth-service",
+  "name": "@hive/authentication-service",
   "version": "1.0.0",
   "main": "dist/index.js",
   "module": "./dist/index.js",

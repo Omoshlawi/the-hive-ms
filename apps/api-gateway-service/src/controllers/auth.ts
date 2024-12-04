@@ -9,7 +9,7 @@ export const authRouterMiddleware = async (
   try {
     const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
     const response = await serviceClient.callServiceWithResponse(
-      "@hive/auth-service",
+      "@hive/authentication-service",
       {
         method: req.method,
         url: req.url,

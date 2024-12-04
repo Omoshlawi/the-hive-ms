@@ -1,6 +1,7 @@
 export const BASE_DIR = process.cwd();
 import { RegistryAddress, ServiceIdentity } from "@hive/core-utils";
 import config from "config";
+import path from "path";
 
 export const configuration = {
   version: require("./../../package.json").version,
@@ -23,5 +24,5 @@ export const registryAddress: RegistryAddress = {
 export const serviceIdentity: ServiceIdentity = {
   name: configuration.name,
   version: configuration.version,
-  
 };
+export const MEDIA_ROOT = path.join(BASE_DIR, "media");
