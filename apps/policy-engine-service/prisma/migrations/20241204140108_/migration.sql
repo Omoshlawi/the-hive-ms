@@ -72,6 +72,18 @@ CREATE TABLE "OrganizationMemberShip" (
     CONSTRAINT "OrganizationMemberShip_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "RolePrivilege" (
+    "id" UUID NOT NULL,
+    "privilegeId" UUID NOT NULL,
+    "roleId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "RolePrivilege_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Organization_name_key" ON "Organization"("name");
 
@@ -99,6 +111,9 @@ CREATE UNIQUE INDEX "Privilege_organizationId_resourceId_permitedResourceDataPoi
 -- CreateIndex
 CREATE UNIQUE INDEX "OrganizationMemberShip_memberPersonId_organizationId_key" ON "OrganizationMemberShip"("memberPersonId", "organizationId");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "RolePrivilege_privilegeId_roleId_key" ON "RolePrivilege"("privilegeId", "roleId");
+
 -- AddForeignKey
 ALTER TABLE "Role" ADD CONSTRAINT "Role_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -113,3 +128,9 @@ ALTER TABLE "OrganizationMemberShip" ADD CONSTRAINT "OrganizationMemberShip_role
 
 -- AddForeignKey
 ALTER TABLE "OrganizationMemberShip" ADD CONSTRAINT "OrganizationMemberShip_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RolePrivilege" ADD CONSTRAINT "RolePrivilege_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RolePrivilege" ADD CONSTRAINT "RolePrivilege_privilegeId_fkey" FOREIGN KEY ("privilegeId") REFERENCES "Privilege"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -27,16 +27,17 @@ model Organization {
 }
 
 model Role {
-  id             String                   @id @default(uuid()) @db.Uuid
-  name           String                   @unique
-  description    String?                  @db.Text
-  createdBy      Json // minimal user object of the creater
-  organizationId String?                  @db.Uuid
-  organization   Organization?            @relation(fields: [organizationId], onDelete: Cascade, references: [id])
-  createdAt      DateTime                 @default(now())
-  updatedAt      DateTime                 @updatedAt
-  voided         Boolean                  @default(false)
-  memberships    OrganizationMemberShip[]
+  id                   String                   @id @default(uuid()) @db.Uuid
+  name                 String                   @unique
+  description          String?                  @db.Text
+  createdBy            Json // minimal user object of the creater
+  organizationId       String?                  @db.Uuid
+  organization         Organization?            @relation(fields: [organizationId], onDelete: Cascade, references: [id])
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  voided               Boolean                  @default(false)
+  memberships          OrganizationMemberShip[]
+  privilegeAssignments RolePrivilege[]
 
   @@unique([name, organizationId])
 }
@@ -70,9 +71,10 @@ model Privilege {
 
   operations Operation[] @default([])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  voided    Boolean  @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  voided          Boolean         @default(false)
+  roleAssignments RolePrivilege[]
 
   @@unique([organizationId, name])
   @@unique([organizationId, resourceId, permitedResourceDataPoints])
@@ -92,6 +94,20 @@ model OrganizationMemberShip {
   voided       Boolean      @default(false)
 
   @@unique([memberPersonId, organizationId])
+}
+
+model RolePrivilege {
+  id          String @id @default(uuid()) @db.Uuid
+  privilegeId String @db.Uuid
+  roleId      String @db.Uuid
+
+  role         Role      @relation(fields: [roleId], onDelete: Cascade, references: [id])
+  privilege    Privilege @relation(fields: [privilegeId], onDelete: Cascade, references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  voided       Boolean   @default(false)
+
+  @@unique([privilegeId, roleId])
 }
 
 enum Operation {
