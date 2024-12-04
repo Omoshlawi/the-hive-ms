@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { OrganizationMembershipsModel } from "../models";
+import { OrganizationMembershipsModel, RolesModel } from "../models";
 import { OrganizationMembershipSchema } from "@/utils/validators";
 import {
   APIException,
@@ -49,6 +49,18 @@ export const addOrganizationMembership = async (
     );
     if (!validation.success)
       throw new APIException(400, validation.error.format());
+
+    // ensure role bellong to the organization
+    const roleInOrganization = await RolesModel.count({
+      where: {
+        id: validation.data.roleId,
+        organizationId: validation.data.organizationId,
+      },
+    });
+    if (roleInOrganization === 0)
+      throw new APIException(401, {
+        roleId: { _errors: ["role not in organization"] },
+      });
     const item = await OrganizationMembershipsModel.create({
       data: {
         ...validation.data,
@@ -73,6 +85,17 @@ export const updateOrganizationMembership = async (
     );
     if (!validation.success)
       throw new APIException(400, validation.error.format());
+    // ensure role bellong to the organization
+    const roleInOrganization = await RolesModel.count({
+      where: {
+        id: validation.data.roleId,
+        organizationId: validation.data.organizationId,
+      },
+    });
+    if (roleInOrganization === 0)
+      throw new APIException(401, {
+        roleId: { _errors: ["role not in organization"] },
+      });
     const item = await OrganizationMembershipsModel.update({
       where: { id: req.params.membershipId, voided: false },
       data: validation.data,
@@ -94,6 +117,17 @@ export const patchOrganizationMembership = async (
       await OrganizationMembershipSchema.partial().safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
+    // ensure role bellong to the organization
+    const roleInOrganization = await RolesModel.count({
+      where: {
+        id: validation.data.roleId,
+        organizationId: validation.data.organizationId,
+      },
+    });
+    if (roleInOrganization === 0)
+      throw new APIException(401, {
+        roleId: { _errors: ["role not in organization"] },
+      });
     const item = await OrganizationMembershipsModel.update({
       where: { id: req.params.membershipId, voided: false },
       data: validation.data,

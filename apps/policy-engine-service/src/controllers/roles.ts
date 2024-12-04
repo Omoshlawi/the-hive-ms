@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { RolesModel } from "../models";
+import { PrivilegesModel, RolesModel } from "../models";
 import { RoleSchema } from "@/utils/validators";
 import {
   APIException,
@@ -48,6 +48,14 @@ export const addRole = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { privileges, ...data } = validation.data;
+    // only pick privileges that are in the same organization
+    const privilegesInSameOrganization = await PrivilegesModel.findMany({
+      where: {
+        id: { in: privileges },
+        organizationId: data.organizationId ?? null,
+      },
+      select: { id: true },
+    });
     const item = await RolesModel.create({
       data: {
         ...data,
@@ -55,7 +63,9 @@ export const addRole = async (
         privilegeAssignments: {
           createMany: {
             skipDuplicates: true,
-            data: privileges?.map((p) => ({ privilegeId: p })),
+            data: privilegesInSameOrganization.map((p) => ({
+              privilegeId: p.id,
+            })),
           },
         },
       }, // TODO get creater user and add here
@@ -77,16 +87,26 @@ export const updateRole = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { privileges, ...data } = validation.data;
-
+    // only pick privileges that are in the same organization
+    const privilegesInSameOrganization = await PrivilegesModel.findMany({
+      where: {
+        id: { in: privileges },
+        organizationId: data.organizationId ?? null,
+      },
+      select: { id: true },
+    });
     const item = await RolesModel.update({
       where: { id: req.params.roleId, voided: false },
       data: {
         ...data,
         privilegeAssignments: {
+          deleteMany: { roleId: req.params.roleId }, // delete current asociation
           createMany: {
             // Just adds bt dont delete privileges not found in the input array
             skipDuplicates: true,
-            data: privileges.map((p) => ({ privilegeId: p })),
+            data: privilegesInSameOrganization.map((p) => ({
+              privilegeId: p.id,
+            })),
           },
         },
       },
@@ -108,16 +128,26 @@ export const patchRole = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { privileges, ...data } = validation.data;
-
+    // only pick privileges that are in the same organization
+    const privilegesInSameOrganization = await PrivilegesModel.findMany({
+      where: {
+        id: { in: privileges },
+        organizationId: data.organizationId ?? null,
+      },
+      select: { id: true },
+    });
     const item = await RolesModel.update({
       where: { id: req.params.roleId, voided: false },
       data: {
         ...data,
         privilegeAssignments: {
+          deleteMany: { roleId: req.params.roleId }, // delete current asociation
           createMany: {
             // Just adds bt dont delete privileges not found in the input array
             skipDuplicates: true,
-            data: (privileges ?? []).map((p) => ({ privilegeId: p })),
+            data: privilegesInSameOrganization.map((p) => ({
+              privilegeId: p.id,
+            })),
           },
         },
       },

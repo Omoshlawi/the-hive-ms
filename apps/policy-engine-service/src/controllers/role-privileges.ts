@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { RolePrivilege } from "../models";
+import { PrivilegesModel, RolePrivilege, RolesModel } from "../models";
 import { RolePrivilegeSchema } from "@/utils/validators";
 import {
   APIException,
@@ -47,6 +47,19 @@ export const addRolePrivilege = async (
     const validation = await RolePrivilegeSchema.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
+    // Ensure role and privilege bellong to same organization
+    const role = await RolesModel.findUnique({
+      where: { id: validation.data.roleId },
+    });
+    if (!role)
+      throw new APIException(401, { roleId: { _errors: ["Invalid role"] } });
+    const privlege = await PrivilegesModel.findUnique({
+      where: { id: validation.data.privilegeId },
+    });
+    if (!privlege)
+      throw new APIException(401, {
+        roleId: { _errors: ["Invalid privilege"] },
+      });
     const item = await RolePrivilege.create({
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
@@ -66,6 +79,19 @@ export const updateRolePrivilege = async (
     const validation = await RolePrivilegeSchema.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
+    // Ensure role and privilege bellong to same organization
+    const role = await RolesModel.findUnique({
+      where: { id: validation.data.roleId },
+    });
+    if (!role)
+      throw new APIException(401, { roleId: { _errors: ["Invalid role"] } });
+    const privlege = await PrivilegesModel.findUnique({
+      where: { id: validation.data.privilegeId },
+    });
+    if (!privlege)
+      throw new APIException(401, {
+        roleId: { _errors: ["Invalid privilege"] },
+      });
     const item = await RolePrivilege.update({
       where: { id: req.params.rolePrivilegeId, voided: false },
       data: validation.data,
@@ -88,6 +114,19 @@ export const patchRolePrivilege = async (
     );
     if (!validation.success)
       throw new APIException(400, validation.error.format());
+    // Ensure role and privilege bellong to same organization
+    const role = await RolesModel.findUnique({
+      where: { id: validation.data.roleId },
+    });
+    if (!role)
+      throw new APIException(401, { roleId: { _errors: ["Invalid role"] } });
+    const privlege = await PrivilegesModel.findUnique({
+      where: { id: validation.data.privilegeId },
+    });
+    if (!privlege)
+      throw new APIException(401, {
+        roleId: { _errors: ["Invalid privilege"] },
+      });
     const item = await RolePrivilege.update({
       where: { id: req.params.rolePrivilegeId, voided: false },
       data: validation.data,

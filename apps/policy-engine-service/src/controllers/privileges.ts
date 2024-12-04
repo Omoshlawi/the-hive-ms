@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { PrivilegesModel } from "../models";
+import { PrivilegesModel, ResourcesModel } from "../models";
 import { PrivilegeSchema } from "@/utils/validators";
 import {
   APIException,
@@ -47,8 +47,24 @@ export const addPrivilege = async (
     const validation = await PrivilegeSchema.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
+    // Get resource
+    const resourceDataPoints = await ResourcesModel.findUnique({
+      where: { id: validation.data.resourceId },
+      select: { dataPoints: true },
+    });
+    if (!resourceDataPoints)
+      throw new APIException(401, {
+        resourceId: { _errors: ["Invalid resource"] },
+      });
     const item = await PrivilegesModel.create({
-      data: { ...validation.data, createdBy: {} }, // TODO Get creatotr user and populate
+      data: {
+        ...validation.data,
+        createdBy: {},
+        permitedResourceDataPoints:
+          validation.data.permitedResourceDataPoints.filter((point) =>
+            resourceDataPoints.dataPoints.includes(point)
+          ), // Only pick points that are in the resource
+      }, // TODO Get creatotr user and populate
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
@@ -66,9 +82,24 @@ export const updatePrivilege = async (
     const validation = await PrivilegeSchema.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
+    // Get resource
+    const resourceDataPoints = await ResourcesModel.findUnique({
+      where: { id: validation.data.resourceId },
+      select: { dataPoints: true },
+    });
+    if (!resourceDataPoints)
+      throw new APIException(401, {
+        resourceId: { _errors: ["Invalid resource"] },
+      });
     const item = await PrivilegesModel.update({
       where: { id: req.params.privilegeId, voided: false },
-      data: validation.data,
+      data: {
+        ...validation.data,
+        permitedResourceDataPoints:
+          validation.data.permitedResourceDataPoints.filter((point) =>
+            resourceDataPoints.dataPoints.includes(point)
+          ), // Only pick points that are in the resource
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
@@ -86,9 +117,24 @@ export const patchPrivilege = async (
     const validation = await PrivilegeSchema.partial().safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
+    // Get resource
+    const resourceDataPoints = await ResourcesModel.findUnique({
+      where: { id: validation.data.resourceId },
+      select: { dataPoints: true },
+    });
+    if (!resourceDataPoints)
+      throw new APIException(401, {
+        resourceId: { _errors: ["Invalid resource"] },
+      });
     const item = await PrivilegesModel.update({
       where: { id: req.params.privilegeId, voided: false },
-      data: validation.data,
+      data: {
+        ...validation.data,
+        permitedResourceDataPoints:
+          validation.data.permitedResourceDataPoints?.filter((point) =>
+            resourceDataPoints.dataPoints.includes(point)
+          ), // Only pick points that are in the resource
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
