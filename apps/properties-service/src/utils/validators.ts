@@ -87,6 +87,7 @@ export const RelationshipSchema = z.object({
   propertyBId: z.string().uuid(),
   startDate: z.date({ coerce: true }),
   endDate: z.date({ coerce: true }).optional(),
+  typeId: z.string().uuid(),
 });
 
 // Attribute types
