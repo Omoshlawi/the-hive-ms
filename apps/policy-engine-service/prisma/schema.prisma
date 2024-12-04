@@ -11,6 +11,92 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Orga {
-  id String @id @default(uuid()) @db.Uuid
+model Organization {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String? @db.Text
+
+  createdBy Json // minimal user object of the creater
+
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  voided      Boolean                  @default(false)
+  memberShips OrganizationMemberShip[]
+  roles       Role[]
+  privileges  Privilege[]
+}
+
+model Role {
+  id             String                   @id @default(uuid()) @db.Uuid
+  name           String                   @unique
+  description    String?                  @db.Text
+  createdBy      Json // minimal user object of the creater
+  organizationId String?                  @db.Uuid
+  organization   Organization?            @relation(fields: [organizationId], onDelete: Cascade, references: [id])
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  voided         Boolean                  @default(false)
+  memberships    OrganizationMemberShip[]
+
+  @@unique([name, organizationId])
+}
+
+model Resource {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String? @db.Text
+
+  dataPoints String[]    @default([]) //Table fields
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  voided     Boolean     @default(false)
+  privileges Privilege[]
+
+  @@unique([name, dataPoints])
+}
+
+model Privilege {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String? @db.Text
+
+  createdBy      Json // minimal user object of the creater
+  organizationId String?       @db.Uuid
+  organization   Organization? @relation(fields: [organizationId], onDelete: Cascade, references: [id])
+
+  resourceId                 String   @db.Uuid
+  resource                   Resource @relation(fields: [resourceId], onDelete: Cascade, references: [id])
+  permitedResourceDataPoints String[] @default([])
+
+  operations Operation[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  voided    Boolean  @default(false)
+
+  @@unique([organizationId, name])
+  @@unique([organizationId, resourceId, permitedResourceDataPoints])
+}
+
+model OrganizationMemberShip {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  memberPersonId String @db.Uuid
+  roleId         String @db.Uuid
+
+  role         Role         @relation(fields: [roleId], onDelete: Cascade, references: [id])
+  memberPerson Json //minimal person object for member
+  organization Organization @relation(fields: [organizationId], onDelete: Cascade, references: [id])
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  voided       Boolean      @default(false)
+
+  @@unique([memberPersonId, organizationId])
+}
+
+enum Operation {
+  Create
+  Read
+  Update
+  Delete
 }
