@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+export const OrganizationMembershipsFilterSchema = z.object({
+  memberPersonId: z.string().uuid().optional(),
+  organizationId: z.string().uuid().optional(),
+});
+
 export const PrivilegeSchema = z.object({
   name: z.string().min(1, "required"),
   description: z.string().min(1, "required"),
@@ -23,7 +28,7 @@ export const ResourceSchema = z.object({
 export const OrganizationMembershipSchema = z.object({
   organizationId: z.string().uuid("invalid organization"),
   memberPersonId: z.string().uuid("invalid person"),
-  roleId: z.string().uuid("invalid role"),
+  roleIds: z.array(z.string().uuid("invalid role")),
 });
 
 export const RolePrivilegeSchema = z.object({

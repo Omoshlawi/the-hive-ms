@@ -53,7 +53,7 @@ export const addPrivilege = async (
       select: { dataPoints: true },
     });
     if (!resourceDataPoints)
-      throw new APIException(401, {
+      throw new APIException(400, {
         resourceId: { _errors: ["Invalid resource"] },
       });
     const item = await PrivilegesModel.create({
@@ -88,7 +88,7 @@ export const updatePrivilege = async (
       select: { dataPoints: true },
     });
     if (!resourceDataPoints)
-      throw new APIException(401, {
+      throw new APIException(400, {
         resourceId: { _errors: ["Invalid resource"] },
       });
     const item = await PrivilegesModel.update({
@@ -123,7 +123,7 @@ export const patchPrivilege = async (
       select: { dataPoints: true },
     });
     if (!resourceDataPoints)
-      throw new APIException(401, {
+      throw new APIException(400, {
         resourceId: { _errors: ["Invalid resource"] },
       });
     const item = await PrivilegesModel.update({

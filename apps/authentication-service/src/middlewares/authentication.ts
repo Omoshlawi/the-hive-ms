@@ -1,7 +1,7 @@
 import { UsersModel } from "@/models";
 import { TokenPayload } from "@/types";
-import { configuration } from "@/utils";
-import { APIException } from "@hive/core-utils";
+import { configuration, registryAddress, serviceIdentity } from "@/utils";
+import { APIException, ServiceClient } from "@hive/core-utils";
 import { NextFunction, Request, Response } from "express";
 import { JsonWebTokenError, TokenExpiredError, verify } from "jsonwebtoken";
 
@@ -15,7 +15,11 @@ const authenticate = async (
   try {
     if (!token)
       throw new APIException(401, { detail: "Unauthorized - Token missing" });
-    const { id, type: tokenType }: TokenPayload = verify(
+    const {
+      userId,
+      type: tokenType,
+      organizationId,
+    }: TokenPayload = verify(
       token,
       configuration.auth.auth_secrete as string
     ) as TokenPayload;
@@ -23,11 +27,29 @@ const authenticate = async (
       throw new APIException(401, {
         detail: "Unauthorized - Invalid token type",
       });
+
     const user = await UsersModel.findUnique({
-      where: { id },
+      where: { id: userId },
+      include: { person: true },
     });
     if (!user)
       throw new APIException(401, { detail: "Unauthorized - Invalid Token" });
+    // Assertain user membership to organization
+    if (organizationId) {
+      const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
+
+      const response = await serviceClient.callService<{ results: Array<any> }>(
+        "@hive/policy-engine-service",
+        {
+          method: "GET",
+          url: `/organization-membership`,
+          params: { memberPersonId: user.person?.id, organizationId },
+        }
+      );
+      if (!response.results.length) {
+        throw new APIException(401, { detail: "Unauthorized - Invalid Token" });
+      }
+    }
     req.user = user;
     req.headers["x-access-token"] = token;
     return next();

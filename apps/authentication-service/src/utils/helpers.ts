@@ -10,17 +10,16 @@ export const hashPassword = async (password: string) => {
   return hash;
 };
 
-export function generateUserToken(user: User & { person?: Person }) {
+export function generateUserToken(payload: {
+  userId: string;
+  organizationId?: string;
+  // personId?: string;
+}) {
   const accessPayload: TokenPayload = {
-    id: user.id,
+    ...payload,
     type: "access",
-    name: (user.person as any).name,
-    email: user.person?.email,
-    username: user.username,
-    phoneNumber: user.person?.phoneNumber,
-    image: user.person?.avatarUrl ?? undefined,
   };
-  const refreshPayload: TokenPayload = { id: user.id, type: "refresh" };
+  const refreshPayload: TokenPayload = { ...payload, type: "refresh" };
   const accessToken = jwt.sign(accessPayload, configuration.auth.auth_secrete, {
     expiresIn: configuration.auth.access_token_age,
   });

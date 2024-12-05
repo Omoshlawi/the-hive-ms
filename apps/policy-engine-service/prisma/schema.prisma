@@ -27,17 +27,17 @@ model Organization {
 }
 
 model Role {
-  id                   String                   @id @default(uuid()) @db.Uuid
-  name                 String                   @unique
-  description          String?                  @db.Text
+  id                   String                        @id @default(uuid()) @db.Uuid
+  name                 String                        @unique
+  description          String?                       @db.Text
   createdBy            Json // minimal user object of the creater
-  organizationId       String?                  @db.Uuid
-  organization         Organization?            @relation(fields: [organizationId], onDelete: Cascade, references: [id])
-  createdAt            DateTime                 @default(now())
-  updatedAt            DateTime                 @updatedAt
-  voided               Boolean                  @default(false)
-  memberships          OrganizationMemberShip[]
+  organizationId       String?                       @db.Uuid
+  organization         Organization?                 @relation(fields: [organizationId], onDelete: Cascade, references: [id])
+  createdAt            DateTime                      @default(now())
+  updatedAt            DateTime                      @updatedAt
+  voided               Boolean                       @default(false)
   privilegeAssignments RolePrivilege[]
+  memberships          OrganizationMemberShipRoles[]
 
   @@unique([name, organizationId])
 }
@@ -81,19 +81,30 @@ model Privilege {
 }
 
 model OrganizationMemberShip {
-  id             String @id @default(uuid()) @db.Uuid
-  organizationId String @db.Uuid
-  memberPersonId String @db.Uuid
-  roleId         String @db.Uuid
-
-  role         Role         @relation(fields: [roleId], onDelete: Cascade, references: [id])
-  memberPerson Json //minimal person object for member
-  organization Organization @relation(fields: [organizationId], onDelete: Cascade, references: [id])
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  voided       Boolean      @default(false)
+  id              String                        @id @default(uuid()) @db.Uuid
+  organizationId  String                        @db.Uuid
+  memberPersonId  String                        @db.Uuid
+  memberPerson    Json //minimal person object for member
+  organization    Organization                  @relation(fields: [organizationId], onDelete: Cascade, references: [id])
+  createdAt       DateTime                      @default(now())
+  updatedAt       DateTime                      @updatedAt
+  voided          Boolean                       @default(false)
+  membershipRoles OrganizationMemberShipRoles[]
 
   @@unique([memberPersonId, organizationId])
+}
+
+model OrganizationMemberShipRoles {
+  id           String                 @id @default(uuid()) @db.Uuid
+  membershipId String                 @db.Uuid
+  roleId       String                 @db.Uuid
+  membership   OrganizationMemberShip @relation(fields: [membershipId], onDelete: Cascade, references: [id])
+  role         Role                   @relation(fields: [roleId], onDelete: Cascade, references: [id])
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  voided       Boolean                @default(false)
+
+  @@unique([membershipId, roleId])
 }
 
 model RolePrivilege {
@@ -101,11 +112,11 @@ model RolePrivilege {
   privilegeId String @db.Uuid
   roleId      String @db.Uuid
 
-  role         Role      @relation(fields: [roleId], onDelete: Cascade, references: [id])
-  privilege    Privilege @relation(fields: [privilegeId], onDelete: Cascade, references: [id])
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  voided       Boolean   @default(false)
+  role      Role      @relation(fields: [roleId], onDelete: Cascade, references: [id])
+  privilege Privilege @relation(fields: [privilegeId], onDelete: Cascade, references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  voided    Boolean   @default(false)
 
   @@unique([privilegeId, roleId])
 }

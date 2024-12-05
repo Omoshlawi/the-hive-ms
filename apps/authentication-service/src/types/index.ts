@@ -25,13 +25,11 @@ export interface Repository<T> {
 }
 
 export interface TokenPayload {
-  id: string;
-  name?: string;
-  email?: string;
-  username?: string;
-  phoneNumber?: string;
-  image?: string;
+  userId: string; //user id
   type: "refresh" | "access";
+  organizationId?: string;
+  roles?: string[];
+  // personId?: string;
 }
 
 declare global {

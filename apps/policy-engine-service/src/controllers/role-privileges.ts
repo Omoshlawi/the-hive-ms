@@ -52,12 +52,12 @@ export const addRolePrivilege = async (
       where: { id: validation.data.roleId },
     });
     if (!role)
-      throw new APIException(401, { roleId: { _errors: ["Invalid role"] } });
+      throw new APIException(400, { roleId: { _errors: ["Invalid role"] } });
     const privlege = await PrivilegesModel.findUnique({
       where: { id: validation.data.privilegeId },
     });
     if (!privlege)
-      throw new APIException(401, {
+      throw new APIException(400, {
         roleId: { _errors: ["Invalid privilege"] },
       });
     const item = await RolePrivilege.create({
@@ -84,12 +84,12 @@ export const updateRolePrivilege = async (
       where: { id: validation.data.roleId },
     });
     if (!role)
-      throw new APIException(401, { roleId: { _errors: ["Invalid role"] } });
+      throw new APIException(400, { roleId: { _errors: ["Invalid role"] } });
     const privlege = await PrivilegesModel.findUnique({
       where: { id: validation.data.privilegeId },
     });
     if (!privlege)
-      throw new APIException(401, {
+      throw new APIException(400, {
         roleId: { _errors: ["Invalid privilege"] },
       });
     const item = await RolePrivilege.update({
@@ -119,12 +119,12 @@ export const patchRolePrivilege = async (
       where: { id: validation.data.roleId },
     });
     if (!role)
-      throw new APIException(401, { roleId: { _errors: ["Invalid role"] } });
+      throw new APIException(400, { roleId: { _errors: ["Invalid role"] } });
     const privlege = await PrivilegesModel.findUnique({
       where: { id: validation.data.privilegeId },
     });
     if (!privlege)
-      throw new APIException(401, {
+      throw new APIException(400, {
         roleId: { _errors: ["Invalid privilege"] },
       });
     const item = await RolePrivilege.update({

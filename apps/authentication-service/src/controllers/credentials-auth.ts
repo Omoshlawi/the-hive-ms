@@ -1,13 +1,13 @@
 import { AccountModel, UsersModel } from "@/models";
 import { Login, Register } from "@/schema";
 import { TokenPayload } from "@/types";
-import { configuration } from "@/utils";
+import { configuration, registryAddress, serviceIdentity } from "@/utils";
 import {
   checkPassword,
   generateUserToken,
   hashPassword,
 } from "@/utils/helpers";
-import { APIException } from "@hive/core-utils";
+import { APIException, ServiceClient } from "@hive/core-utils";
 import { JsonWebTokenError, TokenExpiredError, verify } from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
 import isEmpty from "lodash/isEmpty";
@@ -53,7 +53,10 @@ export const registerUser = async (
         // refresh_token: refreshToken,
       },
     });
-    const token = generateUserToken(user as any);
+    const token = generateUserToken({
+      userId: user.id,
+      // personId: user.person?.id,
+    });
     return res
       .setHeader("x-access-token", token.accessToken)
       .setHeader("x-refresh-token", token.refreshToken)
@@ -102,7 +105,10 @@ export const loginUser = async (
         },
       };
     const user = users[passwordChecks.findIndex((val) => val)];
-    const token = generateUserToken(user as any);
+    const token = generateUserToken({
+      userId: user.id,
+      // personId: user.person?.id,
+    });
     return res
       .setHeader("x-access-token", token.accessToken)
       .setHeader("x-refresh-token", token.refreshToken)
@@ -126,7 +132,12 @@ export const refreshToken = async (
     const refreshToken = req.header("x-refresh-token");
     if (!refreshToken)
       throw new APIException(401, { detail: "Unauthorized - Token missing" });
-    const { id, type: tokenType }: TokenPayload = verify(
+    const {
+      userId,
+      organizationId,
+      type: tokenType,
+      roles,
+    }: TokenPayload = verify(
       refreshToken,
       configuration.auth.auth_secrete as string
     ) as TokenPayload;
@@ -135,12 +146,28 @@ export const refreshToken = async (
         detail: "Unauthorized - Invalid token type",
       });
     const user = await UsersModel.findUnique({
-      where: { id },
+      where: { id: userId },
       include: { person: true },
     });
     if (!user)
       throw new APIException(401, { detail: "Unauthorized - Invalid Token" });
-    const token = generateUserToken(user as any);
+    // Assertain user membership to organization and organization roles
+    if (organizationId) {
+      const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
+
+      const response = await serviceClient.callService<{ results: Array<any> }>(
+        "@hive/policy-engine-service",
+        {
+          method: "GET",
+          url: `/organization-membership`,
+          params: { memberPersonId: user.person?.id, organizationId }, // TODO Adjust query to get user
+        }
+      );
+      if (!response.results.length) {
+        throw new APIException(401, { detail: "Unauthorized - Invalid Token" });
+      }
+    }
+    const token = generateUserToken({ userId: user.id, organizationId });
     return res
       .setHeader("x-access-token", token.accessToken)
       .setHeader("x-refresh-token", token.refreshToken)

@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { OrganizationMembershipsModel, RolesModel } from "../models";
-import { OrganizationMembershipSchema } from "@/utils/validators";
+import {
+  OrganizationMembershipSchema,
+  OrganizationMembershipsFilterSchema,
+} from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
@@ -12,8 +15,14 @@ export const getOrganizationMemberships = async (
   next: NextFunction
 ) => {
   try {
+    const validation = await OrganizationMembershipsFilterSchema.safeParseAsync(
+      req.query
+    );
+    if (!validation.success)
+      throw new APIException(400, validation.error.format());
+    const { memberPersonId, organizationId } = validation.data;
     const results = await OrganizationMembershipsModel.findMany({
-      where: { voided: false },
+      where: { voided: false, memberPersonId, organizationId },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json({ results });
@@ -50,21 +59,29 @@ export const addOrganizationMembership = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
 
-    // ensure role bellong to the organization
-    const roleInOrganization = await RolesModel.count({
+    const { roleIds, memberPersonId, organizationId, ...data } =
+      validation.data;
+    // ensure roles bellong to the organization
+    const rolesInOrganization = await RolesModel.findMany({
       where: {
-        id: validation.data.roleId,
-        organizationId: validation.data.organizationId,
+        id: { in: validation.data.roleIds },
+        organizationId: organizationId,
       },
+      select: { id: true },
     });
-    if (roleInOrganization === 0)
-      throw new APIException(401, {
-        roleId: { _errors: ["role not in organization"] },
-      });
+
     const item = await OrganizationMembershipsModel.create({
       data: {
-        ...validation.data,
-        memberPerson: { id: validation.data.memberPersonId },
+        ...data,
+        memberPerson: { id: memberPersonId },
+        organizationId,
+        memberPersonId,
+        membershipRoles: {
+          createMany: {
+            skipDuplicates: true,
+            data: rolesInOrganization.map((role) => ({ roleId: role.id })),
+          },
+        },
       }, // TODO GET person by uuid and update the object
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -85,20 +102,34 @@ export const updateOrganizationMembership = async (
     );
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    // ensure role bellong to the organization
-    const roleInOrganization = await RolesModel.count({
+    const { roleIds, memberPersonId, organizationId, ...data } =
+      validation.data;
+    // ensure roles bellong to the organization
+    const rolesInOrganization = await RolesModel.findMany({
       where: {
-        id: validation.data.roleId,
-        organizationId: validation.data.organizationId,
+        id: { in: validation.data.roleIds },
+        organizationId: organizationId,
       },
+      select: { id: true },
     });
-    if (roleInOrganization === 0)
-      throw new APIException(401, {
-        roleId: { _errors: ["role not in organization"] },
-      });
+
     const item = await OrganizationMembershipsModel.update({
       where: { id: req.params.membershipId, voided: false },
-      data: validation.data,
+      data: {
+        ...data,
+        memberPerson: { id: memberPersonId },
+        organizationId,
+        memberPersonId,
+        membershipRoles: {
+          deleteMany: {
+            membershipId: req.params.membershipId,
+          },
+          createMany: {
+            skipDuplicates: true,
+            data: rolesInOrganization.map((role) => ({ roleId: role.id })),
+          },
+        },
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
@@ -117,20 +148,34 @@ export const patchOrganizationMembership = async (
       await OrganizationMembershipSchema.partial().safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    // ensure role bellong to the organization
-    const roleInOrganization = await RolesModel.count({
+    const { roleIds, memberPersonId, organizationId, ...data } =
+      validation.data;
+    // ensure roles bellong to the organization
+    const rolesInOrganization = await RolesModel.findMany({
       where: {
-        id: validation.data.roleId,
-        organizationId: validation.data.organizationId,
+        id: { in: validation.data.roleIds },
+        organizationId: organizationId,
       },
+      select: { id: true },
     });
-    if (roleInOrganization === 0)
-      throw new APIException(401, {
-        roleId: { _errors: ["role not in organization"] },
-      });
+
     const item = await OrganizationMembershipsModel.update({
       where: { id: req.params.membershipId, voided: false },
-      data: validation.data,
+      data: {
+        ...data,
+        memberPerson: { id: memberPersonId },
+        organizationId,
+        memberPersonId,
+        membershipRoles: {
+          deleteMany: {
+            membershipId: req.params.membershipId,
+          },
+          createMany: {
+            skipDuplicates: true,
+            data: rolesInOrganization.map((role) => ({ roleId: role.id })),
+          },
+        },
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
