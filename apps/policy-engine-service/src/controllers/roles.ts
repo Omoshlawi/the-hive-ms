@@ -59,7 +59,7 @@ export const addRole = async (
     const item = await RolesModel.create({
       data: {
         ...data,
-        createdBy: {},
+        createdBy: req?.context!.userId,
         privilegeAssignments: {
           createMany: {
             skipDuplicates: true,
@@ -68,7 +68,7 @@ export const addRole = async (
             })),
           },
         },
-      }, // TODO get creater user and add here
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);

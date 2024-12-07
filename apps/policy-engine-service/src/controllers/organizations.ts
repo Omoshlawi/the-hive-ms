@@ -1,10 +1,10 @@
-import { NextFunction, Request, Response } from "express";
-import { OrganizationsModel } from "../models";
 import { OrganizationSchema } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
+import { NextFunction, Request, Response } from "express";
+import { OrganizationsModel } from "../models";
 
 export const getOrganizations = async (
   req: Request,
@@ -48,7 +48,13 @@ export const addOrganization = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await OrganizationsModel.create({
-      data: { ...validation.data, createdBy: {} }, // TODO Get User and add info
+      data: {
+        ...validation.data,
+        createdBy: req?.context!.userId,
+        memberShips: {
+          create: { memberUserId: req.context!.userId, isAdmin: true },
+        },
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);

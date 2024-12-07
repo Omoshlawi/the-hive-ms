@@ -16,7 +16,7 @@ model Organization {
   name        String  @unique
   description String? @db.Text
 
-  createdBy Json // minimal user object of the creater
+  createdBy String
 
   createdAt   DateTime                 @default(now())
   updatedAt   DateTime                 @updatedAt
@@ -30,7 +30,7 @@ model Role {
   id                   String                        @id @default(uuid()) @db.Uuid
   name                 String                        @unique
   description          String?                       @db.Text
-  createdBy            Json // minimal user object of the creater
+  createdBy            String
   organizationId       String?                       @db.Uuid
   organization         Organization?                 @relation(fields: [organizationId], onDelete: Cascade, references: [id])
   createdAt            DateTime                      @default(now())
@@ -61,7 +61,7 @@ model Privilege {
   name        String  @unique
   description String? @db.Text
 
-  createdBy      Json // minimal user object of the creater
+  createdBy      String
   organizationId String?       @db.Uuid
   organization   Organization? @relation(fields: [organizationId], onDelete: Cascade, references: [id])
 
@@ -83,15 +83,16 @@ model Privilege {
 model OrganizationMemberShip {
   id              String                        @id @default(uuid()) @db.Uuid
   organizationId  String                        @db.Uuid
-  memberPersonId  String                        @db.Uuid
-  memberPerson    Json //minimal person object for member
+  memberUserId    String                        @db.Uuid
+  memberUser      Json? //minimal person object for member
+  isAdmin         Boolean                       @default(false) // has full access
   organization    Organization                  @relation(fields: [organizationId], onDelete: Cascade, references: [id])
   createdAt       DateTime                      @default(now())
   updatedAt       DateTime                      @updatedAt
   voided          Boolean                       @default(false)
   membershipRoles OrganizationMemberShipRoles[]
 
-  @@unique([memberPersonId, organizationId])
+  @@unique([memberUserId, organizationId])
 }
 
 model OrganizationMemberShipRoles {

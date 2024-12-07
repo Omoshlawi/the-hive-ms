@@ -59,12 +59,12 @@ export const addPrivilege = async (
     const item = await PrivilegesModel.create({
       data: {
         ...validation.data,
-        createdBy: {},
+        createdBy: req?.context!.userId,
         permitedResourceDataPoints:
           validation.data.permitedResourceDataPoints.filter((point) =>
             resourceDataPoints.dataPoints.includes(point)
           ), // Only pick points that are in the resource
-      }, // TODO Get creatotr user and populate
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);

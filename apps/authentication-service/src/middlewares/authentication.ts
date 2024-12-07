@@ -43,7 +43,7 @@ const authenticate = async (
         {
           method: "GET",
           url: `/organization-membership`,
-          params: { memberPersonId: user.person?.id, organizationId },
+          params: { memberUserId: user?.id, organizationId },
         }
       );
       if (!response.results.length) {

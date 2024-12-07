@@ -16,6 +16,7 @@
     "lodash": "^4.17.7",
     "slugify": "^1.6.6",
     "sharp": "^0.33.4",
+    "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
@@ -25,6 +26,7 @@
     "@hive/typescript-config": "workspace:*",
     "@turbo/gen": "^1.12.4",
     "@types/node": "^20.11.24",
+    "@types/jsonwebtoken": "^9.0.5",
     "@types/eslint": "^8.56.5",
     "eslint": "^8.57.0",
     "eslint-config-turbo": "^2.0.0",

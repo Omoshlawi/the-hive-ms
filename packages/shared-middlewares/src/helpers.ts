@@ -1,4 +1,6 @@
+import pick from "lodash/pick";
 import { MemoryMulterFile } from "./types";
+import { Request } from "express";
 
 export const objectToFormData = (
   data: { [key: string]: any },
@@ -48,11 +50,18 @@ export const objectToFormData = (
   return formData;
 };
 
-export const memoryMulterFileToJSFile = (memoryFile: MemoryMulterFile): File => {
+export const memoryMulterFileToJSFile = (
+  memoryFile: MemoryMulterFile
+): File => {
   const uint8Array = Uint8Array.from(memoryFile.buffer);
   const blob = new Blob([uint8Array], { type: memoryFile.mimetype });
   const file = new File([blob], memoryFile.originalname, {
     type: blob.type,
   });
   return file;
+};
+
+export const sanitizeHeaders = (req: Request) => {
+  const ALLOWED_HEADERS = ["x-access-token", "x-refresh-token"];
+  return pick(req.headers ?? {}, ALLOWED_HEADERS);
 };

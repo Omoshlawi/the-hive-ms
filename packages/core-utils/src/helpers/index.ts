@@ -1,4 +1,5 @@
 import { UUID_REGEX } from "@/constants";
+import pick from "lodash/pick";
 
 export function parseMessage(object: any, template: string) {
   // regular expression to match placeholders like {{field}}

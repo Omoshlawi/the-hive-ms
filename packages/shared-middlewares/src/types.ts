@@ -13,3 +13,17 @@ export type DiskMulterFile = Pick<
   | "filename"
   | "path"
 >;
+
+export type Context = {
+  userId: string;
+  organizationId?: string;
+  roles?: Array<string>;
+};
+
+declare global {
+  namespace Express {
+    interface Request {
+      context?: Context;
+    }
+  }
+}

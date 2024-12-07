@@ -20,9 +20,9 @@ export const getOrganizationMemberships = async (
     );
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const { memberPersonId, organizationId } = validation.data;
+    const { memberUserId, organizationId } = validation.data;
     const results = await OrganizationMembershipsModel.findMany({
-      where: { voided: false, memberPersonId, organizationId },
+      where: { voided: false, memberUserId, organizationId },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json({ results });
@@ -59,7 +59,7 @@ export const addOrganizationMembership = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
 
-    const { roleIds, memberPersonId, organizationId, ...data } =
+    const { roleIds, memberUserId, organizationId, ...data } =
       validation.data;
     // ensure roles bellong to the organization
     const rolesInOrganization = await RolesModel.findMany({
@@ -73,16 +73,15 @@ export const addOrganizationMembership = async (
     const item = await OrganizationMembershipsModel.create({
       data: {
         ...data,
-        memberPerson: { id: memberPersonId },
         organizationId,
-        memberPersonId,
+        memberUserId,
         membershipRoles: {
           createMany: {
             skipDuplicates: true,
             data: rolesInOrganization.map((role) => ({ roleId: role.id })),
           },
         },
-      }, // TODO GET person by uuid and update the object
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
@@ -102,7 +101,7 @@ export const updateOrganizationMembership = async (
     );
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const { roleIds, memberPersonId, organizationId, ...data } =
+    const { roleIds, memberUserId, organizationId, ...data } =
       validation.data;
     // ensure roles bellong to the organization
     const rolesInOrganization = await RolesModel.findMany({
@@ -117,9 +116,8 @@ export const updateOrganizationMembership = async (
       where: { id: req.params.membershipId, voided: false },
       data: {
         ...data,
-        memberPerson: { id: memberPersonId },
         organizationId,
-        memberPersonId,
+        memberUserId,
         membershipRoles: {
           deleteMany: {
             membershipId: req.params.membershipId,
@@ -148,7 +146,7 @@ export const patchOrganizationMembership = async (
       await OrganizationMembershipSchema.partial().safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const { roleIds, memberPersonId, organizationId, ...data } =
+    const { roleIds, memberUserId, organizationId, ...data } =
       validation.data;
     // ensure roles bellong to the organization
     const rolesInOrganization = await RolesModel.findMany({
@@ -163,9 +161,8 @@ export const patchOrganizationMembership = async (
       where: { id: req.params.membershipId, voided: false },
       data: {
         ...data,
-        memberPerson: { id: memberPersonId },
         organizationId,
-        memberPersonId,
+        memberUserId,
         membershipRoles: {
           deleteMany: {
             membershipId: req.params.membershipId,
