@@ -11,6 +11,7 @@ import { APIException, ServiceClient } from "@hive/core-utils";
 import { JsonWebTokenError, TokenExpiredError, verify } from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
 import isEmpty from "lodash/isEmpty";
+import { sanitizeHeaders } from "@hive/shared-middlewares";
 
 export const registerUser = async (
   req: Request,
@@ -136,11 +137,11 @@ export const refreshToken = async (
       userId,
       organizationId,
       type: tokenType,
-      roles,
     }: TokenPayload = verify(
       refreshToken,
       configuration.auth.auth_secrete as string
     ) as TokenPayload;
+    let roles: string[] | string | undefined;
     if (tokenType !== "refresh")
       throw new APIException(401, {
         detail: "Unauthorized - Invalid token type",
@@ -151,23 +152,29 @@ export const refreshToken = async (
     });
     if (!user)
       throw new APIException(401, { detail: "Unauthorized - Invalid Token" });
-    // Assertain user membership to organization and organization roles
+    // Assertain user membership to organization and roles on the membership
     if (organizationId) {
       const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
 
-      const response = await serviceClient.callService<{ results: Array<any> }>(
-        "@hive/policy-engine-service",
-        {
-          method: "GET",
-          url: `/organization-membership`,
-          params: { memberPersonId: user.person?.id, organizationId }, // TODO Adjust query to get user
-        }
-      );
+      const response = await serviceClient.callService<{
+        results: Array<{ membershipRoles: Array<any>; isAdmin: boolean }>;
+      }>("@hive/policy-engine-service", {
+        method: "GET",
+        url: `/organization-membership`,
+        params: {
+          memberUserId: user?.id,
+          organizationId,
+          v: "custom:include(membershipRoles)",
+        },
+      });
       if (!response.results.length) {
         throw new APIException(401, { detail: "Unauthorized - Invalid Token" });
       }
+      // incase the role have changed, getting current ones nd setting to token
+      if (response.results[0].isAdmin) roles = "*";
+      else roles = response.results[0].membershipRoles.map((r) => r.roleId);
     }
-    const token = generateUserToken({ userId: user.id, organizationId });
+    const token = generateUserToken({ userId: user.id, organizationId, roles });
     return res
       .setHeader("x-access-token", token.accessToken)
       .setHeader("x-refresh-token", token.refreshToken)
@@ -190,5 +197,48 @@ export const refreshToken = async (
       return next(error);
     }
     return next(new APIException(500, { detail: "Internal Server Error" }));
+  }
+};
+
+export const changeOrganizationContext = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const organizationId = req.params.organizationId;
+    let roles: string[] | string | undefined;
+    const user = req.user!;
+    // Assertain user membership to organization and roles on the membership
+    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
+    const response = await serviceClient.callService<{
+      results: Array<{ membershipRoles: Array<any>; isAdmin: boolean }>;
+    }>("@hive/policy-engine-service", {
+      method: "GET",
+      url: `/organization-membership`,
+      params: {
+        memberUserId: user?.id,
+        organizationId,
+        v: "custom:include(membershipRoles)",
+      },
+      headers: sanitizeHeaders(req),
+    });
+    if (!response.results.length) {
+      throw new APIException(404, { detail: "Organization not found" });
+    }
+    if (response.results[0].isAdmin) roles = "*";
+    else roles = response.results[0].membershipRoles.map((r) => r.roleId);
+    const token = generateUserToken({ userId: user.id, organizationId, roles });
+    return res
+      .setHeader("x-access-token", token.accessToken)
+      .setHeader("x-refresh-token", token.refreshToken)
+      .cookie(
+        configuration.authCookieConfig.name,
+        token.accessToken,
+        configuration.authCookieConfig.config
+      )
+      .json(token);
+  } catch (error: any) {
+    return next(error);
   }
 };

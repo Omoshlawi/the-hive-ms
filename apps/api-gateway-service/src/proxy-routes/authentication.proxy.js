@@ -9,6 +9,12 @@ module.exports = [
     serviceVersion,
   },
   {
+    path: "/change-context",
+    prefix: "/change-context",
+    serviceName,
+    serviceVersion,
+  },
+  {
     path: "/users",
     prefix: "/users",
     serviceName,

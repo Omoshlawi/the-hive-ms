@@ -13,6 +13,7 @@ export const hashPassword = async (password: string) => {
 export function generateUserToken(payload: {
   userId: string;
   organizationId?: string;
+  roles?: string[] | string;
   // personId?: string;
 }) {
   const accessPayload: TokenPayload = {

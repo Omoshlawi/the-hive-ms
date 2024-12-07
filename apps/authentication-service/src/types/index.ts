@@ -28,7 +28,7 @@ export interface TokenPayload {
   userId: string; //user id
   type: "refresh" | "access";
   organizationId?: string;
-  roles?: string[];
+  roles?: string[] | string; // Array of role ids or "*" for group admin
   // personId?: string;
 }
 
