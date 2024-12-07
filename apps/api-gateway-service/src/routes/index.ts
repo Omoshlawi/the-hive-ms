@@ -73,7 +73,9 @@ class ProxyRouteLoader {
       serviceRouterMiddleware(
         route.serviceName,
         route.prefix || "",
-        route.serviceVersion
+        route.serviceVersion,
+        route.includeHeaders,
+        5000
       )
     );
   }

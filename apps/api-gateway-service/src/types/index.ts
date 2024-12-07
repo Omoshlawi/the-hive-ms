@@ -3,4 +3,5 @@ export type GatewayProxyRoute = {
   prefix?: string;
   serviceName: string;
   serviceVersion?: string;
+  includeHeaders?: boolean;
 };
