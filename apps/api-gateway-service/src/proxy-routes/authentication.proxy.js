@@ -21,6 +21,5 @@ module.exports = [
     prefix: "/users",
     serviceName,
     serviceVersion,
-    includeHeaders: true
   },
 ]

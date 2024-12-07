@@ -166,6 +166,7 @@ export const refreshToken = async (
           organizationId,
           v: "custom:include(membershipRoles)",
         },
+        headers: sanitizeHeaders(req),
       });
       if (!response.results.length) {
         throw new APIException(401, { detail: "Unauthorized - Invalid Token" });

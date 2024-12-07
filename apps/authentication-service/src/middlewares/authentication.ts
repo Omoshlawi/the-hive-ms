@@ -2,6 +2,7 @@ import { UsersModel } from "@/models";
 import { TokenPayload } from "@/types";
 import { configuration, registryAddress, serviceIdentity } from "@/utils";
 import { APIException, ServiceClient } from "@hive/core-utils";
+import { sanitizeHeaders } from "@hive/shared-middlewares";
 import { NextFunction, Request, Response } from "express";
 import { JsonWebTokenError, TokenExpiredError, verify } from "jsonwebtoken";
 
@@ -48,6 +49,7 @@ const authenticate = async (
             organizationId,
             v: "custom:include(membershipRoles)",
           },
+          headers: sanitizeHeaders(req),
         }
       );
       if (!response.results.length) {
