@@ -3,9 +3,13 @@ import { NextFunction, Request, Response } from "express";
 import { decode } from "jsonwebtoken";
 import { Context } from "./types";
 
-export const requireContext = (req: Request, res: Response, next: NextFunction) => {
+export const requireContext = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const token = req.header("x-access-token");
+    const token = req.header("x-access-token") ?? req.header("x-refresh-token");
     if (!token)
       throw new APIException(401, { detail: "Unauthorized - Token missing" });
     const context: Context = decode(token) as Context;
@@ -15,4 +19,3 @@ export const requireContext = (req: Request, res: Response, next: NextFunction) 
     next(error);
   }
 };
-

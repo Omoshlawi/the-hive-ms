@@ -3,7 +3,7 @@
   "port": null,
   "db": "",
   "token": {
-    "access_expiry": "2h",
+    "access_expiry": "15m",
     "refresh_expiry": "1d"
   },
   "registry": {

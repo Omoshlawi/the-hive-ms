@@ -132,7 +132,9 @@ export const refreshToken = async (
   try {
     const refreshToken = req.header("x-refresh-token");
     if (!refreshToken)
-      throw new APIException(401, { detail: "Unauthorized - Token missing" });
+      throw new APIException(401, {
+        detail: "Unauthorized - Refresh token missing",
+      });
     const {
       userId,
       organizationId,
@@ -151,11 +153,12 @@ export const refreshToken = async (
       include: { person: true },
     });
     if (!user)
-      throw new APIException(401, { detail: "Unauthorized - Invalid Token" });
+      throw new APIException(401, {
+        detail: "Unauthorized - Invalid Refresh token",
+      });
     // Assertain user membership to organization and roles on the membership
     if (organizationId) {
       const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
-
       const response = await serviceClient.callService<{
         results: Array<{ membershipRoles: Array<any>; isAdmin: boolean }>;
       }>("@hive/policy-engine-service", {
@@ -169,7 +172,9 @@ export const refreshToken = async (
         headers: sanitizeHeaders(req),
       });
       if (!response.results.length) {
-        throw new APIException(401, { detail: "Unauthorized - Invalid Token" });
+        throw new APIException(401, {
+          detail: "Unauthorized - Invalid Refresh token",
+        });
       }
       // incase the role have changed, getting current ones nd setting to token
       if (response.results[0].isAdmin) roles = "*";
@@ -188,11 +193,15 @@ export const refreshToken = async (
   } catch (error: any) {
     if (error instanceof TokenExpiredError) {
       return next(
-        new APIException(401, { detail: "Unauthorized - Token expired" })
+        new APIException(401, {
+          detail: "Unauthorized - Refresh token expired",
+        })
       );
     } else if (error instanceof JsonWebTokenError) {
       return next(
-        new APIException(401, { detail: "Unauthorized - Invalid Token" })
+        new APIException(401, {
+          detail: "Unauthorized - Invalid Refresh token",
+        })
       );
     } else if (error instanceof APIException) {
       return next(error);
