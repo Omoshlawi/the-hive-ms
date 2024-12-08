@@ -1,5 +1,6 @@
 import {
   changeOrganizationContext,
+  exitContext,
   refreshToken,
   registerUser,
 } from "@/controllers/credentials-auth";
@@ -15,6 +16,7 @@ router.get(
   authenticate,
   changeOrganizationContext
 );
+router.delete("/exit-context", authenticate, exitContext);
 router.get("/refresh-token", refreshToken);
 router.post("/signup", registerUser);
 router.use("/signin", signInRouter);

@@ -17,6 +17,13 @@ module.exports = [
     includeHeaders: true
   },
   {
+    path: "/exit-context",
+    prefix: "/exit-context",
+    serviceName,
+    serviceVersion,
+    includeHeaders: true
+  },
+  {
     path: "/users",
     prefix: "/users",
     serviceName,

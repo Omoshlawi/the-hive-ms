@@ -252,3 +252,27 @@ export const changeOrganizationContext = async (
     return next(error);
   }
 };
+
+export const exitContext = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = req.user!;
+    const token = generateUserToken({
+      userId: user.id,
+    });
+    return res
+      .setHeader("x-access-token", token.accessToken)
+      .setHeader("x-refresh-token", token.refreshToken)
+      .cookie(
+        configuration.authCookieConfig.name,
+        token.accessToken,
+        configuration.authCookieConfig.config
+      )
+      .json(token);
+  } catch (error) {
+    next(error);
+  }
+};
