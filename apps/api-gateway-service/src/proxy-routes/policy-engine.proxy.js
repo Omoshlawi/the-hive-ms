@@ -32,4 +32,10 @@ module.exports =  [
     serviceVersion,
     serviceName
   },
+  {
+    path: "/resources-schema",
+    prefix: "/resources-schema",
+    serviceVersion,
+    serviceName
+  },
 ]
