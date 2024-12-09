@@ -9,6 +9,12 @@ module.exports =  [
     serviceVersion,
   },
   {
+    path: "/resources",
+    prefix: "/resources",
+    serviceName,
+    serviceVersion,
+  },
+  {
     path: "/organization-membership",
     prefix: "/organization-membership",
     serviceName,
