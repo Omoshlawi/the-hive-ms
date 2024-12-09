@@ -8,9 +8,10 @@ import { Router } from "express";
 import signInRouter from "./signin";
 import usersRouter from "./users";
 import authenticate from "@/middlewares/authentication";
+import { getDatabaseSchemas } from "@/controllers/db-schema";
 
 const router = Router();
-
+router.get("/resources-schema", getDatabaseSchemas);
 router.get(
   "/change-context/:organizationId",
   authenticate,

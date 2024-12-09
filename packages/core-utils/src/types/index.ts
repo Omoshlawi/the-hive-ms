@@ -29,3 +29,23 @@ export interface PrismaClientKnownRequestError extends Error {
   message: string;
   name: string;
 }
+
+export interface ResourcesSchemas {
+  schemas: Schemas;
+}
+
+export interface Schemas {
+  [resource: string]: ResourceSchema;
+}
+
+export interface ResourceSchema {
+  columnNames: string[];
+  orderedColumns: OrderedColumn[];
+}
+
+export interface OrderedColumn {
+  name: string;
+  position: number;
+  type: string;
+  nullable: boolean;
+}

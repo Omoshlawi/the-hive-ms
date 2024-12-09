@@ -4,9 +4,10 @@ import { default as attributeTypesRouter } from "./attribute-types";
 import { default as relationshipTypeRouter } from "./relationship-types";
 import { default as categoriesRouter } from "./categories";
 import { default as propertiesRouter } from "./properties";
+import { getDatabaseSchemas } from "@/controllers/db-schema";
 
 const router = Router();
-
+router.get("/resources-schema", getDatabaseSchemas);
 router.use("/amenities", amenitiesRouter);
 router.use("/attribute-types", attributeTypesRouter);
 router.use("/relationship-types", relationshipTypeRouter);

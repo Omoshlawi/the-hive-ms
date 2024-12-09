@@ -5,9 +5,13 @@ import organizationsRouter from "./organization";
 import privilegesRouter from "./privileges";
 import rolesPrivilegeRouter from "./role-privilege";
 import { requireContext } from "@hive/shared-middlewares";
-import { getDatabaseSchemas } from "@/controllers/db-schema";
+import {
+  getDatabaseSchemas,
+  pullServiceDatabaseSchema,
+} from "@/controllers/db-schema";
 const router = Router();
 router.get("/resources-schema", getDatabaseSchemas);
+router.post("/resources-schema", pullServiceDatabaseSchema);
 router.use("/roles", rolesRouter);
 router.use("/organization-membership", [requireContext], membershipRouter);
 router.use("/organizations", [requireContext], organizationsRouter);

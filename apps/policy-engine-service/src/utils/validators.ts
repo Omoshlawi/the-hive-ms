@@ -42,3 +42,8 @@ export const RoleSchema = z.object({
   organizationId: z.string().uuid("invalid organization"),
   privileges: z.array(z.string().uuid()),
 });
+
+export const ServiceSchema = z.object({
+  name: z.string().min(1, "required"),
+  version: z.string().min(1, "Required").optional(),
+});
