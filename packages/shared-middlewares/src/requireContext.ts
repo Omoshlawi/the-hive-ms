@@ -11,9 +11,24 @@ export const requireContext = (
   try {
     const token = req.header("x-access-token") ?? req.header("x-refresh-token");
     if (!token)
-      throw new APIException(401, { detail: "Unauthorized - Token missing" });
+      throw new APIException(403, { detail: "Fobbiden - Required context" });
     const context: Context = decode(token) as Context;
     req.context = context;
+    return next();
+  } catch (error) {
+    next(error);
+  }
+};
+export const requireOrganizationContext = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.context?.organizationId)
+      throw new APIException(403, {
+        detail: "Fobbiden - Required organization context",
+      });
     return next();
   } catch (error) {
     next(error);

@@ -8,7 +8,6 @@ export const OrganizationMembershipsFilterSchema = z.object({
 export const PrivilegeSchema = z.object({
   name: z.string().min(1, "required"),
   description: z.string().min(1, "required"),
-  organizationId: z.string().uuid("invalid organization"),
   resourceId: z.string().uuid("invalid resource"),
   permitedResourceDataPoints: z.array(z.string().min(1, "required")),
   operations: z.array(z.enum(["Create", "Read", "Update", "Delete"])),
@@ -26,7 +25,6 @@ export const ResourceSchema = z.object({
 });
 
 export const OrganizationMembershipSchema = z.object({
-  organizationId: z.string().uuid("invalid organization"),
   memberUserId: z.string().uuid("invalid user"),
   roleIds: z.array(z.string().uuid("invalid role")),
 });
@@ -39,7 +37,6 @@ export const RolePrivilegeSchema = z.object({
 export const RoleSchema = z.object({
   name: z.string().min(1, "required"),
   description: z.string().min(1, "required"),
-  organizationId: z.string().uuid("invalid organization"),
   privileges: z.array(z.string().uuid()),
 });
 

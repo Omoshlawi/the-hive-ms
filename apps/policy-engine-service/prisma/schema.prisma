@@ -28,7 +28,7 @@ model Organization {
 
 model Role {
   id                   String                        @id @default(uuid()) @db.Uuid
-  name                 String                        @unique
+  name                 String
   description          String?                       @db.Text
   createdBy            String
   organizationId       String?                       @db.Uuid
@@ -58,7 +58,7 @@ model Resource {
 
 model Privilege {
   id          String  @id @default(uuid()) @db.Uuid
-  name        String  @unique
+  name        String
   description String? @db.Text
 
   createdBy      String

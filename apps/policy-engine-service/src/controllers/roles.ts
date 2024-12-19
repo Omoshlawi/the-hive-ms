@@ -13,7 +13,10 @@ export const getRoles = async (
 ) => {
   try {
     const results = await RolesModel.findMany({
-      where: { voided: false },
+      where: {
+        voided: false,
+        organizationId: req.context?.organizationId ?? null,
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json({ results });
@@ -29,7 +32,11 @@ export const getRole = async (
 ) => {
   try {
     const item = await RolesModel.findUniqueOrThrow({
-      where: { id: req.params.roleId, voided: false },
+      where: {
+        id: req.params.roleId,
+        voided: false,
+        organizationId: req.context?.organizationId ?? null,
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
@@ -49,16 +56,19 @@ export const addRole = async (
       throw new APIException(400, validation.error.format());
     const { privileges, ...data } = validation.data;
     // only pick privileges that are in the same organization
+    const organizationId = req.context?.organizationId;
+
     const privilegesInSameOrganization = await PrivilegesModel.findMany({
       where: {
         id: { in: privileges },
-        organizationId: data.organizationId ?? null,
+        organizationId: organizationId ?? null,
       },
       select: { id: true },
     });
     const item = await RolesModel.create({
       data: {
         ...data,
+        organizationId: organizationId ?? null,
         createdBy: req?.context!.userId,
         privilegeAssignments: {
           createMany: {
@@ -88,10 +98,11 @@ export const updateRole = async (
       throw new APIException(400, validation.error.format());
     const { privileges, ...data } = validation.data;
     // only pick privileges that are in the same organization
+    const organizationId = req.context?.organizationId;
     const privilegesInSameOrganization = await PrivilegesModel.findMany({
       where: {
         id: { in: privileges },
-        organizationId: data.organizationId ?? null,
+        organizationId: organizationId ?? null,
       },
       select: { id: true },
     });
@@ -129,10 +140,12 @@ export const patchRole = async (
       throw new APIException(400, validation.error.format());
     const { privileges, ...data } = validation.data;
     // only pick privileges that are in the same organization
+    const organizationId = req.context?.organizationId;
+
     const privilegesInSameOrganization = await PrivilegesModel.findMany({
       where: {
         id: { in: privileges },
-        organizationId: data.organizationId ?? null,
+        organizationId: organizationId ?? null,
       },
       select: { id: true },
     });
@@ -165,6 +178,7 @@ export const deleteRole = async (
   next: NextFunction
 ) => {
   try {
+    const organizationId = req.context?.organizationId;
     const item = await RolesModel.update({
       where: { id: req.params.roleId, voided: false },
       data: {

@@ -5,7 +5,10 @@ import organizationsRouter from "./organization";
 import privilegesRouter from "./privileges";
 import rolesPrivilegeRouter from "./role-privilege";
 import resourcesRouter from "./resources";
-import { requireContext } from "@hive/shared-middlewares";
+import {
+  requireContext,
+  requireOrganizationContext,
+} from "@hive/shared-middlewares";
 import {
   getDatabaseSchemas,
   pullServiceDatabaseSchema,
@@ -16,10 +19,14 @@ router.get("/resources-schema", getDatabaseSchemas);
 router.post("/resources-schema", pullServiceDatabaseSchema);
 router.post("/resources-schema/source", sourceServiceDBSchemaToResource);
 router.use("/resources", resourcesRouter);
-router.use("/roles", rolesRouter);
-router.use("/organization-membership", [requireContext], membershipRouter);
+router.use("/roles", [requireContext], rolesRouter);
+router.use(
+  "/organization-membership",
+  [requireContext, requireOrganizationContext],
+  membershipRouter
+);
 router.use("/organizations", [requireContext], organizationsRouter);
-router.use("/privileges", privilegesRouter);
+router.use("/privileges", [requireContext], privilegesRouter);
 router.use("/role-privileges", rolesPrivilegeRouter);
 
 export default router;

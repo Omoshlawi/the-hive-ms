@@ -13,7 +13,10 @@ export const getPrivileges = async (
 ) => {
   try {
     const results = await PrivilegesModel.findMany({
-      where: { voided: false },
+      where: {
+        voided: false,
+        organizationId: req.context?.organizationId ?? null,
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json({ results });
@@ -29,7 +32,11 @@ export const getPrivilege = async (
 ) => {
   try {
     const item = await PrivilegesModel.findUniqueOrThrow({
-      where: { id: req.params.privilegeId, voided: false },
+      where: {
+        id: req.params.privilegeId,
+        voided: false,
+        organizationId: req.context?.organizationId ?? null,
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
@@ -64,6 +71,7 @@ export const addPrivilege = async (
           validation.data.permitedResourceDataPoints.filter((point) =>
             resourceDataPoints.dataPoints.includes(point)
           ), // Only pick points that are in the resource
+        organizationId: req.context?.organizationId ?? null,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
