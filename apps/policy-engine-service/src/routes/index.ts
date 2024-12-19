@@ -20,11 +20,7 @@ router.post("/resources-schema", pullServiceDatabaseSchema);
 router.post("/resources-schema/source", sourceServiceDBSchemaToResource);
 router.use("/resources", resourcesRouter);
 router.use("/roles", [requireContext], rolesRouter);
-router.use(
-  "/organization-membership",
-  [requireContext, requireOrganizationContext],
-  membershipRouter
-);
+router.use("/organization-membership", [requireContext], membershipRouter);
 router.use("/organizations", [requireContext], organizationsRouter);
 router.use("/privileges", [requireContext], privilegesRouter);
 router.use("/role-privileges", rolesPrivilegeRouter);

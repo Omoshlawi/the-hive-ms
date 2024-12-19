@@ -8,12 +8,15 @@ import {
   purgeOrganizationMembership,
   updateOrganizationMembership,
 } from "../controllers/membershisps";
-import { validateUUIDPathParam } from "@hive/shared-middlewares";
+import {
+  requireOrganizationContext,
+  validateUUIDPathParam,
+} from "@hive/shared-middlewares";
 
 const router = Router({ mergeParams: true });
 
 router.get("/", getOrganizationMemberships);
-router.post("/", addOrganizationMembership);
+router.post("/", [requireOrganizationContext], addOrganizationMembership);
 router.get(
   "/:membershipId",
   [validateUUIDPathParam("membershipId")],

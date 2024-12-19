@@ -70,7 +70,7 @@ export const addRole = async (
         ...data,
         organizationId: organizationId ?? null,
         createdBy: req?.context!.userId,
-        privilegeAssignments: {
+        privileges: {
           createMany: {
             skipDuplicates: true,
             data: privilegesInSameOrganization.map((p) => ({
@@ -110,7 +110,7 @@ export const updateRole = async (
       where: { id: req.params.roleId, voided: false },
       data: {
         ...data,
-        privilegeAssignments: {
+        privileges: {
           deleteMany: { roleId: req.params.roleId }, // delete current asociation
           createMany: {
             // Just adds bt dont delete privileges not found in the input array
@@ -153,7 +153,7 @@ export const patchRole = async (
       where: { id: req.params.roleId, voided: false },
       data: {
         ...data,
-        privilegeAssignments: {
+        privileges: {
           deleteMany: { roleId: req.params.roleId }, // delete current asociation
           createMany: {
             // Just adds bt dont delete privileges not found in the input array
