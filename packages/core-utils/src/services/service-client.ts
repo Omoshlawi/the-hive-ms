@@ -14,7 +14,7 @@ export class ServiceClient {
     this.callerService = callerService;
   }
 
-  onerror(error: any) {
+  private onerror(error: any) {
     if (axios.isAxiosError(error)) {
       const axiosError: AxiosError = error;
       // if (
@@ -41,6 +41,17 @@ export class ServiceClient {
         `${this.registryAddress.url}/find`,
         { name: serviceName, version: version ?? this.callerService.version }
       );
+      return response.data;
+    } catch (error: any) {
+      throw this.onerror(error);
+    }
+  }
+
+  async getServices() {
+    try {
+      // Gateway version is used to match the registry version hence use of config version
+      const response: AxiosResponse<{ results: Array<Service> }> =
+        await axios.get(`${this.registryAddress.url}/services`);
       return response.data;
     } catch (error: any) {
       throw this.onerror(error);

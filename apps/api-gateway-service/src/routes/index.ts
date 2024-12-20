@@ -5,6 +5,7 @@ import { filesRouterMiddleware } from "@/controllers/files";
 import { serviceRouterMiddleware } from "@/utils";
 import { GatewayProxyRoute } from "@/types";
 import mediaAddRouter from "./files";
+import registryRouter from "./registry";
 import logger from "@/services/logger"; // Assume a centralized logging utility
 
 class ProxyRouteLoader {
@@ -18,6 +19,7 @@ class ProxyRouteLoader {
   private initializeStaticRoutes() {
     this.router.use("/media/upload", mediaAddRouter);
     this.router.use("/media", filesRouterMiddleware);
+    this.router.use("/service-registry", registryRouter);
   }
 
   async loadDynamicRoutes() {
