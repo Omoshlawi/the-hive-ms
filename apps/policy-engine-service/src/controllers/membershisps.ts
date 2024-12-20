@@ -7,7 +7,10 @@ import {
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
+  ServiceClient,
 } from "@hive/core-utils";
+import { registryAddress, serviceIdentity } from "@/utils";
+import { sanitizeHeaders } from "@hive/shared-middlewares";
 
 export const getOrganizationMemberships = async (
   req: Request,
@@ -20,9 +23,65 @@ export const getOrganizationMemberships = async (
     );
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const { memberUserId, organizationId } = validation.data;
+    const { memberUserId, organizationId, search } = validation.data;
     const results = await OrganizationMembershipsModel.findMany({
-      where: { voided: false, memberUserId, organizationId },
+      where: {
+        AND: [
+          {
+            voided: false,
+            memberUserId,
+            organizationId,
+          },
+          {
+            OR: search
+              ? [
+                  {
+                    memberUser: {
+                      path: ["person", "name"],
+                      string_contains: search,
+                    },
+                  },
+                  {
+                    memberUser: {
+                      path: ["username"],
+                      string_contains: search,
+                    },
+                  },
+                  {
+                    memberUser: {
+                      path: ["person", "email"],
+                      string_contains: search,
+                    },
+                  },
+                  {
+                    memberUser: {
+                      path: ["person", "phoneNumber"],
+                      string_contains: search,
+                    },
+                  },
+                  {
+                    memberUser: {
+                      path: ["person", "firstName"],
+                      string_contains: search,
+                    },
+                  },
+                  {
+                    memberUser: {
+                      path: ["person", "lastName"],
+                      string_contains: search,
+                    },
+                  },
+                  {
+                    memberUser: {
+                      path: ["person", "surname"],
+                      string_contains: search,
+                    },
+                  },
+                ]
+              : undefined,
+          },
+        ],
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json({ results });
@@ -69,11 +128,37 @@ export const addOrganizationMembership = async (
       select: { id: true },
     });
 
+    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
+
+    const memberUser = await serviceClient.callService<{
+      id: string;
+      username: string;
+      person: {
+        id: string;
+        firstName: any;
+        lastName: any;
+        surname: any;
+        phoneNumber: string;
+        gender: string;
+        email: string;
+        name: any;
+      };
+    }>("@hive/authentication-service", {
+      method: "GET",
+      url: `/users/${memberUserId}`,
+      headers: sanitizeHeaders(req),
+      params: {
+        v: "custom:select(id,username,person:select(id,firstName,lastName,surname,phoneNumber,gender,email,name))",
+      },
+    });
+
+    // TODO Update user async using middleware subscription if its value changes from auth service
     const item = await OrganizationMembershipsModel.create({
       data: {
         ...data,
         organizationId: req.context!.organizationId!,
         memberUserId,
+        memberUser,
         membershipRoles: {
           createMany: {
             skipDuplicates: true,

@@ -1,5 +1,9 @@
 import { UsersModel } from "@/models";
-import { getMultipleOperationCustomRepresentationQeury } from "@hive/core-utils";
+import { UserFilterSchema } from "@/schema";
+import {
+  APIException,
+  getMultipleOperationCustomRepresentationQeury,
+} from "@hive/core-utils";
 import { Request, Response, NextFunction } from "express";
 
 export const getUserByToken = async (
@@ -24,8 +28,48 @@ export const getUsers = async (
   next: NextFunction
 ) => {
   try {
+    const validation = UserFilterSchema.safeParse(req.query);
+    if (!validation.success)
+      throw new APIException(400, validation.error.format());
+    const { search } = validation.data;
     const results = await UsersModel.findMany({
-      where: { voided: false },
+      where: {
+        AND: [
+          { voided: false },
+          {
+            OR: search
+              ? [
+                  { username: { contains: search, mode: "insensitive" } },
+                  {
+                    person: {
+                      email: { contains: search, mode: "insensitive" },
+                    },
+                  },
+                  {
+                    person: {
+                      phoneNumber: { contains: search, mode: "insensitive" },
+                    },
+                  },
+                  {
+                    person: {
+                      firstName: { contains: search, mode: "insensitive" },
+                    },
+                  },
+                  {
+                    person: {
+                      lastName: { contains: search, mode: "insensitive" },
+                    },
+                  },
+                  {
+                    person: {
+                      surname: { contains: search, mode: "insensitive" },
+                    },
+                  },
+                ]
+              : undefined,
+          },
+        ],
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json({ results });

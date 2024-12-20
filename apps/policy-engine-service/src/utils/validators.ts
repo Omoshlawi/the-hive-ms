@@ -3,6 +3,7 @@ import { z } from "zod";
 export const OrganizationMembershipsFilterSchema = z.object({
   memberUserId: z.string().uuid().optional(),
   organizationId: z.string().uuid().optional(),
+  search: z.string().optional(),
 });
 
 export const PrivilegeSchema = z.object({

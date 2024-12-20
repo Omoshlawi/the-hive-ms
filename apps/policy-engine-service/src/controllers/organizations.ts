@@ -2,9 +2,12 @@ import { OrganizationSchema } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
+  ServiceClient,
 } from "@hive/core-utils";
 import { NextFunction, Request, Response } from "express";
 import { OrganizationsModel } from "../models";
+import { sanitizeHeaders } from "@hive/shared-middlewares";
+import { registryAddress, serviceIdentity } from "@/utils";
 
 export const getOrganizations = async (
   req: Request,
@@ -47,12 +50,40 @@ export const addOrganization = async (
     const validation = await OrganizationSchema.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
+
+    // Get user details from auth service
+    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
+    const memberUser = await serviceClient.callService<{
+      id: string;
+      username: string;
+      person: {
+        id: string;
+        firstName: any;
+        lastName: any;
+        surname: any;
+        phoneNumber: string;
+        gender: string;
+        email: string;
+        name: any;
+      };
+    }>("@hive/authentication-service", {
+      method: "GET",
+      url: `/users/${req.context!.userId}`,
+      headers: sanitizeHeaders(req),
+      params: {
+        v: "custom:select(id,username,person:select(id,firstName,lastName,surname,phoneNumber,gender,email,name))",
+      },
+    });
     const item = await OrganizationsModel.create({
       data: {
         ...validation.data,
         createdBy: req?.context!.userId,
         memberShips: {
-          create: { memberUserId: req.context!.userId, isAdmin: true },
+          create: {
+            memberUserId: req.context!.userId,
+            isAdmin: true,
+            memberUser,
+          },
         },
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),

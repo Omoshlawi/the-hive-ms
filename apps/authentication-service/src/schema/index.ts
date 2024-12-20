@@ -27,3 +27,7 @@ export const OauthAuthSchema = z.object({
   type: z.enum(["google", "apple"]),
   provider: z.string(),
 });
+
+export const UserFilterSchema = z.object({
+  search: z.string().optional(),
+});
