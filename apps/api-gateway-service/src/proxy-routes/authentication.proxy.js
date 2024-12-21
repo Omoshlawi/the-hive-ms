@@ -9,24 +9,27 @@ module.exports = [
     serviceVersion,
     includeHeaders: true
   },
-  {
+  { 
     path: "/change-context",
     prefix: "/change-context",
     serviceName,
     serviceVersion,
-    includeHeaders: true
+    includeHeaders: true,
+    authenticate:false // authentication handled in authen service
   },
   {
     path: "/exit-context",
     prefix: "/exit-context",
     serviceName,
     serviceVersion,
-    includeHeaders: true
+    includeHeaders: true,
+    authenticate:true
   },
   {
     path: "/users",
     prefix: "/users",
     serviceName,
     serviceVersion,
+    authenticate:true
   },
 ]

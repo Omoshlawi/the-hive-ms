@@ -259,9 +259,8 @@ export const exitContext = async (
   next: NextFunction
 ) => {
   try {
-    const user = req.user!;
     const token = generateUserToken({
-      userId: user.id,
+      userId: req.context!.userId!,
     });
     return res
       .setHeader("x-access-token", token.accessToken)
