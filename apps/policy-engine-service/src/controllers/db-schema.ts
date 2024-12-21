@@ -28,6 +28,7 @@ export const pullServiceDatabaseSchema = async (
   next: NextFunction
 ) => {
   try {
+    const resourceFilter = req.query.resource;
     const validation = await ServiceSchema.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
