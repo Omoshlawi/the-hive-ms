@@ -56,6 +56,4 @@ export const AddressSchema = z.object({
   latitude: z.number({ coerce: true }).optional(),
   longitude: z.number({ coerce: true }).optional(),
   landmark: z.string(),
-  ownerUserId: z.string().uuid(),
-  organizationId: z.string().uuid(),
 });

@@ -69,7 +69,12 @@ export const addAddress = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await AddressesModel.create({
-      data: validation.data,
+      data: {
+        ...validation.data,
+        createdBy: req.context!.userId,
+        organizationId: req.context!.organizationId,
+        ownerUserId: req.context!.userId,
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
