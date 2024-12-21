@@ -16,7 +16,7 @@ export const getCounties = async (
   next: NextFunction
 ) => {
   try {
-    const validation = CountyFilterSchema.safeParse(req.query);
+    const validation = await CountyFilterSchema.safeParseAsync(req.query);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { search, ...filters } = validation.data;
@@ -59,7 +59,7 @@ export const getSubcounties = async (
   next: NextFunction
 ) => {
   try {
-    const validation = SubCountyFilterSchema.safeParse(req.query);
+    const validation = await SubCountyFilterSchema.safeParseAsync(req.query);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { search, county, ...filters } = validation.data;
@@ -104,12 +104,12 @@ export const getWards = async (
   next: NextFunction
 ) => {
   try {
-    const validation = WardFilterSchema.safeParse(req.query);
+    const validation = await WardFilterSchema.safeParseAsync(req.query);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { search, county, subCounty, ...filters } = validation.data;
     const results = await WardsModel.findMany({
-      where: { 
+      where: {
         AND: [
           { voided: false, ...filters },
           {
@@ -139,7 +139,7 @@ export const getWards = async (
               : undefined,
           },
         ],
-       },
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json({ results });

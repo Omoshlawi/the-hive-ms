@@ -44,3 +44,18 @@ export const AddressFilterSchema = z.object({
   organizationId: z.string().optional(),
   search: z.string().optional(),
 });
+
+export const AddressSchema = z.object({
+  name: z.string().min(1, "Required"),
+  description: z.string().min(1, "Required").optional(),
+  county: z.string().min(1, "Required"),
+  subCounty: z.string().min(1, "Required"),
+  ward: z.string().min(1, "Required"),
+  village: z.string().min(1, "Required").optional(),
+  postalCode: z.string().min(1, "Required").optional(),
+  latitude: z.number({ coerce: true }).optional(),
+  longitude: z.number({ coerce: true }).optional(),
+  landmark: z.string(),
+  ownerUserId: z.string().uuid(),
+  organizationId: z.string().uuid(),
+});
