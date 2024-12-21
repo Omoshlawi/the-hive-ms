@@ -4,8 +4,8 @@ import { configuration } from "@/utils";
 import morgan from "morgan";
 import cors from "cors";
 import {
+  cookieToHeader,
   handleErrorsMiddleWare,
-  sessionCookieToSessionHeader,
 } from "@hive/shared-middlewares";
 import { RegistryClient } from "@hive/core-utils";
 import { registryAddress, serviceIdentity } from "@/utils";
@@ -43,7 +43,7 @@ export default class ApplicationServer {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser(configuration.auth.auth_secrete));
-    this.app.use(sessionCookieToSessionHeader); // Convert session cookie to session header
+    this.app.use(cookieToHeader); // Convert session cookie to session header
   }
 
   private setupRoutes(): void {

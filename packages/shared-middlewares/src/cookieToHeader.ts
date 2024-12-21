@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
-export const sessionCookieToSessionHeader = (
+export const cookieToHeader = (
   req: Request,
   res: Response,
   next: NextFunction

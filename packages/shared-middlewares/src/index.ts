@@ -8,5 +8,5 @@ export { default as uploader } from "./upload";
 export { default as requireUser } from "./requireUser";
 export * from "./types";
 export * from "./requireContext";
-export * from "./sessionCookieToSessionHeader";
 export * from "./requireAuthentication";
+export * from "./cookieToHeader";

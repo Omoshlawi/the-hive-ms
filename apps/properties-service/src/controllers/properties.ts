@@ -64,9 +64,6 @@ export const addProperty = async (
             data: media ?? [],
           },
         },
-        location: {
-          create: location,
-        },
         amenities: {
           createMany: {
             skipDuplicates: true,

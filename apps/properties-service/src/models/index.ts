@@ -3,7 +3,6 @@ export const PropertiesModel = db.property;
 export const AmenitiesModel = db.amenity;
 export const AttributeTypesModel = db.attributeType;
 export const PropertyMediaModel = db.propertyMedia;
-export const PropertyLocationsModel = db.propertyLocation;
 export const PropertyCategoriesModel = db.propertyCategory;
 export const CategoriesModel = db.category;
 export const RelationshipsModel = db.relationship;
