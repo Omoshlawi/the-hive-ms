@@ -66,7 +66,7 @@ export const getSubcounties = async (
     const results = await SubCountiesModel.findMany({
       where: {
         AND: [
-          { voided: false, ...filters },
+          { voided: false, ...filters, county: { name: county } },
           {
             OR: search
               ? [
@@ -111,7 +111,12 @@ export const getWards = async (
     const results = await WardsModel.findMany({
       where: {
         AND: [
-          { voided: false, ...filters },
+          {
+            voided: false,
+            ...filters,
+            county: { name: county },
+            subCounty: { name: subCounty },
+          },
           {
             OR: search
               ? [
