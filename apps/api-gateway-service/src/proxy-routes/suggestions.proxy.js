@@ -25,6 +25,7 @@ module.exports = [
       prefix: "/addresses",
       serviceName,
       serviceVersion,
+      authenticate:true
     },
   ]
   

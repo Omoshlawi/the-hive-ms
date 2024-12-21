@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { AddressesModel } from "../models";
+import { AddressesModel, CountiesModel } from "../models";
 import { AddressFilterSchema, AddressSchema } from "@/utils/validators";
 import {
   APIException,
@@ -68,6 +68,37 @@ export const addAddress = async (
     const validation = await AddressSchema.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
+    const location = await CountiesModel.findFirst({
+      where: {
+        name: validation.data.county,
+      },
+      select: {
+        subCounties: {
+          select: { name: true, wards: { select: { name: true } } },
+        },
+      },
+    });
+    if (!location)
+      throw new APIException(400, {
+        county: { _errors: ["County does not exist"] },
+      });
+    if (
+      location.subCounties.findIndex(
+        (subCounty) => subCounty.name === validation.data.subCounty
+      ) === -1
+    )
+      throw new APIException(400, {
+        subCounty: { _errors: ["Sub County does not exist"] },
+      });
+    if (
+      location.subCounties
+        .find((subCounty) => subCounty.name === validation.data.subCounty)
+        ?.wards.findIndex((ward) => ward.name === validation.data.ward) === -1
+    )
+      throw new APIException(400, {
+        ward: { _errors: ["Ward does not exist"] },
+      });
+
     const item = await AddressesModel.create({
       data: {
         ...validation.data,
