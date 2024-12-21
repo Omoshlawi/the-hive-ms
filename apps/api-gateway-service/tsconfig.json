@@ -8,7 +8,7 @@
   },
   "include": [
     "src/**/*"
-  ],
+, "../../packages/shared-middlewares/src/sessionCookieToSessionHeader.ts"  ],
   "exclude": [
     "node_modules",
     "dist"

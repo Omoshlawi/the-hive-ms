@@ -9,7 +9,6 @@ import { registryAddress, serviceIdentity } from "@/utils";
 import { toNumber } from "lodash";
 import logger from "@/services/logger";
 import router from "./routes";
-import cookieParser from "cookie-parser";
 
 export interface ServerAddress {
   address: string;
@@ -38,7 +37,6 @@ export default class ApplicationServer {
     }
     this.app.use(cors());
     this.app.use(express.json());
-    this.app.use(cookieParser(configuration.auth.auth_secrete));
     this.app.use(express.urlencoded({ extended: true }));
   }
 

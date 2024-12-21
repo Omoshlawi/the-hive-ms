@@ -1,6 +1,7 @@
 export const BASE_DIR = process.cwd();
 import { RegistryAddress, ServiceIdentity } from "@hive/core-utils";
 import config from "config";
+import { CookieOptions } from "express";
 
 export const configuration = {
   version: require("./../../package.json").version,
@@ -20,6 +21,16 @@ export const configuration = {
     auth_secrete: config.get("auth_secrete") as string,
     access_token_age: config.get("token.access_expiry") as string,
     refresh_token_age: config.get("token.refresh_expiry") as string,
+  },
+  authCookieConfig: {
+    name: "session-token",
+    config: {
+      MAX_AGE: 30 * 24 * 60 * 60,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+    } as CookieOptions,
   },
 };
 

@@ -11,8 +11,7 @@ const authenticate = async (
   res: Response,
   next: NextFunction
 ) => {
-  const cookieToken = req.cookies["session-token"];
-  const token = req.header("x-access-token") ?? cookieToken;
+  const token = req.header("x-access-token");
   try {
     if (!token)
       throw new APIException(401, { detail: "Unauthorized - Token missing" });
@@ -57,7 +56,6 @@ const authenticate = async (
       }
     }
     req.user = user;
-    req.headers["x-access-token"] = token;
     return next();
   } catch (error: unknown) {
     if (error instanceof TokenExpiredError) {
