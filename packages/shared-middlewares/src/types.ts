@@ -27,3 +27,48 @@ declare global {
     }
   }
 }
+
+/**
+ * Configuration options for file saving
+ */
+export interface FileSaveOptions {
+  /** Base directory for file storage */
+  basePath?: string;
+  /** Custom filename generator */
+  generateFilename?: (file: MemoryMulterFile) => string | Promise<string>;
+  /** Allowed file types (mime types) */
+  allowedTypes?: string[];
+  /** Maximum file size in bytes */
+  maxSize?: number;
+  /** Whether to preserve original filename */
+  preserveOriginalName?: boolean;
+  /** Custom validation function */
+  validateFile?: (file: MemoryMulterFile) => Promise<boolean>;
+  /** Processing function to transform file before saving */
+  processFile?: (file: MemoryMulterFile) => Promise<Buffer>;
+}
+
+/**
+ * Response interface for saved file
+ */
+export interface SavedFileResponse {
+  success: boolean;
+  filePath: string;
+  fileName: string;
+  size: number;
+  mimeType: string;
+  error?: string;
+}
+
+/**
+ * Error class for file-related operations
+ */
+export class FileOperationError extends Error {
+  constructor(
+    message: string,
+    public code: string
+  ) {
+    super(message);
+    this.name = "FileOperationError";
+  }
+}

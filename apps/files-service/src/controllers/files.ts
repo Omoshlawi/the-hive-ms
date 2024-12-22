@@ -5,6 +5,10 @@ import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
+import {
+  MemoryMulterFile,
+  memoryMulterFileToJSFile,
+} from "@hive/shared-middlewares";
 
 export const getHiveFiles = async (
   req: Request,
@@ -44,8 +48,8 @@ export const addHiveFile = async (
   next: NextFunction
 ) => {
   try {
-    
-    console.log(req.body, req.files);
+    const files: MemoryMulterFile[] = req.files as MemoryMulterFile[];
+    const fieldsData = req.body;
 
     const validation = await FilesSchema.safeParseAsync(req.body);
     if (!validation.success)
