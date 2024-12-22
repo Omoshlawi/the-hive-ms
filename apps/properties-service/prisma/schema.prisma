@@ -53,10 +53,14 @@ model Category {
 }
 
 model Property {
-  id           String @id @default(uuid()) @db.Uuid
-  name         String
-  thumbnail    String
-  organization Json
+  id        String @id @default(uuid()) @db.Uuid
+  name      String
+  thumbnail String
+
+  organizationId String
+  organization   Json?
+  addressId      String
+  address        Json?
 
   // Relationships
   relationshipsAsA Relationship[]      @relation("PropertyARelationship")
@@ -66,6 +70,7 @@ model Property {
   amenities        PropertyAmenity[]
   categories       PropertyCategory[]
 
+  createdBy String   @db.Uuid
   voided    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

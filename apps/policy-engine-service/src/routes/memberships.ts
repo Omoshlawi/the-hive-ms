@@ -14,7 +14,7 @@ import {
 } from "@hive/shared-middlewares";
 
 const router = Router({ mergeParams: true });
-
+// Has context info
 router.get("/", getOrganizationMemberships);
 router.post("/", [requireOrganizationContext], addOrganizationMembership);
 router.get(

@@ -59,7 +59,6 @@ export const PropertyLocation = z.object({
 export const PropertySchema = z.object({
   name: z.string(),
   thumbnail: z.string(),
-  organization: OrganixationSchema,
   attributes: z
     .array(
       z.object({
@@ -68,7 +67,7 @@ export const PropertySchema = z.object({
       })
     )
     .optional(),
-  location: PropertyLocation.omit({ propertyId: true }).optional(),
+  addressId: z.string().uuid("invalid address"),
   media: z.array(PropertyMediaSchema.omit({ propertyId: true })).optional(),
   amenities: z.array(z.string().uuid()).optional(),
   categories: z.array(z.string().uuid()).optional(),

@@ -4,7 +4,12 @@ import { PropertySchema } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
+  nullifyExceptionAsync,
+  ServiceClient,
 } from "@hive/core-utils";
+import { registryAddress, serviceIdentity } from "@/utils";
+import { sanitizeHeaders } from "@hive/shared-middlewares";
+import { Address, OrganizationMembership } from "@/types";
 
 export const getProperties = async (
   req: Request,
@@ -47,14 +52,38 @@ export const addProperty = async (
     const validation = await PropertySchema.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const {
-      attributes,
-      amenities,
-      categories,
-      location,
-      media,
-      ...propertyAttributes
-    } = validation.data;
+    const { attributes, amenities, categories, media, ...propertyAttributes } =
+      validation.data;
+    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
+    const callService = nullifyExceptionAsync(serviceClient.callService);
+    // Get addresses
+    const address = await callService<Address>("@hive/suggestion-service", {
+      method: "GET",
+      url: `/addresses/${validation.data.addressId}`,
+      params: {
+        v: "custom:select(id,name,description,county,subCounty,subCounty,ward,village,landmark,postalCode,latitude,longitude,metadata)",
+      },
+      headers: sanitizeHeaders(req),
+    });
+    if (!address)
+      throw new APIException(400, {
+        addressId: { _errors: ["Invalid address"] },
+      });
+
+    // get user organization membership
+    const organizationMemberships = await serviceClient.callService<
+      OrganizationMembership[]
+    >("@hive/policy-engine-service", {
+      method: "GET",
+      url: `/organization-membership`,
+      params: {
+        v: "custom:select(id,organizationId,organization:select(id,name,description))",
+        memberUserId: req.context!.userId!,
+        organizationId: req.context!.organizationId!,
+      },
+      headers: sanitizeHeaders(req),
+    });
+
     const item = await PropertiesModel.create({
       data: {
         ...propertyAttributes,
@@ -79,6 +108,10 @@ export const addProperty = async (
             data: (categories ?? []).map((categoryId) => ({ categoryId })),
           },
         },
+        organizationId: req.context!.organizationId!,
+        organization: organizationMemberships[0].organization,
+        address,
+        createdBy: req.context!.userId!,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -97,7 +130,6 @@ export const updateProperty = async (
     const validation = await PropertySchema.pick({
       name: true,
       thumbnail: true,
-      organization: true,
     }).safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
@@ -120,7 +152,7 @@ export const patchProperty = async (
 ) => {
   try {
     const validation = await PropertySchema.partial()
-      .pick({ name: true, organization: true, thumbnail: true })
+      .pick({ name: true, thumbnail: true })
       .safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());

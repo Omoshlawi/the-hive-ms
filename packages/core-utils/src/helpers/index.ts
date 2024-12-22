@@ -63,3 +63,16 @@ export const normalizeIp = (ip: string) => {
 export const isUUID = (value: string) => {
   return UUID_REGEX.test(value);
 };
+
+export const nullifyExceptionAsync = <T, P extends any[]>(
+  fn: (...args: P) => Promise<T>
+): ((...args: P) => Promise<T | null>) => {
+  return async (...args: P) => {
+    try {
+      return await fn(...args);
+    } catch (error) {
+      console.error("[Nullify exception]: ", error);
+      return null;
+    }
+  };
+};

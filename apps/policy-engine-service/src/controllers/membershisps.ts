@@ -23,14 +23,37 @@ export const getOrganizationMemberships = async (
     );
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const { memberUserId, organizationId, search } = validation.data;
+    const organizationId = req.context?.organizationId;
+    const memberUserId = req.context?.userId;
+
+    const {
+      context,
+      search,
+      organizationId: organization,
+      memberUserId: memberUser,
+    } = validation.data;
+    if (context === "organization" && !organizationId)
+      throw new APIException(403, {
+        detail: "organization context required",
+      });
+
     const results = await OrganizationMembershipsModel.findMany({
       where: {
         AND: [
           {
             voided: false,
-            memberUserId,
-            organizationId,
+            memberUserId:
+              context === "individual"
+                ? memberUserId!
+                : context === "organization"
+                  ? memberUser
+                  : undefined,
+            organizationId:
+              context === "organization"
+                ? organizationId!
+                : context === "individual"
+                  ? organization
+                  : undefined,
           },
           {
             OR: search

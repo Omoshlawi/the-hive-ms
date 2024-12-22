@@ -13,13 +13,19 @@ export const getAddresses = async (
 ) => {
   try {
     const validation = await AddressFilterSchema.safeParseAsync(req.query);
+    const context = req.context!;
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { search, ...filters } = validation.data;
     const results = await AddressesModel.findMany({
       where: {
         AND: [
-          { voided: false, ...filters },
+          {
+            voided: false,
+            ...filters,
+            organizationId: context.organizationId ?? undefined,
+            ownerUserId: !context.organizationId ? context.userId : undefined,
+          },
           {
             OR: search
               ? [
@@ -49,8 +55,15 @@ export const getAddress = async (
   next: NextFunction
 ) => {
   try {
+    const context = req.context!;
     const item = await AddressesModel.findUniqueOrThrow({
-      where: { id: req.params.addressId, voided: false },
+      where: {
+        id: req.params.addressId,
+        voided: false,
+        // if user has organization context then get for that org only, otherwise get for that user as individual
+        organizationId: context.organizationId ?? undefined,
+        ownerUserId: !context.organizationId ? context.userId : undefined,
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);

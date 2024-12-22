@@ -1,8 +1,12 @@
 import { z } from "zod";
 
 export const OrganizationMembershipsFilterSchema = z.object({
-  memberUserId: z.string().uuid().optional(),
-  organizationId: z.string().uuid().optional(),
+  context: z
+    .enum(["individual", "organization"])
+    .optional()
+    .default("individual"),
+  organizationId: z.string().uuid("invalid organization").optional(),
+  memberUserId: z.string().uuid("invalid user").optional(),
   search: z.string().optional(),
 });
 
