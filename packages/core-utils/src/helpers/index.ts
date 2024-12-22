@@ -64,14 +64,15 @@ export const isUUID = (value: string) => {
   return UUID_REGEX.test(value);
 };
 
-export const nullifyExceptionAsync = <T, P extends any[]>(
-  fn: (...args: P) => Promise<T>
+export const nullifyExceptionAsync = <T, P extends any[], TErr = Error>(
+  fn: (...args: P) => Promise<T>,
+  onError?: (error: TErr) => void
 ): ((...args: P) => Promise<T | null>) => {
   return async (...args: P) => {
     try {
       return await fn(...args);
-    } catch (error) {
-      console.error("[Nullify exception]: ", error);
+    } catch (error: any) {
+      onError?.(error);
       return null;
     }
   };
