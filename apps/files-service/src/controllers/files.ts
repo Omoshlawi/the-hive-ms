@@ -1,5 +1,4 @@
-import { NextFunction, Request, Response } from "express";
-import { HiveFilesModel } from "../models";
+import { MEDIA_ROOT } from "@/utils";
 import { FilesSchema } from "@/utils/validators";
 import {
   APIException,
@@ -10,12 +9,12 @@ import {
   deleteFiles,
   FileOperationError,
   MemoryMulterFile,
-  memoryMulterFileToJSFile,
   saveFile,
 } from "@hive/shared-middlewares";
-import path from "path";
-import { MEDIA_ROOT } from "@/utils";
 import { HiveFile } from "dist/prisma";
+import { NextFunction, Request, Response } from "express";
+import path from "path";
+import { HiveFilesModel } from "../models";
 
 export const getHiveFiles = async (
   req: Request,
@@ -67,13 +66,16 @@ export const addHiveFile = async (
       saveFile(file, {
         basePath: path.join(MEDIA_ROOT, filePath, preValidation.data.path),
         throwErrors: true,
+        maxSize: 5 * 1024 * 1024, //5mbs
       })
     );
     const saveResults = await Promise.allSettled(saveFilesAsync);
 
     // Add role back cleanup task
     if (!saveResults.every((r) => r.status === "fulfilled")) {
-      addRollBackTaskToQueue(req, async () => {
+      // TODO Fix rollback tasks
+      // addRollBackTaskToQueue(req,
+      (async () => {
         const paths = saveResults
           .filter((r) => r.status === "fulfilled")
           .map((r) => r.value.filePath);
@@ -81,8 +83,12 @@ export const addHiveFile = async (
           ignoreNonExistent: true,
           throwErrors: false,
         });
-        return `${paths.join(", ")} Rolled back successfully!`;
-      });
+
+        const message = `${paths.join(", ")} Rolled back successfully!`;
+        console.log("[File upload]: ", message);
+
+        return message;
+      })(); // );
       throw new APIException(
         400,
         saveResults.reduce((prev, curr, index) => {
@@ -101,6 +107,8 @@ export const addHiveFile = async (
     const items = await HiveFilesModel.createManyAndReturn({
       data: saveResults.map(({ value }) => ({
         path: path.join(filePath, preValidation.data.path, value.fileName),
+        bytesSize: value.size,
+        memeType: value.mimeType,
         organizationId: context?.organizationId, // TODO Add other organization info to cache
         uploadedBy: context.userId!,
       })),
