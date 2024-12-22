@@ -32,6 +32,7 @@ declare global {
  * Configuration options for file saving
  */
 export interface FileSaveOptions {
+  throwErrors?: boolean;
   /** Base directory for file storage */
   basePath?: string;
   /** Custom filename generator */
@@ -71,4 +72,27 @@ export class FileOperationError extends Error {
     super(message);
     this.name = "FileOperationError";
   }
+}
+
+/**
+ * Response interface for file deletion
+ */
+export interface DeleteFileResponse {
+  success: boolean;
+  filePath: string;
+  error?: string;
+}
+
+/**
+ * Configuration options for file deletion
+ */
+export interface DeleteFileOptions {
+  /** Base directory for file storage */
+  basePath?: string;
+  /** Whether to ignore if file doesn't exist */
+  ignoreNonExistent?: boolean;
+  /** Callback to execute before deletion */
+  beforeDelete?: (filePath: string) => Promise<boolean>;
+  /** Whether to throw errors instead of returning response object */
+  throwErrors?: boolean;
 }

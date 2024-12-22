@@ -8,7 +8,12 @@ import {
   purgeHiveFile,
   updateHiveFile,
 } from "../controllers/files";
-import { fileUploader, uploader, validateUUIDPathParam } from "@hive/shared-middlewares";
+import {
+  fileUploader,
+  requireContext,
+  uploader,
+  validateUUIDPathParam,
+} from "@hive/shared-middlewares";
 import { MEDIA_ROOT } from "@/utils";
 
 const router = Router({ mergeParams: true });
@@ -17,9 +22,10 @@ router.get("/", getHiveFiles);
 router.post(
   "/upload",
   [
+    requireContext,
     // fileUploader.diskStorage("draft", MEDIA_ROOT).any(),
     // fileUploader.postUpload(MEDIA_ROOT, "").fields(),
-    uploader.memoryFile().any()
+    uploader.memoryFile().any(),
   ],
   addHiveFile
 );

@@ -1,5 +1,7 @@
 import pick from "lodash/pick";
 import {
+  DeleteFileOptions,
+  DeleteFileResponse,
   FileOperationError,
   FileSaveOptions,
   MemoryMulterFile,
@@ -11,6 +13,34 @@ import path from "path";
 import crypto from "crypto";
 import { lookup } from "mime-types";
 
+/**
+ * Converts a nested object into FormData, handling Files and arrays.
+ *
+ * @param data - The object to convert to FormData
+ * @param options - Configuration options
+ * @param options.useIndexOnFiles - If true, uses array indices in keys for File objects
+ * @param formData - Optional existing FormData to append to
+ * @param parentKey - Used internally for recursive calls to maintain proper key hierarchy
+ *
+ * @returns FormData object containing all the data with proper key structure
+ *
+ * @example
+ * const data = {
+ *   name: 'John',
+ *   files: [file1, file2],
+ *   details: {
+ *     age: 30,
+ *     photo: fileObject
+ *   }
+ * };
+ *
+ * const formData = objectToFormData(data, { useIndexOnFiles: true });
+ * // Results in FormData with keys like:
+ * // - name
+ * // - files[0], files[1]
+ * // - details[age]
+ * // - details[photo]
+ */
 export const objectToFormData = (
   data: { [key: string]: any },
   options: { useIndexOnFiles: boolean } = { useIndexOnFiles: false },
@@ -59,6 +89,16 @@ export const objectToFormData = (
   return formData;
 };
 
+/**
+ * Converts a MemoryMulterFile to a standard JavaScript File object.
+ *
+ * @param memoryFile - The MemoryMulterFile object to convert
+ * @returns A standard JavaScript File object containing the same data
+ *
+ * @example
+ * const memoryFile = req.file; // MemoryMulterFile from multer middleware
+ * const jsFile = memoryMulterFileToJSFile(memoryFile);
+ */
 export const memoryMulterFileToJSFile = (
   memoryFile: MemoryMulterFile
 ): File => {
@@ -189,6 +229,9 @@ export const saveFile = async (
       mimeType: file.mimetype,
     };
   } catch (error) {
+    if (options.throwErrors ?? false) {
+      throw error;
+    }
     if (error instanceof FileOperationError) {
       return {
         success: false,
@@ -199,6 +242,9 @@ export const saveFile = async (
         error: `${error.code}: ${error.message}`,
       };
     }
+    console.error(
+      `[Save File]:${error instanceof Error ? error.message : "Unknown error occurred"}`
+    );
 
     return {
       success: false,
@@ -214,7 +260,7 @@ export const saveFile = async (
 /**
  * Generates a unique filename for the uploaded file
  */
-async function generateUniqueFilename(
+export async function generateUniqueFilename(
   file: MemoryMulterFile,
   basePath: string
 ): Promise<string> {
@@ -234,3 +280,128 @@ async function generateUniqueFilename(
     return baseFileName;
   }
 }
+
+/**
+ * Deletes a file from the filesystem with advanced error handling
+ *
+ * @param filePath - Path to the file or just filename if using basePath
+ * @param options - Configuration options for file deletion
+ * @returns Promise resolving to DeleteFileResponse
+ *
+ * @example
+ * // Basic usage
+ * const result = await deleteFile('uploads/example.jpg');
+ *
+ * // With options
+ * const result = await deleteFile('example.jpg', {
+ *   basePath: './uploads',
+ *   ignoreNonExistent: true,
+ *   beforeDelete: async (path) => {
+ *     // Custom validation or logging
+ *     return true;
+ *   }
+ * });
+ */
+export const deleteFile = async (
+  filePath: string,
+  options: DeleteFileOptions = {}
+): Promise<DeleteFileResponse> => {
+  try {
+    const {
+      basePath,
+      ignoreNonExistent = false,
+      beforeDelete,
+      throwErrors = false,
+    } = options;
+
+    // Construct full file path
+    const fullPath = basePath ? path.join(basePath, filePath) : filePath;
+
+    try {
+      // Check if file exists
+      await fs.access(fullPath);
+    } catch (error) {
+      if (ignoreNonExistent) {
+        return {
+          success: true,
+          filePath: fullPath,
+        };
+      }
+      throw new FileOperationError("File does not exist", "FILE_NOT_FOUND");
+    }
+
+    // Execute beforeDelete hook if provided
+    if (beforeDelete) {
+      const shouldProceed = await beforeDelete(fullPath);
+      if (!shouldProceed) {
+        throw new FileOperationError(
+          "Deletion cancelled by beforeDelete hook",
+          "DELETION_CANCELLED"
+        );
+      }
+    }
+
+    // Delete the file
+    await fs.unlink(fullPath);
+
+    // Check if directory is empty and remove it (if using basePath)
+    if (basePath) {
+      try {
+        const dir = path.dirname(fullPath);
+        const files = await fs.readdir(dir);
+        if (files.length === 0) {
+          await fs.rmdir(dir);
+        }
+      } catch (error) {
+        // Ignore directory deletion errors
+      }
+    }
+
+    return {
+      success: true,
+      filePath: fullPath,
+    };
+  } catch (error) {
+    if (options.throwErrors ?? false) {
+      throw error;
+    }
+
+    if (error instanceof FileOperationError) {
+      return {
+        success: false,
+        filePath: filePath,
+        error: `${error.code}: ${error.message}`,
+      };
+    }
+
+    return {
+      success: false,
+      filePath: filePath,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
+  }
+};
+
+/**
+ * Deletes multiple files at once
+ *
+ * @param filePaths - Array of file paths to delete
+ * @param options - Configuration options for file deletion
+ * @returns Promise resolving to array of DeleteFileResponse
+ *
+ * @example
+ * const results = await deleteFiles(['file1.jpg', 'file2.pdf'], {
+ *   basePath: './uploads',
+ *   ignoreNonExistent: true
+ * });
+ */
+export const deleteFiles = async (
+  filePaths: string[],
+  options: DeleteFileOptions = {}
+): Promise<DeleteFileResponse[]> => {
+  const deletePromises = filePaths.map((filePath) =>
+    deleteFile(filePath, { ...options, throwErrors: false })
+  );
+
+  return Promise.all(deletePromises);
+};

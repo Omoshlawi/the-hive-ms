@@ -12,12 +12,16 @@ datasource db {
 }
 
 model HiveFile {
-  id           String   @id @default(uuid()) @db.Uuid
-  path         String
-  mbSize       Decimal?
-  memeType     String?
-  organization Json
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  voided       Boolean  @default(false)
+  id        String   @id @default(uuid()) @db.Uuid
+  path      String
+  bytesSize Decimal?
+  memeType  String?
+
+  organizationId String? @db.Uuid
+  organization   Json?
+
+  uploadedBy String   @db.Uuid
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  voided     Boolean  @default(false)
 }
