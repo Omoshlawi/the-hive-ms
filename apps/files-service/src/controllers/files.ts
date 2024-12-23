@@ -115,18 +115,15 @@ export const addHiveFile = async (
       skipDuplicates: false,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    return res.json({
-      results: items.reduce<{ [key: string]: HiveFile[] }>(
-        (prev, curr, idx) => {
-          const fieldName = files[idx].fieldname;
-          if (fieldName in prev) {
-            return { ...prev, [fieldName]: [...prev[fieldName], curr] };
-          }
-          return { ...prev, [fieldName]: [curr] };
-        },
-        {}
-      ),
-    });
+    return res.json(
+      items.reduce<{ [key: string]: HiveFile[] }>((prev, curr, idx) => {
+        const fieldName = files[idx].fieldname;
+        if (fieldName in prev) {
+          return { ...prev, [fieldName]: [...prev[fieldName], curr] };
+        }
+        return { ...prev, [fieldName]: [curr] };
+      }, {})
+    );
   } catch (error) {
     next(error);
   }
