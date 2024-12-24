@@ -55,25 +55,40 @@ export const addProperty = async (
     const { attributes, amenities, categories, media, ...propertyAttributes } =
       validation.data;
     const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
-    const callService = nullifyExceptionAsync(serviceClient.callService);
-    // Get addresses
-    const address = await callService<Address>("@hive/suggestion-service", {
-      method: "GET",
-      url: `/addresses/${validation.data.addressId}`,
-      params: {
-        v: "custom:select(id,name,description,county,subCounty,subCounty,ward,village,landmark,postalCode,latitude,longitude,metadata)",
+    const getAddress = nullifyExceptionAsync(
+      async () => {
+        const address = await serviceClient.callService<Address>(
+          "@hive/suggestion-service",
+          {
+            method: "GET",
+            url: `/addresses/${validation.data.addressId}`,
+            params: {
+              v: "custom:select(id,name,description,county,subCounty,subCounty,ward,village,landmark,postalCode,latitude,longitude,metadata)",
+            },
+            headers: sanitizeHeaders(req),
+          }
+        );
+        return address;
       },
-      headers: sanitizeHeaders(req),
-    });
-    if (!address)
-      throw new APIException(400, {
-        addressId: { _errors: ["Invalid address"] },
-      });
-
+      (err: APIException) => {
+        if (
+          err.status === 404 &&
+          (err.errors.detail as string).toLowerCase().startsWith("service")
+        ) {
+          throw new APIException(400, {
+            addressId: { _errors: ["Invalid address"] },
+          });
+        } else {
+          throw err;
+        }
+      }
+    );
+    // Get addresses
+    const address = await getAddress();
     // get user organization membership
-    const organizationMemberships = await serviceClient.callService<
-      OrganizationMembership[]
-    >("@hive/policy-engine-service", {
+    const organizationMemberships = await serviceClient.callService<{
+      results: OrganizationMembership[];
+    }>("@hive/policy-engine-service", {
       method: "GET",
       url: `/organization-membership`,
       params: {
@@ -109,8 +124,8 @@ export const addProperty = async (
           },
         },
         organizationId: req.context!.organizationId!,
-        organization: organizationMemberships[0].organization,
-        address,
+        organization: organizationMemberships.results[0].organization,
+        address: address as any,
         createdBy: req.context!.userId!,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
