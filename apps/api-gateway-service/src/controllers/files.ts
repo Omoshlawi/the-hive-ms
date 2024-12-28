@@ -54,16 +54,10 @@ export const streamFile = async (
 ) => {
   try {
     const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
-    const service = await serviceClient.getService("@hive/files-service");
-    // return res.json({
-    //   path: req.url,
-    //   url: `http://${service.host}:${service.port}/media${req.url}`,
-    // });
-
     const fileStream = await serviceClient.callService<any>(
       "@hive/files-service",
       {
-        method: req.method,
+        method: "GET",
         url: `${req.url}`,
         timeout: 5000,
         responseType: "stream",
@@ -74,8 +68,6 @@ export const streamFile = async (
     fileStream.pipe(res);
     return res;
   } catch (error) {
-    console.log("[err]:", error);
-
     next(new APIException(404, { detail: "File not found" }));
   }
 };
