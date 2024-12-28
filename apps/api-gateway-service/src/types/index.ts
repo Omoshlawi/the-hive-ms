@@ -6,3 +6,5 @@ export type GatewayProxyRoute = {
   includeHeaders?: boolean;
   authenticate?: boolean;
 };
+
+

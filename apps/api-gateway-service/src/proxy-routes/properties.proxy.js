@@ -7,35 +7,47 @@ module.exports = [
     prefix: "/relationship-types",
     serviceName,
     serviceVersion,
+    authenticate:true
+
   },
   {
     path: "/attribute-types",
     prefix: "/attribute-types",
     serviceName,
     serviceVersion,
+    authenticate:true
+
   },
   {
     path: "/categories",
     prefix: "/categories",
     serviceName,
     serviceVersion,
+    authenticate:true
+
   },
   {
     path: "/relationship-types",
     prefix: "/relationship-types",
     serviceVersion,
-    serviceName
+    serviceName,
+    authenticate:true
+
   },
   {
     path: "/amenities",
     prefix: "/amenities",
     serviceVersion,
-    serviceName
+    serviceName,
+    authenticate:true
+
   },
   {
     path: "/properties",
     prefix: "/properties",
     serviceVersion,
-    serviceName
+    serviceName,
+    authenticate:true
+
   },
 ]

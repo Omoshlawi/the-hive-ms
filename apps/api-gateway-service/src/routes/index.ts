@@ -1,7 +1,6 @@
 import { RequestHandler, Router } from "express";
 import fs from "fs/promises";
 import path from "path";
-import { filesRouterMiddleware } from "@/controllers/files";
 import {
   registryAddress,
   serviceIdentity,
@@ -23,8 +22,7 @@ class ProxyRouteLoader {
   }
 
   private initializeStaticRoutes() {
-    this.router.use("/media/upload", mediaAddRouter);
-    this.router.use("/media", filesRouterMiddleware);
+    this.router.use("/media/files", mediaAddRouter);
     this.router.use("/service-registry", registryRouter);
   }
 

@@ -1,12 +1,12 @@
 import express, { Application } from "express";
 import { createServer, Server } from "http";
-import { configuration } from "@/utils";
+import { configuration, MEDIA_ROOT } from "@/utils";
 import morgan from "morgan";
 import cors from "cors";
 import { handleErrorsMiddleWare } from "@hive/shared-middlewares";
 import { RegistryClient } from "@hive/core-utils";
 import { registryAddress, serviceIdentity } from "@/utils";
-import { toNumber } from "lodash";
+import { method, toNumber } from "lodash";
 import logger from "@/services/logger";
 import router from "./routes";
 
@@ -35,6 +35,9 @@ export default class ApplicationServer {
         `[+]${configuration.name}:${configuration.version} enable morgan`
       );
     }
+    this.app.use(
+      express.static(MEDIA_ROOT)
+    );
     this.app.use(cors());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));

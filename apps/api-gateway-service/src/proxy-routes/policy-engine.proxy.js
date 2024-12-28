@@ -7,41 +7,54 @@ module.exports =  [
     prefix: "/role-privileges",
     serviceName,
     serviceVersion,
+    authenticate:true
   },
   {
     path: "/resources",
     prefix: "/resources",
     serviceName,
     serviceVersion,
+    authenticate:true
+
   },
   {
     path: "/organization-membership",
     prefix: "/organization-membership",
     serviceName,
     serviceVersion,
+    authenticate:true
+
   },
   {
     path: "/organizations",
     prefix: "/organizations",
     serviceName,
     serviceVersion,
+    authenticate:true
+
   },
   {
     path: "/privileges",
     prefix: "/privileges",
     serviceVersion,
-    serviceName
+    serviceName,
+    authenticate:true
+
   },
   {
     path: "/roles",
     prefix: "/roles",
     serviceVersion,
-    serviceName
+    serviceName,
+    authenticate:true
+
   },
   {
     path: "/resources-schema",
     prefix: "/resources-schema",
     serviceVersion,
-    serviceName
+    serviceName,
+    authenticate:true
+
   },
 ]

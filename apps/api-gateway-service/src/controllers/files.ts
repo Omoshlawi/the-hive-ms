@@ -1,33 +1,11 @@
 import { registryAddress, sanitizeHeaders, serviceIdentity } from "@/utils";
-import { ServiceClient } from "@hive/core-utils";
+import { APIException, ServiceClient } from "@hive/core-utils";
 import {
   MemoryMulterFile,
   memoryMulterFileToJSFile,
   objectToFormData,
 } from "@hive/shared-middlewares";
 import { NextFunction, Request, Response } from "express";
-export const filesRouterMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
-    const response = await serviceClient.callServiceWithResponse(
-      "@hive/files-service",
-      {
-        method: req.method,
-        url: req.url,
-        data: req.body,
-        timeout: 5000,
-        headers: sanitizeHeaders(req),
-      }
-    );
-    return res.set(response.headers).json(response.data);
-  } catch (error) {
-    next(error);
-  }
-};
 
 export const uploadFile = async (
   req: Request,
@@ -35,7 +13,7 @@ export const uploadFile = async (
   next: NextFunction
 ) => {
   try {
-    const files = (req.files as Array<MemoryMulterFile>).reduce<
+    const files = ((req as any).files as Array<MemoryMulterFile>).reduce<
       Record<string, File[]>
     >((prev, file) => {
       const { fieldname } = file;
@@ -67,5 +45,37 @@ export const uploadFile = async (
     return res.json(response.data);
   } catch (error) {
     next(error);
+  }
+};
+export const streamFile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
+    const service = await serviceClient.getService("@hive/files-service");
+    // return res.json({
+    //   path: req.url,
+    //   url: `http://${service.host}:${service.port}/media${req.url}`,
+    // });
+
+    const fileStream = await serviceClient.callService<any>(
+      "@hive/files-service",
+      {
+        method: req.method,
+        url: `${req.url}`,
+        timeout: 5000,
+        responseType: "stream",
+        headers: sanitizeHeaders(req),
+      }
+    );
+    // Pipe readable fileStream into res writable stream
+    fileStream.pipe(res);
+    return res;
+  } catch (error) {
+    console.log("[err]:", error);
+
+    next(new APIException(404, { detail: "File not found" }));
   }
 };
