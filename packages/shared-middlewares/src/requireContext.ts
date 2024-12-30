@@ -19,6 +19,21 @@ export const requireContext = (
     next(error);
   }
 };
+export const optionalContext = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const token = req.header("x-access-token") ?? req.header("x-refresh-token");
+    if (!token) return next();
+    const context: Context = decode(token) as Context;
+    req.context = context;
+    return next();
+  } catch (error) {
+    next(error);
+  }
+};
 export const requireOrganizationContext = (
   req: Request,
   res: Response,

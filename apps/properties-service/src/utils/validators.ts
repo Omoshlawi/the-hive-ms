@@ -73,6 +73,11 @@ export const PropertySchema = z.object({
   categories: z.array(z.string().uuid()).optional(),
 });
 
+// Property
+export const PropertyfiltersSchema = z.object({
+  search: z.string().optional(),
+});
+
 // RelationshipType
 export const RelationshipTypeSchema = z.object({
   description: z.string().min(1, "Required").optional(),

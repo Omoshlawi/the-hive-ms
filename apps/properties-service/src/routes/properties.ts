@@ -8,31 +8,55 @@ import {
   purgeProperty,
   updateProperty,
 } from "../controllers/properties";
-import { validateUUIDPathParam } from "@hive/shared-middlewares";
+import {
+  optionalContext,
+  requireContext,
+  requireOrganizationContext,
+  validateUUIDPathParam,
+} from "@hive/shared-middlewares";
 
 const router = Router({ mergeParams: true });
-
-router.get("/", getProperties);
-router.post("/", addProperty);
-router.get("/:propertyId", [validateUUIDPathParam("propertyId")], getProperty);
+router.get("/", [optionalContext], getProperties);
+router.post("/", [requireContext, requireOrganizationContext], addProperty);
+router.get(
+  "/:propertyId",
+  [validateUUIDPathParam("propertyId"), optionalContext],
+  getProperty
+);
 router.patch(
   "/:propertyId",
-  [validateUUIDPathParam("propertyId")],
+  [
+    validateUUIDPathParam("propertyId"),
+    requireContext,
+    requireOrganizationContext,
+  ],
   patchProperty
 );
 router.put(
   "/:propertyId",
-  [validateUUIDPathParam("propertyId")],
+  [
+    validateUUIDPathParam("propertyId"),
+    requireContext,
+    requireOrganizationContext,
+  ],
   updateProperty
 );
 router.delete(
   "/:propertyId",
-  [validateUUIDPathParam("propertyId")],
+  [
+    validateUUIDPathParam("propertyId"),
+    requireContext,
+    requireOrganizationContext,
+  ],
   deleteProperty
 );
 router.purge(
   "/:propertyId",
-  [validateUUIDPathParam("propertyId")],
+  [
+    validateUUIDPathParam("propertyId"),
+    requireContext,
+    requireOrganizationContext,
+  ],
   purgeProperty
 );
 

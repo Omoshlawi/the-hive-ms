@@ -11,14 +11,13 @@ import {
 } from "@hive/shared-middlewares";
 
 const router = Router();
-router.get("/resources-schema", getDatabaseSchemas);
-router.use("/amenities", amenitiesRouter);
-router.use("/attribute-types", attributeTypesRouter);
-router.use("/relationship-types", relationshipTypeRouter);
-router.use("/categories", categoriesRouter);
+router.get("/resources-schema", [requireContext], getDatabaseSchemas);
+router.use("/amenities", [requireContext], amenitiesRouter);
+router.use("/attribute-types", [requireContext], attributeTypesRouter);
+router.use("/relationship-types", [requireContext], relationshipTypeRouter);
+router.use("/categories", [requireContext], categoriesRouter);
 router.use(
   "/properties",
-  [requireContext, requireOrganizationContext],
   propertiesRouter
 );
 

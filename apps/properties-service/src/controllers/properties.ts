@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { PropertiesModel } from "../models";
-import { PropertySchema } from "@/utils/validators";
+import { PropertyfiltersSchema, PropertySchema } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
@@ -17,8 +17,26 @@ export const getProperties = async (
   next: NextFunction
 ) => {
   try {
+    const validation = await PropertyfiltersSchema.safeParseAsync(req.query);
+    if (!validation.success)
+      throw new APIException(400, validation.error.format());
+
+    const { search } = validation.data;
     const results = await PropertiesModel.findMany({
-      where: { voided: false },
+      where: {
+        AND: [
+          {
+            voided: false,
+            organizationId: req.context?.organizationId ?? undefined,
+          },
+
+          {
+            OR: search
+              ? [{ name: { contains: search, mode: "insensitive" } }]
+              : undefined,
+          },
+        ],
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json({ results });
@@ -34,7 +52,11 @@ export const getProperty = async (
 ) => {
   try {
     const item = await PropertiesModel.findUniqueOrThrow({
-      where: { id: req.params.propertyId, voided: false },
+      where: {
+        id: req.params.propertyId,
+        voided: false,
+        organizationId: req.context?.organizationId ?? undefined,
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
