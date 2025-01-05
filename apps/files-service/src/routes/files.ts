@@ -6,6 +6,7 @@ import {
 import { Router } from "express";
 import {
   addHiveFile,
+  cleanHiveFile,
   deleteHiveFile,
   getHiveFile,
   getHiveFiles,
@@ -18,6 +19,7 @@ const router = Router({ mergeParams: true });
 
 router.get("/", getHiveFiles);
 router.post("/upload", [requireContext, memoryFileUploader], addHiveFile);
+router.delete("/clean", [requireContext], cleanHiveFile);
 router.get("/:fileId", [validateUUIDPathParam("fileId")], getHiveFile);
 router.patch("/:fileId", [validateUUIDPathParam("fileId")], patchHiveFile);
 router.put("/:fileId", [validateUUIDPathParam("fileId")], updateHiveFile);

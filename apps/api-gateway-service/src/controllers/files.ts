@@ -13,9 +13,9 @@ export const uploadFile = async (
   next: NextFunction
 ) => {
   try {
-    const files = ((req as any).files as Array<MemoryMulterFile>).reduce<
-      Record<string, File[]>
-    >((prev, file) => {
+    const files = (
+      ((req as any).files ?? []) as Array<MemoryMulterFile>
+    ).reduce<Record<string, File[]>>((prev, file) => {
       const { fieldname } = file;
       return {
         ...prev,
@@ -24,6 +24,10 @@ export const uploadFile = async (
           : [memoryMulterFileToJSFile(file)],
       };
     }, {});
+    if (Object.keys(files).length === 0)
+      throw new APIException(400, {
+        _errors: ["You must provide atleast one file"],
+      });
     const data = {
       ...req.body,
       ...files,
@@ -41,7 +45,6 @@ export const uploadFile = async (
         headers: sanitizeHeaders(req),
       }
     );
-
     return res.json(response.data);
   } catch (error) {
     next(error);

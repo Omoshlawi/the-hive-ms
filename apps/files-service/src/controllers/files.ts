@@ -1,11 +1,12 @@
 import { MEDIA_ROOT } from "@/utils";
-import { FilesSchema } from "@/utils/validators";
+import { FilesCleanSchema, FilesSchema } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
 import {
   addRollBackTaskToQueue,
+  deleteFile,
   deleteFiles,
   FileOperationError,
   MemoryMulterFile,
@@ -54,7 +55,11 @@ export const addHiveFile = async (
   next: NextFunction
 ) => {
   try {
-    const files: MemoryMulterFile[] = req.files as MemoryMulterFile[];
+    const files: MemoryMulterFile[] = (req.files ?? []) as MemoryMulterFile[];
+    if (files.length === 0)
+      throw new APIException(400, {
+        _errors: ["You must provide atleast one file"],
+      });
     const context = req.context!;
     const preValidation = await FilesSchema.safeParse(req.body);
     if (!preValidation.success)
@@ -198,6 +203,35 @@ export const purgeHiveFile = async (
       where: { id: req.params.fileId, voided: false },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    return res.json(item);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const cleanHiveFile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const validation = await FilesCleanSchema.safeParseAsync(req.body);
+    if (!validation.success)
+      throw new APIException(400, validation.error.format());
+    const { paths } = validation.data;
+    // Clean from db
+    const item = await HiveFilesModel.deleteMany({
+      where: { path: { in: paths } },
+      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
+    });
+    // Clean from file system
+    await deleteFiles(
+      paths.map((path_) => path.join(MEDIA_ROOT, path_)),
+      {
+        ignoreNonExistent: true,
+        throwErrors: false,
+      }
+    );
     return res.json(item);
   } catch (error) {
     next(error);
