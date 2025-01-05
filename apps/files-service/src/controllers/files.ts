@@ -100,10 +100,12 @@ export const addHiveFile = async (
           if (curr.status === "fulfilled") return prev;
           return {
             ...prev,
-            [files[index].fieldname]:
-              curr.reason instanceof FileOperationError
-                ? `${curr.reason.code}: ${curr.reason.message}`
-                : (curr.reason?.message ?? "Unknown error occurred"),
+            [files[index].fieldname]: {
+              _errors:
+                curr.reason instanceof FileOperationError
+                  ? [`${curr.reason.code}: ${curr.reason.message}`]
+                  : [curr.reason?.message ?? "Unknown error occurred"],
+            },
           };
         }, {})
       );
