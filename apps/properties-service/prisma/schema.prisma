@@ -115,7 +115,7 @@ model PropertyMedia {
   metadata    Json? // Additional media metadata like meme type, size,e.t.c
   order       Int               @default(0)
 
-  property Property @relation(fields: [propertyId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   voided    Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -135,8 +135,8 @@ model PropertyAttribute {
   attributeId String @db.Uuid
   value       String // Custom value for this property
 
-  property  Property      @relation(fields: [propertyId], references: [id])
-  attribute AttributeType @relation(fields: [attributeId], references: [id])
+  property  Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  attribute AttributeType @relation(fields: [attributeId], references: [id], onDelete: Cascade)
 
   voided    Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -148,8 +148,8 @@ model PropertyAmenity {
   propertyId String @db.Uuid
   amenityId  String @db.Uuid
 
-  property Property @relation(fields: [propertyId], references: [id])
-  amenity  Amenity  @relation(fields: [amenityId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id],onDelete: Cascade)
+  amenity  Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
 
   voided    Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -161,8 +161,8 @@ model PropertyCategory {
   propertyId String @db.Uuid
   categoryId String @db.Uuid
 
-  property Property @relation(fields: [propertyId], references: [id])
-  category Category @relation(fields: [categoryId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   voided    Boolean  @default(false)
   createdAt DateTime @default(now())
