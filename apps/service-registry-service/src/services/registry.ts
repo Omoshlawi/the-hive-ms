@@ -1,5 +1,6 @@
 import { Service, UnregisteredService } from "@/types";
 import semver from "semver";
+import logger from "./logger";
 
 class Registry {
   services: Service[];
@@ -34,7 +35,7 @@ class Registry {
         timestamp: Date.now() / 1000, //epock time converted toseconds
         instance: "",
       });
-      console.log(
+      logger.info(
         `[+]Added service ${service.name} ${service.version} at ${service.host}:${service.port}`
       );
       // console.log(this.services);
@@ -47,7 +48,7 @@ class Registry {
       ...this.services[serviceIndex],
       timestamp: Date.now() / 1000,
     };
-    console.log(
+    logger.info(
       `[+]Udated service ${service.name} ${service.version} at ${service.host}:${service.port}`
     );
     // console.log(this.services);
