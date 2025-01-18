@@ -1,11 +1,11 @@
 import logger from "@/services/logger";
 import redis from "@/services/redis";
-import { Request } from "express";
 import {
   defaultSWRCacheConfig,
+  generateDefaultKey,
   swrCache,
-  toQueryParams,
 } from "@hive/core-utils";
+import { Request } from "express";
 import { serviceIdentity } from "./constants";
 
 /**
@@ -34,8 +34,8 @@ export const getCached = <T>(
   getKey?: (req: Request) => string
 ) => {
   const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
-  const key = typeof getKey === "function" ? getKey(req) : req.originalUrl;
-
+  const key =
+    typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);
   return swrCache<T>({
     fetcher,
     key: `${prefix}:${key}`,

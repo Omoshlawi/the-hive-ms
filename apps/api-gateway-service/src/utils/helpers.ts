@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import pick from "lodash/pick";
-import { ServiceClient } from "@hive/core-utils";
+import { generateDefaultKey, ServiceClient } from "@hive/core-utils";
 import { registryAddress, serviceIdentity } from "./constants";
 
 // TODO Uncoment to unlock redist caching capabilities
@@ -37,10 +37,11 @@ import { registryAddress, serviceIdentity } from "./constants";
 //   getKey?: (req: Request) => string
 // ) => {
 //   const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
-//   const key = typeof getKey === "function" ? getKey(req) : req.originalUrl;
+//   const key =
+// typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);
 //   return swrCache<T>({
 //     fetcher,
-    // key: `${prefix}:${key}`,
+// key: `${prefix}:${key}`,
 //     logger: logger,
 //     redis,
 //     ...defaultSWRCacheConfig,

@@ -1,5 +1,6 @@
 import { UUID_REGEX } from "@/constants";
-import pick from "lodash/pick";
+import { Request } from "express";
+import qs from "querystring";
 
 export function parseMessage(object: any, template: string) {
   // regular expression to match placeholders like {{field}}
@@ -79,16 +80,22 @@ export const nullifyExceptionAsync = <T, P extends any[], TErr = Error>(
 };
 
 export const toQueryParams = (q: Record<string, any>) => {
-  const params = Object.entries(q)
-    .reduce<Array<string>>((prev, [key, val]) => {
-      if (val !== undefined && val !== null) {
-        return [...prev, `${key}=${val}`];
-      }
-      return prev;
-    }, [])
-    .join("&");
+  const params = qs.stringify(q);
   if (params) {
     return "?" + params;
   }
   return "";
+};
+
+export const normalizeQuery = (query: Record<string, any>) => {
+  const sortedQuery = Object.keys(query)
+    .sort()
+    .reduce((acc, key) => ({ ...acc, [key]: query[key] }), {});
+  return toQueryParams(sortedQuery);
+};
+
+export const generateDefaultKey = (req: Request) => {
+  const basePath = req.originalUrl?.split("?")?.at(0) ?? "";
+  const normalizedQuery = normalizeQuery(req.query);
+  return `${basePath}${normalizedQuery}`;
 };

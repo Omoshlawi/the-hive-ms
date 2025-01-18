@@ -2,6 +2,7 @@ import { TokenPayload } from "@/types";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { configuration } from "./constants";
+import { generateDefaultKey } from "@hive/core-utils";
 // TODO Uncoment to unlock redist caching capabilities
 // import logger from "@/services/logger";
 // import redis from "@/services/redis";
@@ -36,7 +37,8 @@ import { configuration } from "./constants";
 //   getKey?: (req: Request) => string
 // ) => {
 //   const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
-//   const key = typeof getKey === "function" ? getKey(req) : req.originalUrl;
+//   const key =
+// typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);
 //   return swrCache<T>({
 //     fetcher,
 //     key: `${prefix}:${key}`,

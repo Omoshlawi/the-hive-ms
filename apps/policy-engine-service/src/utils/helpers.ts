@@ -1,5 +1,7 @@
 // TODO Uncoment to unlock redist caching capabilities
 
+import { generateDefaultKey } from "@hive/core-utils";
+
 // import logger from "@/services/logger";
 // import redis from "@/services/redis";
 // import {
@@ -33,7 +35,8 @@
 //   getKey?: (req: Request) => string
 // ) => {
 //   const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
-//   const key = typeof getKey === "function" ? getKey(req) : req.originalUrl;
+//   const key =
+// typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);
 //   return swrCache<T>({
 //     fetcher,
 //     key: `${prefix}:${key}`,
