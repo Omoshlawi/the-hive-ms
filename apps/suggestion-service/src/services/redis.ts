@@ -1,21 +1,23 @@
-import { createRedisClient, Redis } from "@hive/core-utils";
-import { configuration } from "@/utils";
-import logger from "./logger";
+// TODO Uncoment to unlock redist caching capabilities
 
-const globalForRedis = global as unknown as { redis: Redis };
+// import { createRedisClient, Redis } from "@hive/core-utils";
+// import { configuration } from "@/utils";
+// import logger from "./logger";
 
-const redis =
-  globalForRedis.redis ||
-  createRedisClient(
-    configuration.redis!,
-    () => {
-      logger.info(
-        `Connection to Redis server ${configuration.redis!} succesfull`
-      );
-    },
-    (err) => logger.error(`Error connecting to redis service:  ${err}`)
-  );
+// const globalForRedis = global as unknown as { redis: Redis };
 
-if (process.env.NODE_ENV !== "production") globalForRedis.redis = redis;
+// const redis =
+//   globalForRedis.redis ||
+//   createRedisClient(
+//     configuration.redis!,
+//     () => {
+//       logger.info(
+//         `Connection to Redis server ${configuration.redis!} succesfull`
+//       );
+//     },
+//     (err) => logger.error(`Error connecting to redis service:  ${err}`)
+//   );
 
-export default redis;
+// if (process.env.NODE_ENV !== "production") globalForRedis.redis = redis;
+
+// export default redis;

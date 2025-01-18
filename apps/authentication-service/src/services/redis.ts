@@ -1,3 +1,5 @@
+// TODO Uncoment to unlock redist caching capabilities
+
 // import { createRedisClient, Redis } from "@hive/core-utils";
 // import { configuration } from "@/utils";
 // import logger from "./logger";

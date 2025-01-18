@@ -79,15 +79,16 @@ export const nullifyExceptionAsync = <T, P extends any[], TErr = Error>(
 };
 
 export const toQueryParams = (q: Record<string, any>) => {
-  return (
-    "?" +
-    Object.entries(q)
-      .reduce<Array<string>>((prev, [key, val]) => {
-        if (val !== undefined && val !== null) {
-          return [...prev, `${key}=${val}`];
-        }
-        return prev;
-      }, [])
-      .join("&")
-  );
+  const params = Object.entries(q)
+    .reduce<Array<string>>((prev, [key, val]) => {
+      if (val !== undefined && val !== null) {
+        return [...prev, `${key}=${val}`];
+      }
+      return prev;
+    }, [])
+    .join("&");
+  if (params) {
+    return "?" + params;
+  }
+  return "";
 };

@@ -1,16 +1,11 @@
-import { NextFunction, Request, Response } from "express";
-import { AmenitiesModel } from "../models";
+import { getCached } from "@/utils";
 import { AmenitySchema } from "@/utils/validators";
 import {
   APIException,
-  defaultSWRCacheConfig,
   getMultipleOperationCustomRepresentationQeury,
-  swrCache,
-  toQueryParams,
 } from "@hive/core-utils";
-import { Amenity } from "dist/prisma";
-import logger from "@/services/logger";
-import redis from "@/services/redis";
+import { NextFunction, Request, Response } from "express";
+import { AmenitiesModel } from "../models";
 
 export const getAmenities = async (
   req: Request,
@@ -18,19 +13,14 @@ export const getAmenities = async (
   next: NextFunction
 ) => {
   try {
-    const data = await swrCache<Array<Amenity>>({
-      fetcher: async () =>
-        await AmenitiesModel.findMany({
-          where: { voided: false },
-          ...getMultipleOperationCustomRepresentationQeury(
-            req.query?.v as string
-          ),
-        }),
-      key: `amenities${toQueryParams(req.query)}`,
-      logger: logger,
-      redis,
-      ...defaultSWRCacheConfig,
-    });
+    const data = await getCached(req, () =>
+      AmenitiesModel.findMany({
+        where: { voided: false },
+        ...getMultipleOperationCustomRepresentationQeury(
+          req.query?.v as string
+        ),
+      })
+    );
 
     return res.json({ results: data.data, ...data.metadata });
   } catch (error) {
@@ -44,10 +34,15 @@ export const getAmenity = async (
   next: NextFunction
 ) => {
   try {
-    const item = await AmenitiesModel.findUniqueOrThrow({
-      where: { id: req.params.amenityId, voided: false },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
-    });
+    const item = await getCached(req, () =>
+      AmenitiesModel.findUniqueOrThrow({
+        where: { id: req.params.amenityId, voided: false },
+        ...getMultipleOperationCustomRepresentationQeury(
+          req.query?.v as string
+        ),
+      })
+    );
+
     return res.json(item);
   } catch (error) {
     next(error);
