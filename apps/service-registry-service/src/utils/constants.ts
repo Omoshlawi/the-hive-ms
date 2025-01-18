@@ -6,6 +6,8 @@ export const configuration = {
   name: require("./../../package.json").name,
   nameAliase: config.get("name"),
   port: config.get("port") as string | null | undefined,
+  redis: config.get("redis_db") as string | undefined | null,
+
 };
 
 export const serviceId: ServiceIdentity = {

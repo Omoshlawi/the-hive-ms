@@ -2,5 +2,6 @@
   "port": "PORT",
   "jwt": "JWT_TOKEN",
   "db": "DATABASE_URL",
+  "redis_db": "REDIS_DB_URL",
   "backend_url": "BACKEND_URL"
 }

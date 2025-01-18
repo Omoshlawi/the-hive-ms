@@ -9,6 +9,7 @@ export const configuration = {
   port: config.get("port") as string | undefined | null,
   jwt: config.get("jwt") as string | undefined | null,
   backend_url: config.get("backend_url") as string,
+  redis: config.get("redis_db") as string | undefined | null,
   registry: {
     url: config.get("registry.url") as string,
     version: config.get("registry.version") as string,

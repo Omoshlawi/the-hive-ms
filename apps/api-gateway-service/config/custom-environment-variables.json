@@ -6,5 +6,6 @@
   "google_client_secrete": "GOOGLE_CLIENT_SECRETE",
   "github_client_id": "GITHUB_CLIENT_ID",
   "github_client_secrete": "GITHUB_CLIENT_SECRETE",
+  "redis_db": "REDIS_DB_URL",
   "auth_secrete": "AUTH_SECRET"
 }

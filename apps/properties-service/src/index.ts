@@ -3,6 +3,18 @@ import "dotenv/config";
 import logger from "@/services/logger";
 
 import ApplicationServer from "@/app";
+import { createRedisClient } from "@hive/core-utils";
+import { configuration } from "./utils";
+
+export const redisClient = createRedisClient(
+  configuration.redis!,
+  () => {
+    logger.info(
+      `Connection to Redis server ${configuration.redis!} succesfull`
+    );
+  },
+  (err) => logger.error(`Error connecting to redis service:  ${err}`)
+);
 
 // Start the server
 const startServer = async () => {

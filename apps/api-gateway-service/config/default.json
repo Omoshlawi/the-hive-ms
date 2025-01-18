@@ -3,6 +3,7 @@
   "port": null,
   "db": "",
   "jwt": "AUTH_SECRET",
+  "redis_db": "",
   "registry": {
     "url": "http://localhost:9000",
     "version": "*"

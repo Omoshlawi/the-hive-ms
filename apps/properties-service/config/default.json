@@ -2,7 +2,8 @@
   "name": "The hive properties service",
   "port": null,
   "db": "",
-  "jwt": "JWT_TOKEN",
+  "redis_db": "",
+  "jwt": "",
   "registry": {
     "url": "http://localhost:9000",
     "version": "*"

@@ -1,5 +1,6 @@
+import { NextFunction, Request, Response } from "express";
 import { Redis } from "ioredis";
-import { Request, Response, NextFunction } from "express";
+import { Logger } from "winston";
 
 interface CacheConfig {
   redis: Redis;
@@ -7,6 +8,7 @@ interface CacheConfig {
   staleTime: number; // Time before data is considered stale in seconds
   lockTimeout?: number; // Lock timeout in seconds (default: 10)
   throwOnError?: boolean; // Whether to throw errors or return stale data
+  logger: Logger;
 }
 
 interface CacheData<T> {
@@ -21,6 +23,7 @@ export class RedisSWRCache {
   private staleTime: number;
   private lockTimeout: number;
   private throwOnError: boolean;
+  private logger: Logger;
 
   constructor(config: CacheConfig) {
     this.redis = config.redis;
@@ -28,6 +31,7 @@ export class RedisSWRCache {
     this.staleTime = config.staleTime;
     this.lockTimeout = config.lockTimeout || 10;
     this.throwOnError = config.throwOnError ?? true;
+    this.logger = config.logger;
   }
 
   private async getFromCache<T>(key: string): Promise<CacheData<T> | null> {
@@ -84,7 +88,7 @@ export class RedisSWRCache {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      console.error("Background revalidation failed:", errorMessage);
+      this.logger.error(`Background revalidation failed: ${errorMessage}`);
       await this.setCache(key, null as T, errorMessage);
     } finally {
       await this.releaseLock(key);

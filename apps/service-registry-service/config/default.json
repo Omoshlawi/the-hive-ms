@@ -1,5 +1,6 @@
 {
   "name": "The hive service registry service",
   "port": null,
+  "redis_db": "",
   "db": ""
 }

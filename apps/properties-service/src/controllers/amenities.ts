@@ -3,8 +3,14 @@ import { AmenitiesModel } from "../models";
 import { AmenitySchema } from "@/utils/validators";
 import {
   APIException,
+  defaultSWRCacheConfig,
   getMultipleOperationCustomRepresentationQeury,
+  swrCache,
+  toQueryParams,
 } from "@hive/core-utils";
+import { Amenity } from "dist/prisma";
+import logger from "@/services/logger";
+import { redisClient } from "..";
 
 export const getAmenities = async (
   req: Request,
@@ -12,11 +18,22 @@ export const getAmenities = async (
   next: NextFunction
 ) => {
   try {
-    const results = await AmenitiesModel.findMany({
-      where: { voided: false },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
+    const data = await swrCache<Array<Amenity>>({
+      fetcher: async () =>
+        await AmenitiesModel.findMany({
+          where: { voided: false },
+          ...getMultipleOperationCustomRepresentationQeury(
+            req.query?.v as string
+          ),
+        }),
+      key: `amenities${toQueryParams(req.query)}`,
+      logger: logger,
+      redis: redisClient,
+
+      ...defaultSWRCacheConfig,
     });
-    return res.json({ results });
+
+    return res.json({ results: data.data, ...data.metadata });
   } catch (error) {
     next(error);
   }
