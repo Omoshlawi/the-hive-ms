@@ -1,24 +1,12 @@
 import { ServiceSchema } from "@/schema";
 // import { MemoryStorage, RedisStorage, Registry } from "@/services/registry";
-import { configuration } from "@/utils";
 import { APIException } from "@hive/core-utils";
 import { NextFunction, Request, Response, Router } from "express";
-import Reg from "@/services/registry-legacy";
-import RedisStorage from "@/services/registry/redis-storage";
-import MemoryStorage from "@/services/registry/memory-storage";
-import Registry from "@/services/registry/registry";
-import redis from "@/services/redis";
+import registry from "@/services/registry";
+// import Reg from "@/services/registry-legacy";
 
 const router = Router();
 
-// Initialize registry with chosen storage strategy
-// You can easily switch between memory and Redis storage
-const storage =
-  configuration.storageStrategy === "redis"
-    ? new RedisStorage(redis)
-    : new MemoryStorage();
-
-const registry = new Registry(storage);
 // const registry = new Reg();
 
 /**
