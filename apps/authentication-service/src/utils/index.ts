@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { RegistryAddress, ServiceIdentity } from "@hive/core-utils";
 import config from "config";
 import { CookieOptions } from "express";

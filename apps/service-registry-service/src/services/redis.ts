@@ -13,7 +13,10 @@ const redis =
         `Connection to Redis server ${configuration.redis!} succesfull`
       );
     },
-    (err) => logger.error(`Error connecting to redis service:  ${err}`)
+    (err) =>
+      logger.error(
+        `Error connecting to redis service at ${configuration.redis}:  ${err}`
+      )
   );
 
 if (process.env.NODE_ENV !== "production") globalForRedis.redis = redis;

@@ -1,3 +1,4 @@
+import "dotenv/config";
 export const BASE_DIR = process.cwd();
 import { RegistryAddress, ServiceIdentity } from "@hive/core-utils";
 import config from "config";
@@ -24,5 +25,4 @@ export const registryAddress: RegistryAddress = {
 export const serviceIdentity: ServiceIdentity = {
   name: configuration.name,
   version: configuration.version,
-  
 };

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { ServiceIdentity } from "@hive/core-utils";
 import config from "config";
 
