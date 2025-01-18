@@ -2,13 +2,12 @@ import { ServiceSchema } from "@/schema";
 // import { MemoryStorage, RedisStorage, Registry } from "@/services/registry";
 import { APIException } from "@hive/core-utils";
 import { NextFunction, Request, Response, Router } from "express";
-import registry from "@/services/registry";
+import { registry } from "@/services/registry/registery-factory";
 // import Reg from "@/services/registry-legacy";
 
 const router = Router();
 
 // const registry = new Reg();
-
 /**
  * Register a new service
  * PUT /register

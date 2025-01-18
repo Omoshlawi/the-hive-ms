@@ -10,7 +10,7 @@ import {
 } from "@hive/core-utils";
 import { Amenity } from "dist/prisma";
 import logger from "@/services/logger";
-import { redisClient } from "..";
+import redis from "@/services/redis";
 
 export const getAmenities = async (
   req: Request,
@@ -28,8 +28,7 @@ export const getAmenities = async (
         }),
       key: `amenities${toQueryParams(req.query)}`,
       logger: logger,
-      redis: redisClient,
-
+      redis,
       ...defaultSWRCacheConfig,
     });
 
