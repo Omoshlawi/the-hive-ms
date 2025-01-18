@@ -5,6 +5,7 @@ import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
+import { getCached } from "@/utils";
 
 export const getPropertyCategorys = async (
   req: Request,
@@ -12,11 +13,15 @@ export const getPropertyCategorys = async (
   next: NextFunction
 ) => {
   try {
-    const results = await PropertyCategoriesModel.findMany({
-      where: { voided: false },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
-    });
-    return res.json({ results });
+    const results = await getCached(req, () =>
+      PropertyCategoriesModel.findMany({
+        where: { voided: false },
+        ...getMultipleOperationCustomRepresentationQeury(
+          req.query?.v as string
+        ),
+      })
+    );
+    return res.json({ results: results.data });
   } catch (error) {
     next(error);
   }
@@ -28,11 +33,15 @@ export const getPropertyCategory = async (
   next: NextFunction
 ) => {
   try {
-    const item = await PropertyCategoriesModel.findUniqueOrThrow({
-      where: { id: req.params.propertyCategoryId, voided: false },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
-    });
-    return res.json(item);
+    const item = await getCached(req, () =>
+      PropertyCategoriesModel.findUniqueOrThrow({
+        where: { id: req.params.propertyCategoryId, voided: false },
+        ...getMultipleOperationCustomRepresentationQeury(
+          req.query?.v as string
+        ),
+      })
+    );
+    return res.json(item.data);
   } catch (error) {
     next(error);
   }

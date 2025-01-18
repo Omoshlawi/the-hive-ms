@@ -41,7 +41,7 @@ export const getCategory = async (
         ),
       })
     );
-    return res.json(item);
+    return res.json(item.data);
   } catch (error) {
     next(error);
   }

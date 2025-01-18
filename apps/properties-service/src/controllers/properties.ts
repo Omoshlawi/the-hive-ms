@@ -7,7 +7,7 @@ import {
   nullifyExceptionAsync,
   ServiceClient,
 } from "@hive/core-utils";
-import { registryAddress, serviceIdentity } from "@/utils";
+import { getCached, registryAddress, serviceIdentity } from "@/utils";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
 import { Address, OrganizationMembership } from "@/types";
 
@@ -22,24 +22,28 @@ export const getProperties = async (
       throw new APIException(400, validation.error.format());
 
     const { search } = validation.data;
-    const results = await PropertiesModel.findMany({
-      where: {
-        AND: [
-          {
-            voided: false,
-            organizationId: req.context?.organizationId ?? undefined,
-          },
+    const results = await getCached(req, () =>
+      PropertiesModel.findMany({
+        where: {
+          AND: [
+            {
+              voided: false,
+              organizationId: req.context?.organizationId ?? undefined,
+            },
 
-          {
-            OR: search
-              ? [{ name: { contains: search, mode: "insensitive" } }]
-              : undefined,
-          },
-        ],
-      },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
-    });
-    return res.json({ results });
+            {
+              OR: search
+                ? [{ name: { contains: search, mode: "insensitive" } }]
+                : undefined,
+            },
+          ],
+        },
+        ...getMultipleOperationCustomRepresentationQeury(
+          req.query?.v as string
+        ),
+      })
+    );
+    return res.json({ results: results.data });
   } catch (error) {
     next(error);
   }
@@ -51,15 +55,19 @@ export const getProperty = async (
   next: NextFunction
 ) => {
   try {
-    const item = await PropertiesModel.findUniqueOrThrow({
-      where: {
-        id: req.params.propertyId,
-        voided: false,
-        organizationId: req.context?.organizationId ?? undefined,
-      },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
-    });
-    return res.json(item);
+    const item = await getCached(req, () =>
+      PropertiesModel.findUniqueOrThrow({
+        where: {
+          id: req.params.propertyId,
+          voided: false,
+          organizationId: req.context?.organizationId ?? undefined,
+        },
+        ...getMultipleOperationCustomRepresentationQeury(
+          req.query?.v as string
+        ),
+      })
+    );
+    return res.json(item.data);
   } catch (error) {
     next(error);
   }

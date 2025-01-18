@@ -34,12 +34,11 @@ export const getCached = <T>(
   getKey?: (req: Request) => string
 ) => {
   const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
-  const params = toQueryParams(req.query);
   const key = typeof getKey === "function" ? getKey(req) : req.originalUrl;
 
   return swrCache<T>({
     fetcher,
-    key: `${prefix}:${key}${params}`,
+    key: `${prefix}:${key}`,
     logger: logger,
     redis,
     ...defaultSWRCacheConfig,

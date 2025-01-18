@@ -5,6 +5,7 @@ import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
+import { getCached } from "@/utils";
 
 export const getRelationshipTypes = async (
   req: Request,
@@ -12,11 +13,15 @@ export const getRelationshipTypes = async (
   next: NextFunction
 ) => {
   try {
-    const results = await RelationshipTypesModel.findMany({
-      where: { voided: false },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
-    });
-    return res.json({ results });
+    const results = await getCached(req, () =>
+      RelationshipTypesModel.findMany({
+        where: { voided: false },
+        ...getMultipleOperationCustomRepresentationQeury(
+          req.query?.v as string
+        ),
+      })
+    );
+    return res.json({ results: results.data });
   } catch (error) {
     next(error);
   }
@@ -28,11 +33,15 @@ export const getRelationshipType = async (
   next: NextFunction
 ) => {
   try {
-    const item = await RelationshipTypesModel.findUniqueOrThrow({
-      where: { id: req.params.relationshipTypeUuid, voided: false },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
-    });
-    return res.json(item);
+    const item = await getCached(req, () =>
+      RelationshipTypesModel.findUniqueOrThrow({
+        where: { id: req.params.relationshipTypeUuid, voided: false },
+        ...getMultipleOperationCustomRepresentationQeury(
+          req.query?.v as string
+        ),
+      })
+    );
+    return res.json(item.data);
   } catch (error) {
     next(error);
   }

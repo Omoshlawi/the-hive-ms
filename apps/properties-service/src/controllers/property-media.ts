@@ -5,6 +5,7 @@ import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
+import { getCached } from "@/utils";
 
 export const getPropertiesMedias = async (
   req: Request,
@@ -12,11 +13,15 @@ export const getPropertiesMedias = async (
   next: NextFunction
 ) => {
   try {
-    const results = await PropertyMediaModel.findMany({
-      where: { voided: false },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
-    });
-    return res.json({ results });
+    const results = await getCached(req, () =>
+      PropertyMediaModel.findMany({
+        where: { voided: false },
+        ...getMultipleOperationCustomRepresentationQeury(
+          req.query?.v as string
+        ),
+      })
+    );
+    return res.json({ results: results.data });
   } catch (error) {
     next(error);
   }
@@ -28,11 +33,15 @@ export const getPropertiesMedia = async (
   next: NextFunction
 ) => {
   try {
-    const item = await PropertyMediaModel.findUniqueOrThrow({
-      where: { id: req.params.propertyMediaId, voided: false },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
-    });
-    return res.json(item);
+    const item = await getCached(req, () =>
+      PropertyMediaModel.findUniqueOrThrow({
+        where: { id: req.params.propertyMediaId, voided: false },
+        ...getMultipleOperationCustomRepresentationQeury(
+          req.query?.v as string
+        ),
+      })
+    );
+    return res.json(item.data);
   } catch (error) {
     next(error);
   }
