@@ -1,6 +1,7 @@
 import { Service, UnregisteredService } from "@/types";
 import semver from "semver";
 import logger from "./logger";
+import { deprecate } from "node:util";
 
 class Registry {
   services: Service[];
@@ -84,5 +85,4 @@ class Registry {
     return this.services;
   }
 }
-
 export default Registry;

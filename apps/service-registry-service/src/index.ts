@@ -1,12 +1,14 @@
+import logger from "@/services/logger";
+import { configuration, serviceId } from "@/utils";
+import { handleErrorsMiddleWare } from "@hive/shared-middlewares";
+import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
-import { configuration, serviceId } from "@/utils";
 import morgan from "morgan";
-import cors from "cors";
-import logger from "@/services/logger";
-import { handleErrorsMiddleWare } from "@hive/shared-middlewares";
 import router from "./routes";
+
+
 
 const startServer = async () => {
   const app = express();

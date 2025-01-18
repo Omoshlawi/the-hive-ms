@@ -2,5 +2,6 @@
   "name": "The hive service registry service",
   "port": null,
   "redis_db": "",
+  "storage_strategy": "redis",
   "db": ""
 }
