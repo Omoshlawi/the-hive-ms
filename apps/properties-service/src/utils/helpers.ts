@@ -3,6 +3,8 @@ import redis from "@/services/redis";
 import {
   defaultSWRCacheConfig,
   generateDefaultKey,
+  invalidateCache,
+  invalidatePattern,
   swrCache,
 } from "@hive/core-utils";
 import { Request } from "express";
@@ -42,5 +44,16 @@ export const getCached = <T>(
     logger: logger,
     redis,
     ...defaultSWRCacheConfig,
+  });
+};
+
+export const invalidate = (req: Request, getKey?: (req: Request) => string) => {
+  const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
+  const key =
+    typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);
+  return invalidatePattern(redis, {
+    pattern: `${prefix}:${key}*`,
+    logger,
+    count: 100,
   });
 };

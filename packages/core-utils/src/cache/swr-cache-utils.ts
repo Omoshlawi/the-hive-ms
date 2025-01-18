@@ -235,3 +235,91 @@ export async function swrCache<T>({
     throw error;
   }
 }
+
+/**
+ * Invalidate specific cache keys using a pipeline for efficiency.
+ *
+ * @param {string[]} keys - Array of keys to invalidate.
+ * @param {Redis} redis - Redis instance.
+ * @param {Logger} logger - Logger instance for logging.
+ */
+export const invalidateCache = async (
+  keys: string[],
+  redis: Redis,
+  logger?: Logger
+): Promise<void> => {
+  if (!keys || keys.length === 0) {
+    logger?.warn("[Cache] No keys provided for invalidation.");
+    return;
+  }
+
+  const pipeline = redis.pipeline();
+  keys.forEach((key) => pipeline.del(key));
+
+  try {
+    const results = await pipeline.exec();
+    const deletedCount = results?.filter(([err]) => !err)?.length ?? 0;
+    logger?.info(
+      `[Cache] Successfully invalidated ${deletedCount}/${keys.length} keys.`
+    );
+  } catch (error) {
+    logger?.error("[Cache] Error during cache invalidation.", { error });
+    throw error;
+  }
+};
+
+interface InvalidatePatternOptions {
+  pattern: string; // Redis glob pattern
+  regex?: RegExp; // Optional JavaScript regular expression for filtering
+  count?: number; // Optional SCAN count (batch size, default: 100)
+  logger?: Logger; // Optional Winston logger for debugging
+}
+
+/**
+ * Invalidate cache keys matching a glob pattern and optionally a regex.
+ *
+ * @param redis - Redis instance
+ * @param options - Options for pattern invalidation
+ */
+export async function invalidatePattern(
+  redis: Redis,
+  options: InvalidatePatternOptions
+): Promise<void> {
+  const { pattern, regex, count = 100, logger } = options;
+
+  try {
+    const pipeline = redis.pipeline();
+    let cursor = "0";
+    let matchedKeysCount = 0;
+
+    do {
+      // Fetch keys matching the glob pattern
+      const [nextCursor, keys] = await redis.scan(
+        cursor,
+        "MATCH",
+        pattern,
+        "COUNT",
+        count
+      );
+      cursor = nextCursor;
+
+      // Optionally filter keys using regex
+      const filteredKeys = regex ? keys.filter((key) => regex.test(key)) : keys;
+
+      if (filteredKeys.length > 0) {
+        filteredKeys.forEach((key) => pipeline.del(key));
+        matchedKeysCount += filteredKeys.length;
+      }
+    } while (cursor !== "0");
+
+    // Execute pipeline to delete keys
+    await pipeline.exec();
+    logger?.info(
+      `Invalidated ${matchedKeysCount} keys matching pattern: "${pattern}"` +
+        (regex ? ` and regex: ${regex}` : "")
+    );
+  } catch (error: any) {
+    logger?.error(`Error invalidating pattern: ${error?.message}`);
+    throw error;
+  }
+}

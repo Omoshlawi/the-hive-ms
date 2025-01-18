@@ -48,6 +48,17 @@ import { generateDefaultKey } from "@hive/core-utils";
 //   });
 // };
 
+// export const invalidate = (req: Request, getKey?: (req: Request) => string) => {
+//   const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
+//   const key =
+//     typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);
+//   return invalidatePattern(redis, {
+//     pattern: `${prefix}:${key}*`,
+//     logger,
+//     count: 100,
+//   });
+// };
+
 export const hashPassword = async (password: string) => {
   const salt = await bcrypt.genSalt(10);
   const hash = await bcrypt.hash(password, salt);

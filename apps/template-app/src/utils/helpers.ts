@@ -45,3 +45,14 @@ import { generateDefaultKey } from "@hive/core-utils";
 //     ...defaultSWRCacheConfig,
 //   });
 // };
+
+// export const invalidate = (req: Request, getKey?: (req: Request) => string) => {
+//     const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
+//     const key =
+//       typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);
+//     return invalidatePattern(redis, {
+//       pattern: `${prefix}:${key}*`,
+//       logger,
+//       count: 100,
+//     });
+//   };
