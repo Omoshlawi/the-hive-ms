@@ -5,6 +5,7 @@ import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
+import { getCached } from "@/utils";
 
 export const getCategorys = async (
   req: Request,
@@ -12,11 +13,15 @@ export const getCategorys = async (
   next: NextFunction
 ) => {
   try {
-    const results = await CategoriesModel.findMany({
-      where: { voided: false },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
-    });
-    return res.json({ results });
+    const results = await getCached(req, () =>
+      CategoriesModel.findMany({
+        where: { voided: false },
+        ...getMultipleOperationCustomRepresentationQeury(
+          req.query?.v as string
+        ),
+      })
+    );
+    return res.json({ results: results.data, ...results.metadata });
   } catch (error) {
     next(error);
   }
@@ -28,10 +33,14 @@ export const getCategory = async (
   next: NextFunction
 ) => {
   try {
-    const item = await CategoriesModel.findUniqueOrThrow({
-      where: { id: req.params.categoryId, voided: false },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
-    });
+    const item = await getCached(req, () =>
+      CategoriesModel.findUniqueOrThrow({
+        where: { id: req.params.categoryId, voided: false },
+        ...getMultipleOperationCustomRepresentationQeury(
+          req.query?.v as string
+        ),
+      })
+    );
     return res.json(item);
   } catch (error) {
     next(error);
@@ -131,5 +140,3 @@ export const purgeCategory = async (
     next(error);
   }
 };
-
-

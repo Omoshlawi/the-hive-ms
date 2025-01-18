@@ -5,6 +5,7 @@ import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
+import { getCached } from "@/utils";
 
 export const getAttributeTypes = async (
   req: Request,
@@ -12,11 +13,15 @@ export const getAttributeTypes = async (
   next: NextFunction
 ) => {
   try {
-    const results = await AttributeTypesModel.findMany({
-      where: { voided: false },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
-    });
-    return res.json({ results });
+    const results = await getCached(req, () =>
+      AttributeTypesModel.findMany({
+        where: { voided: false },
+        ...getMultipleOperationCustomRepresentationQeury(
+          req.query?.v as string
+        ),
+      })
+    );
+    return res.json({ results: results.data, ...results.metadata });
   } catch (error) {
     next(error);
   }
@@ -28,11 +33,15 @@ export const getAttributeType = async (
   next: NextFunction
 ) => {
   try {
-    const item = await AttributeTypesModel.findUniqueOrThrow({
-      where: { id: req.params.attributeTypeId, voided: false },
-      ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
-    });
-    return res.json(item);
+    const item = await getCached(req, () =>
+      AttributeTypesModel.findUniqueOrThrow({
+        where: { id: req.params.attributeTypeId, voided: false },
+        ...getMultipleOperationCustomRepresentationQeury(
+          req.query?.v as string
+        ),
+      })
+    );
+    return res.json(item.data);
   } catch (error) {
     next(error);
   }

@@ -34,7 +34,7 @@
 // ) => {
 //   const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
 //   const params = toQueryParams(req.query);
-//   const key = typeof getKey === "function" ? getKey(req) : req.url;
+//   const key = typeof getKey === "function" ? getKey(req) : req.originalUrl;
 //   return swrCache<T>({
 //     fetcher,
 //     key: `${prefix}:${key}${params}`,

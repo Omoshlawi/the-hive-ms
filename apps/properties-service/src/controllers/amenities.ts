@@ -43,7 +43,7 @@ export const getAmenity = async (
       })
     );
 
-    return res.json(item);
+    return res.json(item.data);
   } catch (error) {
     next(error);
   }

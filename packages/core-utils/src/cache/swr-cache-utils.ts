@@ -229,8 +229,9 @@ export async function swrCache<T>({
       metadata: { fromCache: false, age: 0, revalidating: false },
     };
   } catch (error) {
-    throw new Error(
-      `Cache operation failed: ${error instanceof Error ? error.message : String(error)}`
+    logger.error(
+      `[SWRCache]: Cache operation failed: ${error instanceof Error ? error.message : String(error)}`
     );
+    throw error;
   }
 }

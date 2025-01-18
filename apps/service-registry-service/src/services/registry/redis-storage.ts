@@ -3,13 +3,14 @@ import StorageStrategy from "./storage-strategy";
 import Registry from "./registry";
 import { Service } from "@/types";
 import logger from "../logger";
+import { serviceId } from "@/utils";
 
 /**
  * Redis implementation of the StorageStrategy interface.
  * Stores services in Redis with automatic expiration.
  */
 class RedisStorage implements StorageStrategy {
-  private readonly keyPrefix = "service:registry:";
+  private readonly keyPrefix = `${serviceId.name}:${serviceId.version}:live-services:`;
   private client: RedisClient;
 
   /**
@@ -34,9 +35,7 @@ class RedisStorage implements StorageStrategy {
         .filter((service): service is string => service !== null)
         .map((service) => JSON.parse(service));
     } catch (error) {
-      logger.error(
-        `[Registry.RedisStorage.getAll]: ${error}`
-      );
+      logger.error(`[Registry.RedisStorage.getAll]: ${error}`);
       return [];
     }
   }
@@ -50,9 +49,7 @@ class RedisStorage implements StorageStrategy {
       const key = this.keyPrefix + Registry.getKey(service);
       await this.client.set(key, JSON.stringify(service), "EX", 15);
     } catch (error) {
-      logger.error(
-        `[Registry.RedisStorage.save]: ${error}`
-      );
+      logger.error(`[Registry.RedisStorage.save]: ${error}`);
       throw error;
     }
   }
@@ -65,9 +62,7 @@ class RedisStorage implements StorageStrategy {
     try {
       await this.client.del(this.keyPrefix + key);
     } catch (error) {
-      logger.error(
-        `[Registry.RedisStorage.remove]: ${error}`
-      );
+      logger.error(`[Registry.RedisStorage.remove]: ${error}`);
       throw error;
     }
   }
@@ -82,9 +77,7 @@ class RedisStorage implements StorageStrategy {
         await this.client.del(...keys); // ioredis supports spreading keys as arguments
       }
     } catch (error) {
-      logger.error(
-        `[Registry.RedisStorage.clear]: ${error}`
-      );
+      logger.error(`[Registry.RedisStorage.clear]: ${error}`);
       throw error;
     }
   }
