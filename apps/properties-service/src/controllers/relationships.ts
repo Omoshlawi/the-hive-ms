@@ -5,7 +5,7 @@ import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
-import { getCached } from "@/utils";
+import { getCachedResource } from "@/utils";
 
 export const getRelationships = async (
   req: Request,
@@ -13,7 +13,7 @@ export const getRelationships = async (
   next: NextFunction
 ) => {
   try {
-    const results = await getCached(req, () =>
+    const results = await getCachedResource(req, () =>
       RelationshipsModel.findMany({
         where: { voided: false },
         ...getMultipleOperationCustomRepresentationQeury(
@@ -33,7 +33,7 @@ export const getRelationship = async (
   next: NextFunction
 ) => {
   try {
-    const item = await getCached(req, () =>
+    const item = await getCachedResource(req, () =>
       RelationshipsModel.findUniqueOrThrow({
         where: { id: req.params.relationshipId, voided: false },
         ...getMultipleOperationCustomRepresentationQeury(

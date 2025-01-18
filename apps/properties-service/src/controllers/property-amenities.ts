@@ -5,7 +5,7 @@ import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
-import { getCached } from "@/utils";
+import { getCachedResource } from "@/utils";
 
 export const getPropertyAmenitys = async (
   req: Request,
@@ -13,7 +13,7 @@ export const getPropertyAmenitys = async (
   next: NextFunction
 ) => {
   try {
-    const results = await getCached(req, () =>
+    const results = await getCachedResource(req, () =>
       PropertyAmenities.findMany({
         where: { voided: false },
         ...getMultipleOperationCustomRepresentationQeury(
@@ -33,7 +33,7 @@ export const getPropertyAmenity = async (
   next: NextFunction
 ) => {
   try {
-    const item = await getCached(req, () =>
+    const item = await getCachedResource(req, () =>
       PropertyAmenities.findUniqueOrThrow({
         where: { id: req.params.propertyAmenityId, voided: false },
         ...getMultipleOperationCustomRepresentationQeury(

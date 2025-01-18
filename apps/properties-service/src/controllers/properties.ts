@@ -7,7 +7,7 @@ import {
   nullifyExceptionAsync,
   ServiceClient,
 } from "@hive/core-utils";
-import { getCached, registryAddress, serviceIdentity } from "@/utils";
+import { getCachedResource, registryAddress, serviceIdentity } from "@/utils";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
 import { Address, OrganizationMembership } from "@/types";
 
@@ -22,7 +22,7 @@ export const getProperties = async (
       throw new APIException(400, validation.error.format());
 
     const { search } = validation.data;
-    const results = await getCached(req, () =>
+    const results = await getCachedResource(req, () =>
       PropertiesModel.findMany({
         where: {
           AND: [
@@ -55,7 +55,7 @@ export const getProperty = async (
   next: NextFunction
 ) => {
   try {
-    const item = await getCached(req, () =>
+    const item = await getCachedResource(req, () =>
       PropertiesModel.findUniqueOrThrow({
         where: {
           id: req.params.propertyId,

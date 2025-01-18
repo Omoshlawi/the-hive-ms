@@ -22,14 +22,14 @@ import { generateDefaultKey } from "@hive/core-utils";
  *
  * @example
  * ```typescript
- * const data = await getCached(
+ * const data = await getCachedResource(
  *   request,
  *   () => fetchDataFromAPI(),
  *   (req) => `custom-key-${req.params.id}`
  * );
  * ```
  */
-// export const getCached = <T>(
+// export const getCachedResource = <T>(
 //   req: Request,
 //   fetcher: () => Promise<T>,
 //   getKey?: (req: Request) => string
@@ -46,8 +46,7 @@ import { generateDefaultKey } from "@hive/core-utils";
 //   });
 // };
 
-
-// export const invalidate = (req: Request, getKey?: (req: Request) => string) => {
+// export const invalidateCachedResource = (req: Request, getKey?: (req: Request) => string) => {
 //     const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
 //     const key =
 //       typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);
@@ -57,4 +56,3 @@ import { generateDefaultKey } from "@hive/core-utils";
 //       count: 100,
 //     });
 //   };
-  

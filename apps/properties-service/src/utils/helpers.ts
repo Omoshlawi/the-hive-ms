@@ -23,14 +23,14 @@ import { serviceIdentity } from "./constants";
  *
  * @example
  * ```typescript
- * const data = await getCached(
+ * const data = await getCachedResource(
  *   request,
  *   () => fetchDataFromAPI(),
  *   (req) => `custom-key-${req.params.id}`
  * );
  * ```
  */
-export const getCached = <T>(
+export const getCachedResource = <T>(
   req: Request,
   fetcher: () => Promise<T>,
   getKey?: (req: Request) => string
@@ -47,7 +47,10 @@ export const getCached = <T>(
   });
 };
 
-export const invalidate = (req: Request, getKey?: (req: Request) => string) => {
+export const invalidateCachedResource = (
+  req: Request,
+  getKey?: (req: Request) => string
+) => {
   const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
   const key =
     typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);

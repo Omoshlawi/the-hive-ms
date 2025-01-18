@@ -1,4 +1,4 @@
-import { getCached } from "@/utils";
+import { getCachedResource, invalidateCachedResource } from "@/utils";
 import { AmenitySchema } from "@/utils/validators";
 import {
   APIException,
@@ -13,7 +13,7 @@ export const getAmenities = async (
   next: NextFunction
 ) => {
   try {
-    const data = await getCached(req, () =>
+    const data = await getCachedResource(req, () =>
       AmenitiesModel.findMany({
         where: { voided: false },
         ...getMultipleOperationCustomRepresentationQeury(
@@ -34,7 +34,7 @@ export const getAmenity = async (
   next: NextFunction
 ) => {
   try {
-    const item = await getCached(req, () =>
+    const item = await getCachedResource(req, () =>
       AmenitiesModel.findUniqueOrThrow({
         where: { id: req.params.amenityId, voided: false },
         ...getMultipleOperationCustomRepresentationQeury(
@@ -82,6 +82,7 @@ export const updateAmenity = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req); //iNVALIDATE CACHE
     return res.json(item);
   } catch (error) {
     next(error);

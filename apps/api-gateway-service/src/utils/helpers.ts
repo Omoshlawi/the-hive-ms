@@ -24,14 +24,14 @@ import { registryAddress, serviceIdentity } from "./constants";
  *
  * @example
  * ```typescript
- * const data = await getCached(
+ * const data = await getCachedResource(
  *   request,
  *   () => fetchDataFromAPI(),
  *   (req) => `custom-key-${req.params.id}`
  * );
  * ```
  */
-// export const getCached = <T>(
+// export const getCachedResource = <T>(
 //   req: Request,
 //   fetcher: () => Promise<T>,
 //   getKey?: (req: Request) => string
@@ -48,7 +48,7 @@ import { registryAddress, serviceIdentity } from "./constants";
 //   });
 // };
 
-// export const invalidate = (req: Request, getKey?: (req: Request) => string) => {
+// export const invalidateCachedResource = (req: Request, getKey?: (req: Request) => string) => {
 //   const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
 //   const key =
 //     typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);
@@ -58,7 +58,6 @@ import { registryAddress, serviceIdentity } from "./constants";
 //     count: 100,
 //   });
 // };
-
 
 export const sanitizeHeaders = (req: Request) => {
   const ALLOWED_HEADERS = ["x-access-token", "x-refresh-token"];
