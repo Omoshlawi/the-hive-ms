@@ -34,7 +34,7 @@ import { generateDefaultKey } from "@hive/core-utils";
 //   fetcher: () => Promise<T>,
 //   getKey?: (req: Request) => string
 // ) => {
-//   const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
+//   const prefix = `${serviceIdentity.name}:${serviceIdentity.version}${req?.context?.organizationId ? ":" + req.context.organizationId : ""}`;
 //   const key =
 // typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);
 //   return swrCache<T>({
@@ -46,13 +46,18 @@ import { generateDefaultKey } from "@hive/core-utils";
 //   });
 // };
 
-// export const invalidateCachedResource = (req: Request, getKey?: (req: Request) => string) => {
-//     const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
-//     const key =
-//       typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);
-//     return invalidatePattern(redis, {
-//       pattern: `${prefix}:${key}*`,
-//       logger,
-//       count: 100,
-//     });
-//   };
+// export const invalidateCachedResource = (
+//   req: Request,
+//   getKey?: (req: Request) => string
+// ) => {
+//   const prefix = `${serviceIdentity.name}:${serviceIdentity.version}${req?.context?.organizationId ? ":" + req.context.organizationId : ""}`;
+//   const key =
+//     typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);
+//   return smartInvalidatePattern(redis, {
+//     pattern: `${prefix}:${key}*`,
+//     logger,
+//     count: 100,
+//     keyThreshold: 5000,
+//     batchSize: 500,
+//   });
+// };

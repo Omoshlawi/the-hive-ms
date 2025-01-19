@@ -43,7 +43,7 @@ export const getAmenity = async (
       })
     );
 
-    return res.json(item.data);
+    return res.json(item);
   } catch (error) {
     next(error);
   }
@@ -62,6 +62,8 @@ export const addAmenity = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    // Invalidate both the listing and detail routes
+    invalidateCachedResource(req, () => req.baseUrl);
     return res.json(item);
   } catch (error) {
     next(error);
@@ -82,7 +84,8 @@ export const updateAmenity = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    invalidateCachedResource(req); //iNVALIDATE CACHE
+    // Invalidate both the listing and detail routes
+    invalidateCachedResource(req, () => req.baseUrl);
     return res.json(item);
   } catch (error) {
     next(error);
@@ -103,6 +106,8 @@ export const patchAmenity = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    // Invalidate both the listing and detail routes
+    invalidateCachedResource(req, () => req.baseUrl);
     return res.json(item);
   } catch (error) {
     next(error);
@@ -122,6 +127,8 @@ export const deleteAmenity = async (
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    // Invalidate both the listing and detail routes
+    invalidateCachedResource(req, () => req.baseUrl);
     return res.json(item);
   } catch (error) {
     next(error);
@@ -138,6 +145,8 @@ export const purgeAmenity = async (
       where: { id: req.params.amenityId, voided: false },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    // Invalidate both the listing and detail routes
+    invalidateCachedResource(req, () => req.baseUrl);
     return res.json(item);
   } catch (error) {
     next(error);

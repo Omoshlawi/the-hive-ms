@@ -5,6 +5,7 @@ import {
   generateDefaultKey,
   invalidateCache,
   invalidatePattern,
+  smartInvalidatePattern,
   swrCache,
 } from "@hive/core-utils";
 import { Request } from "express";
@@ -35,7 +36,8 @@ export const getCachedResource = <T>(
   fetcher: () => Promise<T>,
   getKey?: (req: Request) => string
 ) => {
-  const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
+  const prefix = `${serviceIdentity.name}:${serviceIdentity.version}${req?.context?.organizationId ? ":" + req.context.organizationId : ""}`;
+
   const key =
     typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);
   return swrCache<T>({
@@ -51,12 +53,15 @@ export const invalidateCachedResource = (
   req: Request,
   getKey?: (req: Request) => string
 ) => {
-  const prefix = `${serviceIdentity.name}:${serviceIdentity.version}`;
+  const prefix = `${serviceIdentity.name}:${serviceIdentity.version}${req?.context?.organizationId ? ":" + req.context.organizationId : ""}`;
   const key =
     typeof getKey === "function" ? getKey(req) : generateDefaultKey(req);
-  return invalidatePattern(redis, {
+
+  return smartInvalidatePattern(redis, {
     pattern: `${prefix}:${key}*`,
     logger,
     count: 100,
+    keyThreshold: 5000,
+    batchSize: 500,
   });
 };
