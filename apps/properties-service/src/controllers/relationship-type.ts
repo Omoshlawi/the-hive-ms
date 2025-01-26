@@ -5,7 +5,7 @@ import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
-import { getCachedResource } from "@/utils";
+import { getCachedResource, invalidateCachedResource } from "@/utils";
 
 export const getRelationshipTypes = async (
   req: Request,
@@ -60,6 +60,8 @@ export const addRelationshipType = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -80,6 +82,8 @@ export const updateRelationshipType = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -102,6 +106,8 @@ export const patchRelationshipType = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -121,6 +127,8 @@ export const deleteRelationshipType = async (
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -137,6 +145,8 @@ export const purgeRelationshipType = async (
       where: { id: req.params.relationshipTypeUuid, voided: false },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);

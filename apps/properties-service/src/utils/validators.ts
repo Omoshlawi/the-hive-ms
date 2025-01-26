@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { optional, z } from "zod";
 
 // IconSchema
 const IconSchema = z.object({
@@ -8,6 +8,11 @@ const IconSchema = z.object({
 // Amenity
 export const AmenitySchema = z.object({
   name: z.string().min(1, "Required"),
+  organizationId: z.string().uuid().optional(),
+  icon: IconSchema,
+});
+export const AmenityFilterSchema = z.object({
+  search: z.string().optional(),
   organizationId: z.string().uuid().optional(),
   icon: IconSchema,
 });

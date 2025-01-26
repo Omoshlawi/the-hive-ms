@@ -5,7 +5,7 @@ import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
-import { getCachedResource } from "@/utils";
+import { getCachedResource, invalidateCachedResource } from "@/utils";
 
 export const getCategorys = async (
   req: Request,
@@ -60,6 +60,8 @@ export const addCategory = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -80,6 +82,8 @@ export const updateCategory = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -100,6 +104,8 @@ export const patchCategory = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -119,6 +125,8 @@ export const deleteCategory = async (
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -135,6 +143,8 @@ export const purgeCategory = async (
       where: { id: req.params.categoryId, voided: false },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);

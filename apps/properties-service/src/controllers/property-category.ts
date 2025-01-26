@@ -5,7 +5,7 @@ import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
-import { getCachedResource } from "@/utils";
+import { getCachedResource, invalidateCachedResource } from "@/utils";
 
 export const getPropertyCategorys = async (
   req: Request,
@@ -60,6 +60,8 @@ export const addPropertyCategory = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -80,6 +82,8 @@ export const updatePropertyCategory = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -102,6 +106,8 @@ export const patchPropertyCategory = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -121,6 +127,8 @@ export const deletePropertyCategory = async (
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -137,6 +145,7 @@ export const purgePropertyCategory = async (
       where: { id: req.params.propertyCategoryId, voided: false },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
     return res.json(item);
   } catch (error) {
     next(error);

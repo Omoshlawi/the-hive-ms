@@ -7,7 +7,12 @@ import {
   nullifyExceptionAsync,
   ServiceClient,
 } from "@hive/core-utils";
-import { getCachedResource, registryAddress, serviceIdentity } from "@/utils";
+import {
+  getCachedResource,
+  invalidateCachedResource,
+  registryAddress,
+  serviceIdentity,
+} from "@/utils";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
 import { Address, OrganizationMembership } from "@/types";
 
@@ -160,6 +165,8 @@ export const addProperty = async (
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -184,6 +191,8 @@ export const updateProperty = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -206,6 +215,8 @@ export const patchProperty = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -225,6 +236,8 @@ export const deleteProperty = async (
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -241,6 +254,8 @@ export const purgeProperty = async (
       where: { id: req.params.propertyId, voided: false },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);

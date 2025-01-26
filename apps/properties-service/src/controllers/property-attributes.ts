@@ -5,7 +5,7 @@ import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
-import { getCachedResource } from "@/utils";
+import { getCachedResource, invalidateCachedResource } from "@/utils";
 
 export const getPropertyAttributes = async (
   req: Request,
@@ -60,6 +60,8 @@ export const addPropertyAttribute = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -80,6 +82,8 @@ export const updatePropertyAttribute = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -102,6 +106,8 @@ export const patchPropertyAttribute = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
+
     return res.json(item);
   } catch (error) {
     next(error);
@@ -121,6 +127,7 @@ export const deletePropertyAttribute = async (
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
     return res.json(item);
   } catch (error) {
     next(error);
@@ -137,6 +144,7 @@ export const purgePropertyAttribute = async (
       where: { id: req.params.propertyAttributeId, voided: false },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
     return res.json(item);
   } catch (error) {
     next(error);

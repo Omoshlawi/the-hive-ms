@@ -5,7 +5,7 @@ import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
-import { getCachedResource } from "@/utils";
+import { getCachedResource, invalidateCachedResource } from "@/utils";
 
 export const getRelationships = async (
   req: Request,
@@ -60,6 +60,7 @@ export const addRelationship = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
     return res.json(item);
   } catch (error) {
     next(error);
@@ -80,6 +81,7 @@ export const updateRelationship = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
     return res.json(item);
   } catch (error) {
     next(error);
@@ -102,6 +104,7 @@ export const patchRelationship = async (
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
     return res.json(item);
   } catch (error) {
     next(error);
@@ -121,6 +124,7 @@ export const deleteRelationship = async (
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
     return res.json(item);
   } catch (error) {
     next(error);
@@ -137,6 +141,7 @@ export const purgeRelationship = async (
       where: { id: req.params.relationshipId, voided: false },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => req.baseUrl);
     return res.json(item);
   } catch (error) {
     next(error);
