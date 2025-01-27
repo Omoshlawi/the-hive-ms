@@ -206,13 +206,23 @@ export const patchProperty = async (
 ) => {
   try {
     const validation = await PropertySchema.partial()
-      .pick({ name: true, thumbnail: true })
+      .pick({ name: true, thumbnail: true, categories: true })
       .safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await PropertiesModel.update({
       where: { id: req.params.propertyId, voided: false },
-      data: validation.data,
+      data: {
+        ...validation.data,
+        categories: {
+          createMany: {
+            skipDuplicates: true,
+            data: (validation.data.categories ?? []).map((categoryId) => ({
+              categoryId,
+            })),
+          },
+        },
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     invalidateCachedResource(req, () => req.baseUrl);

@@ -53,9 +53,10 @@ model Category {
 }
 
 model Property {
-  id        String @id @default(uuid()) @db.Uuid
-  name      String
-  thumbnail String
+  id          String @id @default(uuid()) @db.Uuid
+  name        String
+  description String? @db.Text
+  thumbnail   String
 
   organizationId String
   organization   Json?
@@ -148,7 +149,7 @@ model PropertyAmenity {
   propertyId String @db.Uuid
   amenityId  String @db.Uuid
 
-  property Property @relation(fields: [propertyId], references: [id],onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   amenity  Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
 
   voided    Boolean  @default(false)
