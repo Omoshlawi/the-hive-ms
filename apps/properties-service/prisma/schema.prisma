@@ -53,7 +53,7 @@ model Category {
 }
 
 model Property {
-  id          String @id @default(uuid()) @db.Uuid
+  id          String  @id @default(uuid()) @db.Uuid
   name        String
   description String? @db.Text
   thumbnail   String
@@ -142,6 +142,8 @@ model PropertyAttribute {
   voided    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([propertyId, attributeId])
 }
 
 model PropertyAmenity {
@@ -155,6 +157,8 @@ model PropertyAmenity {
   voided    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([propertyId, amenityId])
 }
 
 model PropertyCategory {
@@ -168,4 +172,6 @@ model PropertyCategory {
   voided    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([propertyId, categoryId])
 }

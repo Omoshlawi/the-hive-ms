@@ -15,6 +15,7 @@ import {
 } from "@/utils";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
 import { Address, OrganizationMembership } from "@/types";
+import isEmpty from "lodash/isEmpty";
 
 export const getProperties = async (
   req: Request,
@@ -179,16 +180,88 @@ export const updateProperty = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await PropertySchema.pick({
-      name: true,
-      thumbnail: true,
+    const validation = await PropertySchema.omit({
+      media: true,
     }).safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
 
+    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
+    const getAddress = nullifyExceptionAsync(
+      async () => {
+        const address = await serviceClient.callService<Address>(
+          "@hive/suggestion-service",
+          {
+            method: "GET",
+            url: `/addresses/${validation.data.addressId}`,
+            params: {
+              v: "custom:select(id,name,description,county,subCounty,subCounty,ward,village,landmark,postalCode,latitude,longitude,metadata)",
+            },
+            headers: sanitizeHeaders(req),
+          }
+        );
+        return address;
+      },
+      (err: APIException) => {
+        if (
+          err.status === 404 &&
+          (err.errors.detail as string).toLowerCase().startsWith("service")
+        ) {
+          throw new APIException(400, {
+            addressId: { _errors: ["Invalid address"] },
+          });
+        } else {
+          throw err;
+        }
+      }
+    );
+    // Get addresses
+    const address = await getAddress();
+    // get user organization membership
+
     const item = await PropertiesModel.update({
       where: { id: req.params.propertyId, voided: false },
-      data: validation.data,
+      data: {
+        ...validation.data,
+        categories: isEmpty(validation.data.categories)
+          ? undefined
+          : {
+              deleteMany: {
+                propertyId: req.params.propertyId,
+              },
+              createMany: {
+                skipDuplicates: true,
+                data: validation.data.categories!.map((categoryId) => ({
+                  categoryId,
+                })),
+              },
+            },
+        amenities: isEmpty(validation.data.amenities)
+          ? undefined
+          : {
+              deleteMany: {
+                propertyId: req.params.propertyId,
+              },
+              createMany: {
+                skipDuplicates: true,
+                data: validation.data.amenities!.map((amenityId) => ({
+                  amenityId,
+                })),
+              },
+            },
+        attributes: isEmpty(validation.data.attributes)
+          ? undefined
+          : {
+              deleteMany: {
+                propertyId: req.params.propertyId,
+              },
+              createMany: {
+                skipDuplicates: true,
+                data: validation.data.attributes!,
+              },
+            },
+        address: address as any,
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     invalidateCachedResource(req, () => req.baseUrl);
@@ -206,22 +279,91 @@ export const patchProperty = async (
 ) => {
   try {
     const validation = await PropertySchema.partial()
-      .pick({ name: true, thumbnail: true, categories: true })
+      .omit({
+        media: true,
+      })
       .safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
+
+    let address;
+    if (validation.data.addressId) {
+      const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
+      const getAddress = nullifyExceptionAsync(
+        async () => {
+          const address = await serviceClient.callService<Address>(
+            "@hive/suggestion-service",
+            {
+              method: "GET",
+              url: `/addresses/${validation.data.addressId}`,
+              params: {
+                v: "custom:select(id,name,description,county,subCounty,subCounty,ward,village,landmark,postalCode,latitude,longitude,metadata)",
+              },
+              headers: sanitizeHeaders(req),
+            }
+          );
+          return address;
+        },
+        (err: APIException) => {
+          if (
+            err.status === 404 &&
+            (err.errors.detail as string).toLowerCase().startsWith("service")
+          ) {
+            throw new APIException(400, {
+              addressId: { _errors: ["Invalid address"] },
+            });
+          } else {
+            throw err;
+          }
+        }
+      );
+      // Get addresses
+      address = await getAddress();
+      // get user organization membership
+    }
+
     const item = await PropertiesModel.update({
       where: { id: req.params.propertyId, voided: false },
       data: {
         ...validation.data,
-        categories: {
-          createMany: {
-            skipDuplicates: true,
-            data: (validation.data.categories ?? []).map((categoryId) => ({
-              categoryId,
-            })),
-          },
-        },
+        categories: isEmpty(validation.data.categories)
+          ? undefined
+          : {
+              deleteMany: {
+                propertyId: req.params.propertyId,
+              },
+              createMany: {
+                skipDuplicates: true,
+                data: (validation.data.categories ?? []).map((categoryId) => ({
+                  categoryId,
+                })),
+              },
+            },
+        amenities: isEmpty(validation.data.amenities)
+          ? undefined
+          : {
+              deleteMany: {
+                propertyId: req.params.propertyId,
+              },
+              createMany: {
+                skipDuplicates: true,
+                data: (validation.data.amenities ?? []).map((amenityId) => ({
+                  amenityId,
+                })),
+              },
+            },
+        attributes: isEmpty(validation.data.attributes)
+          ? undefined
+          : {
+              deleteMany: {
+                propertyId: req.params.propertyId,
+              },
+              createMany: {
+                skipDuplicates: true,
+                data: validation.data.attributes!,
+              },
+            },
+        address: address as any,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });

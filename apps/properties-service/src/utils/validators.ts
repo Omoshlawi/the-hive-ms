@@ -76,6 +76,7 @@ export const PropertySchema = z.object({
   media: z.array(PropertyMediaSchema.omit({ propertyId: true })).optional(),
   amenities: z.array(z.string().uuid()).optional(),
   categories: z.array(z.string().uuid()).optional(),
+  description: z.string().optional(),
 });
 
 // Property

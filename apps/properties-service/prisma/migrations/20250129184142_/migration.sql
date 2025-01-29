@@ -6,6 +6,7 @@ CREATE TABLE "AttributeType" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "organizationId" UUID,
+    "icon" JSONB NOT NULL,
     "voided" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -18,6 +19,7 @@ CREATE TABLE "Amenity" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "organizationId" UUID,
+    "icon" JSONB NOT NULL,
     "voided" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -30,6 +32,8 @@ CREATE TABLE "Category" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "organizationId" UUID,
+    "icon" JSONB NOT NULL,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -40,8 +44,13 @@ CREATE TABLE "Category" (
 CREATE TABLE "Property" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "thumbnailUrl" TEXT NOT NULL,
-    "organization" JSONB NOT NULL,
+    "description" TEXT,
+    "thumbnail" TEXT NOT NULL,
+    "organizationId" TEXT NOT NULL,
+    "organization" JSONB,
+    "addressId" TEXT NOT NULL,
+    "address" JSONB,
+    "createdBy" UUID NOT NULL,
     "voided" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -69,31 +78,12 @@ CREATE TABLE "Relationship" (
     "propertyBId" UUID NOT NULL,
     "startDate" TIMESTAMP(3) NOT NULL,
     "endDate" TIMESTAMP(3),
+    "typeId" UUID NOT NULL,
     "voided" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Relationship_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "PropertyLocation" (
-    "id" UUID NOT NULL,
-    "propertyId" UUID NOT NULL,
-    "addressLine1" TEXT NOT NULL,
-    "addressLine2" TEXT,
-    "city" TEXT NOT NULL,
-    "state" TEXT NOT NULL,
-    "country" TEXT NOT NULL,
-    "postalCode" TEXT NOT NULL,
-    "latitude" DECIMAL(65,30),
-    "longitude" DECIMAL(65,30),
-    "geospatialData" JSONB,
-    "voided" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "PropertyLocation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -163,7 +153,16 @@ CREATE UNIQUE INDEX "Amenity_name_organizationId_key" ON "Amenity"("name", "orga
 CREATE UNIQUE INDEX "Category_name_organizationId_key" ON "Category"("name", "organizationId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "PropertyLocation_propertyId_key" ON "PropertyLocation"("propertyId");
+CREATE UNIQUE INDEX "PropertyAttribute_propertyId_attributeId_key" ON "PropertyAttribute"("propertyId", "attributeId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PropertyAmenity_propertyId_amenityId_key" ON "PropertyAmenity"("propertyId", "amenityId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PropertyCategory_propertyId_categoryId_key" ON "PropertyCategory"("propertyId", "categoryId");
+
+-- AddForeignKey
+ALTER TABLE "Relationship" ADD CONSTRAINT "Relationship_typeId_fkey" FOREIGN KEY ("typeId") REFERENCES "RelationshipType"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Relationship" ADD CONSTRAINT "Relationship_propertyAId_fkey" FOREIGN KEY ("propertyAId") REFERENCES "Property"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -172,25 +171,22 @@ ALTER TABLE "Relationship" ADD CONSTRAINT "Relationship_propertyAId_fkey" FOREIG
 ALTER TABLE "Relationship" ADD CONSTRAINT "Relationship_propertyBId_fkey" FOREIGN KEY ("propertyBId") REFERENCES "Property"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PropertyLocation" ADD CONSTRAINT "PropertyLocation_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "PropertyMedia" ADD CONSTRAINT "PropertyMedia_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PropertyMedia" ADD CONSTRAINT "PropertyMedia_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "PropertyAttribute" ADD CONSTRAINT "PropertyAttribute_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PropertyAttribute" ADD CONSTRAINT "PropertyAttribute_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "PropertyAttribute" ADD CONSTRAINT "PropertyAttribute_attributeId_fkey" FOREIGN KEY ("attributeId") REFERENCES "AttributeType"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PropertyAttribute" ADD CONSTRAINT "PropertyAttribute_attributeId_fkey" FOREIGN KEY ("attributeId") REFERENCES "AttributeType"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "PropertyAmenity" ADD CONSTRAINT "PropertyAmenity_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PropertyAmenity" ADD CONSTRAINT "PropertyAmenity_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "PropertyAmenity" ADD CONSTRAINT "PropertyAmenity_amenityId_fkey" FOREIGN KEY ("amenityId") REFERENCES "Amenity"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PropertyAmenity" ADD CONSTRAINT "PropertyAmenity_amenityId_fkey" FOREIGN KEY ("amenityId") REFERENCES "Amenity"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "PropertyCategory" ADD CONSTRAINT "PropertyCategory_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PropertyCategory" ADD CONSTRAINT "PropertyCategory_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "PropertyCategory" ADD CONSTRAINT "PropertyCategory_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "PropertyCategory" ADD CONSTRAINT "PropertyCategory_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE CASCADE ON UPDATE CASCADE;
