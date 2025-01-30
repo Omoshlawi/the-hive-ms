@@ -228,6 +228,7 @@ export const updateProperty = async (
           : {
               deleteMany: {
                 propertyId: req.params.propertyId,
+                categoryId: { notIn: validation.data.categories },
               },
               createMany: {
                 skipDuplicates: true,
@@ -241,6 +242,7 @@ export const updateProperty = async (
           : {
               deleteMany: {
                 propertyId: req.params.propertyId,
+                amenityId: { notIn: validation.data.amenities },
               },
               createMany: {
                 skipDuplicates: true,
@@ -254,6 +256,9 @@ export const updateProperty = async (
           : {
               deleteMany: {
                 propertyId: req.params.propertyId,
+                attributeId: {
+                  notIn: validation.data.attributes?.map((a) => a.attributeId),
+                },
               },
               createMany: {
                 skipDuplicates: true,
@@ -331,6 +336,7 @@ export const patchProperty = async (
           : {
               deleteMany: {
                 propertyId: req.params.propertyId,
+                categoryId: { notIn: validation.data.categories },
               },
               createMany: {
                 skipDuplicates: true,
@@ -344,6 +350,7 @@ export const patchProperty = async (
           : {
               deleteMany: {
                 propertyId: req.params.propertyId,
+                amenityId: { notIn: validation.data.amenities },
               },
               createMany: {
                 skipDuplicates: true,
@@ -357,6 +364,9 @@ export const patchProperty = async (
           : {
               deleteMany: {
                 propertyId: req.params.propertyId,
+                attributeId: {
+                  notIn: validation.data.attributes?.map((a) => a.attributeId),
+                },
               },
               createMany: {
                 skipDuplicates: true,

@@ -15,7 +15,13 @@ export const getPropertyAttributes = async (
   try {
     const results = await getCachedResource(req, () =>
       PropertyAttributesModel.findMany({
-        where: { voided: false, propertyId: req.params.propertyId },
+        where: {
+          voided: false,
+          propertyId: req.params.propertyId,
+          property: {
+            organizationId: req.context?.organizationId ?? undefined,
+          },
+        },
         ...getMultipleOperationCustomRepresentationQeury(
           req.query?.v as string
         ),
@@ -39,6 +45,9 @@ export const getPropertyAttribute = async (
           id: req.params.propertyAttributeId,
           voided: false,
           propertyId: req.params.propertyId,
+          property: {
+            organizationId: req.context?.organizationId ?? undefined,
+          },
         },
         ...getMultipleOperationCustomRepresentationQeury(
           req.query?.v as string
