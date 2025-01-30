@@ -15,7 +15,7 @@ export const getPropertyAttributes = async (
   try {
     const results = await getCachedResource(req, () =>
       PropertyAttributesModel.findMany({
-        where: { voided: false },
+        where: { voided: false, propertyId: req.params.propertyId },
         ...getMultipleOperationCustomRepresentationQeury(
           req.query?.v as string
         ),
@@ -35,7 +35,11 @@ export const getPropertyAttribute = async (
   try {
     const item = await getCachedResource(req, () =>
       PropertyAttributesModel.findUniqueOrThrow({
-        where: { id: req.params.propertyAttributeId, voided: false },
+        where: {
+          id: req.params.propertyAttributeId,
+          voided: false,
+          propertyId: req.params.propertyId,
+        },
         ...getMultipleOperationCustomRepresentationQeury(
           req.query?.v as string
         ),
@@ -57,7 +61,7 @@ export const addPropertyAttribute = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await PropertyAttributesModel.create({
-      data: validation.data,
+      data: { ...validation.data, propertyId: req.params.propertyId },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     invalidateCachedResource(req, () => req.baseUrl);
@@ -78,7 +82,11 @@ export const updatePropertyAttribute = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await PropertyAttributesModel.update({
-      where: { id: req.params.propertyAttributeId, voided: false },
+      where: {
+        id: req.params.propertyAttributeId,
+        voided: false,
+        propertyId: req.params.propertyId,
+      },
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -102,7 +110,11 @@ export const patchPropertyAttribute = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await PropertyAttributesModel.update({
-      where: { id: req.params.propertyAttributeId, voided: false },
+      where: {
+        id: req.params.propertyAttributeId,
+        voided: false,
+        propertyId: req.params.propertyId,
+      },
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -121,7 +133,11 @@ export const deletePropertyAttribute = async (
 ) => {
   try {
     const item = await PropertyAttributesModel.update({
-      where: { id: req.params.propertyAttributeId, voided: false },
+      where: {
+        id: req.params.propertyAttributeId,
+        voided: false,
+        propertyId: req.params.propertyId,
+      },
       data: {
         voided: true,
       },
@@ -141,7 +157,11 @@ export const purgePropertyAttribute = async (
 ) => {
   try {
     const item = await PropertyAttributesModel.delete({
-      where: { id: req.params.propertyAttributeId, voided: false },
+      where: {
+        id: req.params.propertyAttributeId,
+        voided: false,
+        propertyId: req.params.propertyId,
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     invalidateCachedResource(req, () => req.baseUrl);

@@ -120,7 +120,6 @@ export const PropertyCategorySchema = z.object({
 
 // Property attribute
 export const PropertyAttributeSchema = z.object({
-  propertyId: z.string().uuid(),
   attributeId: z.string().uuid(),
   value: z.string().min(1, "Required"),
 });

@@ -15,6 +15,7 @@ import {
   validateUUIDPathParam,
 } from "@hive/shared-middlewares";
 import mediaRouter from "./property-media";
+import attributesRouter from "./property-attributes";
 
 const router = Router({ mergeParams: true });
 router.get("/", [optionalContext], getProperties);
@@ -65,6 +66,11 @@ router.use(
   "/:propertyId/media",
   [validateUUIDPathParam("propertyId"), optionalContext],
   mediaRouter
+);
+router.use(
+  "/:propertyId/attributes",
+  [validateUUIDPathParam("propertyId"), optionalContext],
+  attributesRouter
 );
 
 export default router;
