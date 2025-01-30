@@ -14,6 +14,7 @@ import {
   requireOrganizationContext,
   validateUUIDPathParam,
 } from "@hive/shared-middlewares";
+import mediaRouter from "./property-media";
 
 const router = Router({ mergeParams: true });
 router.get("/", [optionalContext], getProperties);
@@ -58,6 +59,12 @@ router.purge(
     requireOrganizationContext,
   ],
   purgeProperty
+);
+
+router.use(
+  "/:propertyId/media",
+  [validateUUIDPathParam("propertyId"), optionalContext],
+  mediaRouter
 );
 
 export default router;

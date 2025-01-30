@@ -16,9 +16,6 @@ router.use("/amenities", [requireContext], amenitiesRouter);
 router.use("/attribute-types", [requireContext], attributeTypesRouter);
 router.use("/relationship-types", [requireContext], relationshipTypeRouter);
 router.use("/categories", [requireContext], categoriesRouter);
-router.use(
-  "/properties",
-  propertiesRouter
-);
+router.use("/properties", propertiesRouter);
 
 export default router;

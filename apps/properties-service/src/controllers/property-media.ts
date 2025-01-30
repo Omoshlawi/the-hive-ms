@@ -15,7 +15,7 @@ export const getPropertiesMedias = async (
   try {
     const results = await getCachedResource(req, () =>
       PropertyMediaModel.findMany({
-        where: { voided: false },
+        where: { voided: false, propertyId: req.params.propertyId },
         ...getMultipleOperationCustomRepresentationQeury(
           req.query?.v as string
         ),
@@ -35,7 +35,11 @@ export const getPropertiesMedia = async (
   try {
     const item = await getCachedResource(req, () =>
       PropertyMediaModel.findUniqueOrThrow({
-        where: { id: req.params.propertyMediaId, voided: false },
+        where: {
+          id: req.params.propertyMediaId,
+          voided: false,
+          propertyId: req.params.propertyId,
+        },
         ...getMultipleOperationCustomRepresentationQeury(
           req.query?.v as string
         ),
@@ -57,7 +61,7 @@ export const addPropertiesMedia = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await PropertyMediaModel.create({
-      data: validation.data,
+      data: { ...validation.data, propertyId: req.params.propertyId },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     invalidateCachedResource(req, () => req.baseUrl);
@@ -78,7 +82,11 @@ export const updatePropertiesMedia = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await PropertyMediaModel.update({
-      where: { id: req.params.propertyMediaId, voided: false },
+      where: {
+        id: req.params.propertyMediaId,
+        voided: false,
+        propertyId: req.params.propertyId,
+      },
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -102,7 +110,11 @@ export const patchPropertiesMedia = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await PropertyMediaModel.update({
-      where: { id: req.params.propertyMediaId, voided: false },
+      where: {
+        id: req.params.propertyMediaId,
+        voided: false,
+        propertyId: req.params.propertyId,
+      },
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -121,7 +133,11 @@ export const deletePropertiesMedia = async (
 ) => {
   try {
     const item = await PropertyMediaModel.update({
-      where: { id: req.params.propertyMediaId, voided: false },
+      where: {
+        id: req.params.propertyMediaId,
+        voided: false,
+        propertyId: req.params.propertyId,
+      },
       data: {
         voided: true,
       },
@@ -142,7 +158,11 @@ export const purgePropertiesMedia = async (
 ) => {
   try {
     const item = await PropertyMediaModel.delete({
-      where: { id: req.params.propertyMediaId, voided: false },
+      where: {
+        id: req.params.propertyMediaId,
+        voided: false,
+        propertyId: req.params.propertyId,
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     invalidateCachedResource(req, () => req.baseUrl);
