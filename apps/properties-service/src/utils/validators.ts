@@ -100,6 +100,16 @@ export const RelationshipSchema = z.object({
   typeId: z.string().uuid(),
 });
 
+// Relationship filters
+export const RelationshipFilterSchema = z.object({
+  propertyAId: z.string().uuid().optional(),
+  propertyBId: z.string().uuid().optional(),
+  propertyId: z.string().uuid().optional(),
+  typeId: z.string().uuid().optional(),
+  startDate: z.date({ coerce: true }).optional(),
+  endDate: z.date({ coerce: true }).optional(),
+});
+
 // Attribute types
 export const AttributeTypeSchema = z.object({
   name: z.string().min(1, "Required"),

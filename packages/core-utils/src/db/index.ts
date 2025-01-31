@@ -39,12 +39,18 @@ export const handlePrismaErrors: (e: any) =>
         return { status: 404, errors: { detail: e.meta!.cause as string } };
       return { status: 404, errors: { detail: e.message } };
     } else if (e.code === ERROR_CODES.UNIQUE_CONTRAINT_FAILED) {
-      const taget = (e.meta as any).target as string | string[];
+      const taget = (e.meta as any).target as string[];
 
-      const fieldName = typeof taget === "string" ? taget?.split("_").slice(1, -1).join("_"): taget[0];
+      const errors = taget.reduce(
+        (prev, field) => ({
+          ...prev,
+          [field]: { _errors: ["Must be unique"] },
+        }),
+        {}
+      );
       return {
         status: 400,
-        errors: { [fieldName]: { _errors: ["Must be unique"] } },
+        errors,
       };
     }
   }

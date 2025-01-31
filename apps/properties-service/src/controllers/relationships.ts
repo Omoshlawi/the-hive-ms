@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { RelationshipsModel } from "../models";
-import { RelationshipSchema } from "@/utils/validators";
+import {
+  RelationshipFilterSchema,
+  RelationshipSchema,
+} from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
@@ -13,9 +16,37 @@ export const getRelationships = async (
   next: NextFunction
 ) => {
   try {
+    const validation = await RelationshipFilterSchema.safeParseAsync(req.query);
+    if (!validation.success)
+      throw new APIException(400, validation.error.format());
+    const { endDate, propertyAId, propertyBId, propertyId, startDate, typeId } =
+      validation.data;
     const results = await getCachedResource(req, () =>
       RelationshipsModel.findMany({
-        where: { voided: false },
+        where: {
+          AND: [
+            {
+              voided: false,
+              // organizationId: req.context?.organizationId ?? undefined,
+              startDate,
+              endDate,
+              propertyAId: propertyAId,
+              propertyBId: propertyBId,
+              typeId,
+            },
+            {
+              OR: propertyId
+                ? [{ propertyAId: propertyId, propertyBId: propertyId }]
+                : undefined,
+            },
+
+            // {
+            //   OR: search
+            //     ? [{ name: { contains: search, mode: "insensitive" } }]
+            //     : undefined,
+            // },
+          ],
+        },
         ...getMultipleOperationCustomRepresentationQeury(
           req.query?.v as string
         ),
