@@ -5,6 +5,7 @@ import { default as relationshipTypeRouter } from "./relationship-types";
 import { default as categoriesRouter } from "./categories";
 import { default as propertiesRouter } from "./properties";
 import { getDatabaseSchemas } from "@/controllers/db-schema";
+import relationshipRouter from "./relationships";
 import {
   requireContext,
   requireOrganizationContext,
@@ -17,5 +18,6 @@ router.use("/attribute-types", [requireContext], attributeTypesRouter);
 router.use("/relationship-types", [requireContext], relationshipTypeRouter);
 router.use("/categories", [requireContext], categoriesRouter);
 router.use("/properties", propertiesRouter);
+router.use("/relationships", relationshipRouter);
 
 export default router;

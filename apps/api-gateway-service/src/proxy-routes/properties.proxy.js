@@ -35,6 +35,14 @@ module.exports = [
 
   },
   {
+    path: "/relationships",
+    prefix: "/relationships",
+    serviceVersion,
+    serviceName,
+    authenticate:true
+
+  },
+  {
     path: "/amenities",
     prefix: "/amenities",
     serviceVersion,
@@ -48,6 +56,5 @@ module.exports = [
     serviceVersion,
     serviceName,
     authenticate:true
-
   },
 ]

@@ -80,12 +80,14 @@ model Property {
 model RelationshipType {
   id            String         @id @default(uuid()) @db.Uuid
   description   String?        @db.Text
-  aIsToB        String // e.g., "is parent of", "contains", "has parking"
-  bIsToA        String // e.g., "is child of", "is part of", "belongs to parking"
+  aIsToB        String         @unique // e.g., "is parent of", "contains", "has parking"
+  bIsToA        String         @unique // e.g., "is child of", "is part of", "belongs to parking"
   voided        Boolean        @default(false)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   relationships Relationship[]
+
+  @@unique([aIsToB, bIsToA])
 }
 
 model Relationship {
@@ -104,6 +106,8 @@ model Relationship {
   voided    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([propertyAId, propertyBId, typeId])
 }
 
 model PropertyMedia {
