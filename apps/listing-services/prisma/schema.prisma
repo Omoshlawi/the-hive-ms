@@ -79,7 +79,7 @@ model Listing {
 }
 
 model SaleListing {
-  id        String  @id @db.Uuid
+  id        String  @id @default(uuid()) @db.Uuid
   listingId String  @unique @db.Uuid
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
@@ -98,7 +98,7 @@ model SaleListing {
 }
 
 model RentalListing {
-  id        String  @id @db.Uuid
+  id        String  @id @default(uuid()) @db.Uuid
   listingId String  @unique @db.Uuid
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
@@ -119,7 +119,7 @@ model RentalListing {
 }
 
 model LeaseListing {
-  id        String  @id @db.Uuid
+  id        String  @id @default(uuid()) @db.Uuid
   listingId String  @unique @db.Uuid
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
@@ -140,7 +140,7 @@ model LeaseListing {
 }
 
 model AuctionListing {
-  id        String  @id @db.Uuid
+  id        String  @id @default(uuid()) @db.Uuid
   listingId String  @unique @db.Uuid
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
@@ -159,7 +159,7 @@ model AuctionListing {
 
 // TODO Analyse bellow field models
 model RentToOwnListing {
-  id        String  @id @db.Uuid
+  id        String  @id @default(uuid()) @db.Uuid
   listingId String  @unique @db.Uuid
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
@@ -185,7 +185,7 @@ model RentToOwnListing {
 
 // serviced listing (applies for AIRBNP and alike)
 model ShortTermListing {
-  id        String  @id @db.Uuid
+  id        String  @id @default(uuid()) @db.Uuid
   listingId String  @unique @db.Uuid
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
@@ -220,7 +220,7 @@ model ShortTermListing {
 }
 
 model CoLivingListing {
-  id        String @id @db.Uuid
+  id        String @id @default(uuid()) @db.Uuid
   listingId String @unique @db.Uuid
 
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)

@@ -1,30 +1,4 @@
-import { optional, z } from "zod";
-
-export const ListingSchema = z.object({
-  propertyId: z.string().uuid(),
-  organizationId: z.string().uuid(),
-  tags: z.string().min(1, "Required").array().optional(),
-  status: z
-    .enum([
-      "DRAFT",
-      "ACTIVE",
-      "UNDER_CONTRACT",
-      "SOLD",
-      "LEASED",
-      "RENTED",
-      "WITHDRAWN",
-      "EXPIRED",
-    ])
-    .optional(),
-  title: z.string().min(4),
-  description: z.string().optional(),
-  price: z.number({ coerce: true }).nonnegative(),
-  currency: z.string().optional(),
-  listedDate: z.date({ coerce: true }).optional(),
-  expiryDate: z.date({ coerce: true }).optional(),
-  featured: z.boolean().optional(),
-  contactPersonId: z.string().uuid(),
-});
+import { z } from "zod";
 
 export const ListingMediaSchema = z.object({
   //   listingId: z.string().uuid(),
@@ -91,6 +65,35 @@ export const AuctionListingSchema = z.object({
   auctionEnd: z.date({ coerce: true }),
   requirePreRegistration: z.boolean().optional(),
   requireBidderApproval: z.boolean().optional(),
+});
+export const ListingSchema = z.object({
+  propertyId: z.string().uuid(),
+  organizationId: z.string().uuid(),
+  tags: z.string().min(1, "Required").array().optional(),
+  status: z
+    .enum([
+      "DRAFT",
+      "ACTIVE",
+      "UNDER_CONTRACT",
+      "SOLD",
+      "LEASED",
+      "RENTED",
+      "WITHDRAWN",
+      "EXPIRED",
+    ])
+    .optional(),
+  title: z.string().min(4),
+  description: z.string().optional(),
+  price: z.number({ coerce: true }).nonnegative(),
+  currency: z.string().optional(),
+  listedDate: z.date({ coerce: true }).optional(),
+  expiryDate: z.date({ coerce: true }).optional(),
+  featured: z.boolean().optional(),
+  contactPersonId: z.string().uuid(),
+  saleDetails: SaleListingSchema,
+  rentalDetails: RentalListingSchema,
+  leaseDetails: LeaseListingSchema,
+  auctionDetails: AuctionListingSchema,
 });
 
 // TODO  cKEAN FIELDS AFTER MODEL ANALYSIS
