@@ -51,7 +51,6 @@ export const addListing = async (
     const validation = await ListingSchema.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    console.log(req.context?.organization);
     const allUnprovided = [
       "saleDetails",
       "rentalDetails",
@@ -78,7 +77,7 @@ export const addListing = async (
 
     if (!property)
       throw new APIException(400, {
-        propertyId: { _errors: ["Invalid propery"] },
+        propertyId: { _errors: ["Invalid property"] },
       });
 
     const item = await ListingModel.create({
@@ -115,7 +114,9 @@ export const updateListing = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await ListingSchema.safeParseAsync(req.body);
+    const validation = await ListingSchema.omit({
+      propertyId: true,
+    }).safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
 
@@ -129,23 +130,6 @@ export const updateListing = async (
     if (allUnprovided.every((field) => !(validation.data as any)[field]))
       throw new APIException(400, {
         _errors: ["You must provide atleast " + allUnprovided.join(", ")],
-      });
-
-    const property = await nullifyExceptionAsync(
-      async () =>
-        await serviceClient.callService<Property>("@hive/properties-service", {
-          method: "GET",
-          url: `/properties/${validation.data.propertyId}`,
-          params: {
-            v: "custom:include(membershipRoles)",
-          },
-          headers: sanitizeHeaders(req),
-        })
-    )();
-
-    if (!property)
-      throw new APIException(400, {
-        propertyId: { _errors: ["Invalid propery"] },
       });
 
     const item = await ListingModel.update({
@@ -189,7 +173,6 @@ export const updateListing = async (
             }
           : undefined,
         createdBy: req.context!.userId,
-        property: property as any,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -205,7 +188,9 @@ export const patchListing = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await ListingSchema.partial().safeParseAsync(req.body);
+    const validation = await ListingSchema.omit({ propertyId: true })
+      .partial()
+      .safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await ListingModel.update({

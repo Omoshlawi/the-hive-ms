@@ -22,7 +22,7 @@ const router = Router({ mergeParams: true });
 router.get("/", [optionalContext], getProperties);
 router.post(
   "/",
-  [requireContext, requireOrganizationContext(serviceClient)],
+  [requireContext, requireOrganizationContext(serviceClient, true)],
   addProperty
 );
 router.get(

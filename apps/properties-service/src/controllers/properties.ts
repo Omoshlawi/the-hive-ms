@@ -85,7 +85,7 @@ export const addProperty = async (
       throw new APIException(400, validation.error.format());
     const { attributes, amenities, categories, media, ...propertyAttributes } =
       validation.data;
-    const getAddress = nullifyExceptionAsync(
+    const address = await nullifyExceptionAsync(
       async () => {
         const address = await serviceClient.callService<Address>(
           "@hive/suggestion-service",
@@ -112,22 +112,7 @@ export const addProperty = async (
           throw err;
         }
       }
-    );
-    // Get addresses
-    const address = await getAddress();
-    // get user organization membership
-    const organizationMemberships = await serviceClient.callService<{
-      results: OrganizationMembership[];
-    }>("@hive/policy-engine-service", {
-      method: "GET",
-      url: `/organization-membership`,
-      params: {
-        v: "custom:select(id,organizationId,organization:select(id,name,description))",
-        memberUserId: req.context!.userId!,
-        organizationId: req.context!.organizationId!,
-      },
-      headers: sanitizeHeaders(req),
-    });
+    )();
 
     const item = await PropertiesModel.create({
       data: {
@@ -154,7 +139,7 @@ export const addProperty = async (
           },
         },
         organizationId: req.context!.organizationId!,
-        organization: organizationMemberships.results[0].organization,
+        organization: req.context!.organization,
         address: address as any,
         createdBy: req.context!.userId!,
       },
@@ -180,7 +165,7 @@ export const updateProperty = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
 
-    const getAddress = nullifyExceptionAsync(
+    const address = await nullifyExceptionAsync(
       async () => {
         const address = await serviceClient.callService<Address>(
           "@hive/suggestion-service",
@@ -207,10 +192,8 @@ export const updateProperty = async (
           throw err;
         }
       }
-    );
+    )();
     // Get addresses
-    const address = await getAddress();
-    // get user organization membership
 
     const item = await PropertiesModel.update({
       where: { id: req.params.propertyId, voided: false },
@@ -284,9 +267,9 @@ export const patchProperty = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
 
-    let address;
+    let address: Address | null | undefined;
     if (validation.data.addressId) {
-      const getAddress = nullifyExceptionAsync(
+      address = await nullifyExceptionAsync(
         async () => {
           const address = await serviceClient.callService<Address>(
             "@hive/suggestion-service",
@@ -313,10 +296,7 @@ export const patchProperty = async (
             throw err;
           }
         }
-      );
-      // Get addresses
-      address = await getAddress();
-      // get user organization membership
+      )();
     }
 
     const item = await PropertiesModel.update({
