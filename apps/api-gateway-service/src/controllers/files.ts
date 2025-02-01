@@ -1,5 +1,6 @@
-import { registryAddress, sanitizeHeaders, serviceIdentity } from "@/utils";
-import { APIException, ServiceClient } from "@hive/core-utils";
+import serviceClient from "@/services/service-client";
+import { sanitizeHeaders } from "@/utils";
+import { APIException } from "@hive/core-utils";
 import {
   MemoryMulterFile,
   memoryMulterFileToJSFile,
@@ -34,7 +35,6 @@ export const uploadFile = async (
     };
     const formData = objectToFormData(data);
 
-    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
     const response = await serviceClient.callServiceWithResponse(
       "@hive/files-service",
       {
@@ -56,7 +56,6 @@ export const streamFile = async (
   next: NextFunction
 ) => {
   try {
-    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
     const fileStream = await serviceClient.callService<any>(
       "@hive/files-service",
       {

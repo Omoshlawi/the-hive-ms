@@ -1,17 +1,18 @@
 import { AccountModel, UsersModel } from "@/models";
 import { Login, Register } from "@/schema";
+import serviceClient from "@/services/service-client";
 import { TokenPayload } from "@/types";
-import { configuration, registryAddress, serviceIdentity } from "@/utils";
+import { configuration } from "@/utils";
 import {
   checkPassword,
   generateUserToken,
   hashPassword,
 } from "@/utils/helpers";
-import { APIException, ServiceClient } from "@hive/core-utils";
-import { JsonWebTokenError, TokenExpiredError, verify } from "jsonwebtoken";
-import { NextFunction, Request, Response } from "express";
-import isEmpty from "lodash/isEmpty";
+import { APIException } from "@hive/core-utils";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
+import { NextFunction, Request, Response } from "express";
+import { JsonWebTokenError, TokenExpiredError, verify } from "jsonwebtoken";
+import isEmpty from "lodash/isEmpty";
 
 export const registerUser = async (
   req: Request,
@@ -158,7 +159,6 @@ export const refreshToken = async (
       });
     // Assertain user membership to organization and roles on the membership
     if (organizationId) {
-      const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
       const response = await serviceClient.callService<{
         results: Array<{ membershipRoles: Array<any>; isAdmin: boolean }>;
       }>("@hive/policy-engine-service", {
@@ -220,7 +220,6 @@ export const changeOrganizationContext = async (
     let roles: string[] | string | undefined;
     const user = req.user!;
     // Assertain user membership to organization and roles on the membership
-    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
     const response = await serviceClient.callService<{
       results: Array<{ membershipRoles: Array<any>; isAdmin: boolean }>;
     }>("@hive/policy-engine-service", {

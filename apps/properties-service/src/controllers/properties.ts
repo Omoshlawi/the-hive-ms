@@ -1,21 +1,16 @@
-import { NextFunction, Request, Response } from "express";
-import { PropertiesModel } from "../models";
+import serviceClient from "@/services/service-client";
+import { Address, OrganizationMembership } from "@/types";
+import { getCachedResource, invalidateCachedResource } from "@/utils";
 import { PropertyfiltersSchema, PropertySchema } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
   nullifyExceptionAsync,
-  ServiceClient,
 } from "@hive/core-utils";
-import {
-  getCachedResource,
-  invalidateCachedResource,
-  registryAddress,
-  serviceIdentity,
-} from "@/utils";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
-import { Address, OrganizationMembership } from "@/types";
+import { NextFunction, Request, Response } from "express";
 import isEmpty from "lodash/isEmpty";
+import { PropertiesModel } from "../models";
 
 export const getProperties = async (
   req: Request,
@@ -90,7 +85,6 @@ export const addProperty = async (
       throw new APIException(400, validation.error.format());
     const { attributes, amenities, categories, media, ...propertyAttributes } =
       validation.data;
-    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
     const getAddress = nullifyExceptionAsync(
       async () => {
         const address = await serviceClient.callService<Address>(
@@ -186,7 +180,6 @@ export const updateProperty = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
 
-    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
     const getAddress = nullifyExceptionAsync(
       async () => {
         const address = await serviceClient.callService<Address>(
@@ -293,7 +286,6 @@ export const patchProperty = async (
 
     let address;
     if (validation.data.addressId) {
-      const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
       const getAddress = nullifyExceptionAsync(
         async () => {
           const address = await serviceClient.callService<Address>(

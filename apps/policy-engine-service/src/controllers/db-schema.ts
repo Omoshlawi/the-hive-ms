@@ -1,14 +1,13 @@
-import { NextFunction, Request, Response } from "express";
+import { ResourcesModel } from "@/models";
 import db, { getTableFields } from "@/services/db";
+import serviceClient from "@/services/service-client";
+import { ServiceSchema } from "@/utils/validators";
 import {
   APIException,
-  ResourcesSchemas,
-  ServiceClient,
+  ResourcesSchemas
 } from "@hive/core-utils";
-import { registryAddress, serviceIdentity } from "@/utils";
-import { ServiceSchema } from "@/utils/validators";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
-import { ResourcesModel } from "@/models";
+import { NextFunction, Request, Response } from "express";
 
 export const getDatabaseSchemas = async (
   req: Request,
@@ -32,7 +31,6 @@ export const pullServiceDatabaseSchema = async (
     const validation = await ServiceSchema.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
     const { name, version } = validation.data;
     const schemas = await serviceClient.callService<ResourcesSchemas>(
       name,
@@ -60,7 +58,6 @@ export const sourceServiceDBSchemaToResource = async (
     const validation = await ServiceSchema.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
     const { name, version } = validation.data;
     const schemas = await serviceClient.callService<ResourcesSchemas>(
       name,

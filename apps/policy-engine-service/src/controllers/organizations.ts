@@ -1,13 +1,12 @@
+import serviceClient from "@/services/service-client";
 import { OrganizationSchema } from "@/utils/validators";
 import {
   APIException,
-  getMultipleOperationCustomRepresentationQeury,
-  ServiceClient,
+  getMultipleOperationCustomRepresentationQeury
 } from "@hive/core-utils";
+import { sanitizeHeaders } from "@hive/shared-middlewares";
 import { NextFunction, Request, Response } from "express";
 import { OrganizationsModel } from "../models";
-import { sanitizeHeaders } from "@hive/shared-middlewares";
-import { registryAddress, serviceIdentity } from "@/utils";
 
 export const getOrganizations = async (
   req: Request,
@@ -52,7 +51,6 @@ export const addOrganization = async (
       throw new APIException(400, validation.error.format());
 
     // Get user details from auth service
-    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
     const memberUser = await serviceClient.callService<{
       id: string;
       username: string;

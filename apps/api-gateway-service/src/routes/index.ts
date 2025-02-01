@@ -1,17 +1,15 @@
+import logger from "@/services/logger"; // Assume a centralized logging utility
+import serviceClient from "@/services/service-client";
+import { GatewayProxyRoute } from "@/types";
+import {
+  serviceRouterMiddleware
+} from "@/utils";
+import { requireAuthentication } from "@hive/shared-middlewares";
 import { RequestHandler, Router } from "express";
 import fs from "fs/promises";
 import path from "path";
-import {
-  registryAddress,
-  serviceIdentity,
-  serviceRouterMiddleware,
-} from "@/utils";
-import { GatewayProxyRoute } from "@/types";
 import mediaAddRouter from "./files";
 import registryRouter from "./registry";
-import logger from "@/services/logger"; // Assume a centralized logging utility
-import { requireAuthentication } from "@hive/shared-middlewares";
-import { ServiceClient } from "@hive/core-utils";
 
 class ProxyRouteLoader {
   private router: Router;
@@ -73,7 +71,6 @@ class ProxyRouteLoader {
       logger.warn(`Invalid route definition in file: ${fileName}`, { route });
       return;
     }
-    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
     this.router.use(
       route.path,
       [route.authenticate && requireAuthentication(serviceClient)].filter(

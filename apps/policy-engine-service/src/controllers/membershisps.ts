@@ -1,16 +1,15 @@
-import { NextFunction, Request, Response } from "express";
-import { OrganizationMembershipsModel, RolesModel } from "../models";
+import serviceClient from "@/services/service-client";
 import {
   OrganizationMembershipSchema,
   OrganizationMembershipsFilterSchema,
 } from "@/utils/validators";
 import {
   APIException,
-  getMultipleOperationCustomRepresentationQeury,
-  ServiceClient,
+  getMultipleOperationCustomRepresentationQeury
 } from "@hive/core-utils";
-import { registryAddress, serviceIdentity } from "@/utils";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
+import { NextFunction, Request, Response } from "express";
+import { OrganizationMembershipsModel, RolesModel } from "../models";
 
 export const getOrganizationMemberships = async (
   req: Request,
@@ -151,7 +150,6 @@ export const addOrganizationMembership = async (
       select: { id: true },
     });
 
-    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
 
     const memberUser = await serviceClient.callService<{
       id: string;

@@ -1,7 +1,8 @@
 import { UsersModel } from "@/models";
+import serviceClient from "@/services/service-client";
 import { TokenPayload } from "@/types";
-import { configuration, registryAddress, serviceIdentity } from "@/utils";
-import { APIException, ServiceClient } from "@hive/core-utils";
+import { configuration } from "@/utils";
+import { APIException } from "@hive/core-utils";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
 import { NextFunction, Request, Response } from "express";
 import { JsonWebTokenError, TokenExpiredError, verify } from "jsonwebtoken";
@@ -36,7 +37,6 @@ const authenticate = async (
       throw new APIException(401, { detail: "Unauthorized - Invalid Token" });
     // Assertain user membership to organization
     if (organizationId) {
-      const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
 
       const response = await serviceClient.callService<{ results: Array<any> }>(
         "@hive/policy-engine-service",

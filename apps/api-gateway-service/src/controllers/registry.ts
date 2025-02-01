@@ -1,5 +1,4 @@
-import { registryAddress, serviceIdentity } from "@/utils";
-import { ServiceClient } from "@hive/core-utils";
+import serviceClient from "@/services/service-client";
 import { NextFunction, Request, Response } from "express";
 
 export const getServices = async (
@@ -8,7 +7,6 @@ export const getServices = async (
   next: NextFunction
 ) => {
   try {
-    const serviceClient = new ServiceClient(registryAddress, serviceIdentity);
     const resp = await serviceClient.getServices();
     return res.json(resp);
   } catch (error) {

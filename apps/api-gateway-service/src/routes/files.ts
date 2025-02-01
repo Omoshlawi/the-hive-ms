@@ -1,6 +1,5 @@
-import { uploadFile, streamFile } from "@/controllers/files";
-import { registryAddress, serviceIdentity } from "@/utils";
-import { ServiceClient } from "@hive/core-utils";
+import { streamFile, uploadFile } from "@/controllers/files";
+import serviceClient from "@/services/service-client";
 import {
   memoryFileUploader,
   requireAuthentication,
@@ -10,10 +9,7 @@ import { Router } from "express";
 const router = Router();
 router.use(
   "/upload",
-  [
-    requireAuthentication(new ServiceClient(registryAddress, serviceIdentity)),
-    memoryFileUploader,
-  ],
+  [requireAuthentication(serviceClient), memoryFileUploader],
   uploadFile
 );
 router.use("/stream", streamFile);
