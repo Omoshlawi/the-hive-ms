@@ -1,0 +1,11 @@
+{
+  "name": "The hive listing service",
+  "port": null,
+  "db": "",
+  "jwt": "JWT_TOKEN",
+  "redis_db": "",
+  "registry": {
+    "url": "http://localhost:9000",
+    "version": "*"
+  }
+}
