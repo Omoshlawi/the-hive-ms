@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { date, z } from "zod";
 
 export const ListingMediaSchema = z.object({
   //   listingId: z.string().uuid(),
@@ -93,6 +93,84 @@ export const ListingSchema = z.object({
   rentalDetails: RentalListingSchema.optional(),
   leaseDetails: LeaseListingSchema.optional(),
   auctionDetails: AuctionListingSchema.optional(),
+});
+export const ListingFilterSchema = z.object({
+  search: z.string().optional(),
+  tags: z
+    .string()
+    .optional()
+    .transform((a) =>
+      a
+        ?.split(",")
+        ?.map((a) => a.trim())
+        ?.filter(Boolean)
+        ?.join(",")
+    ),
+  status: z
+    .enum([
+      "DRAFT",
+      "ACTIVE",
+      "UNDER_CONTRACT",
+      "SOLD",
+      "LEASED",
+      "RENTED",
+      "WITHDRAWN",
+      "EXPIRED",
+    ])
+    .optional(),
+  minPrice: z.number({ coerce: true }).nonnegative().optional(),
+  maxPrice: z.number({ coerce: true }).nonnegative().optional(),
+  listedDateStart: z.date({ coerce: true }).optional(),
+  listedDateEnd: z.date({ coerce: true }).optional(),
+  expiryDateStart: z.date({ coerce: true }).optional(),
+  expiryDateEnd: z.date({ coerce: true }).optional(),
+  types: z
+    .string()
+    .optional()
+    .refine((data) => {
+      if (!data) return true;
+      if (
+        data
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .every((d) => ["sale", "rental", "lease", "auction"].includes(d))
+      ) {
+        return true;
+      }
+      return false;
+    })
+    .transform((a) =>
+      a
+        ?.split(",")
+        ?.map((a) => a.trim())
+        ?.filter(Boolean)
+        ?.join(",")
+    ),
+  amenities: z
+    .string()
+    .optional()
+    .transform((a) =>
+      a
+        ?.split(",")
+        ?.map((a) => a.trim())
+        ?.filter(Boolean)
+        ?.join(",")
+    ),
+  categories: z
+    .string()
+    .optional()
+    .transform((a) =>
+      a
+        ?.split(",")
+        ?.map((a) => a.trim())
+        ?.filter(Boolean)
+        ?.join(",")
+    ),
+  attributes: z
+    .string()
+    .regex(/^\s*([^:]+:[^,]+)(,\s*[^:]+:[^,]+)*\s*$/)
+    .optional(),
 });
 
 // TODO  cKEAN FIELDS AFTER MODEL ANALYSIS

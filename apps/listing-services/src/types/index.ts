@@ -1,22 +1,12 @@
 export interface Property {
   id: string;
   name: string;
-  description: any;
   thumbnail: string;
-  organizationId: string;
-  organization?: Organization;
+  address: Address;
   addressId: string;
-  address?: Address;
-  createdBy: string;
-  voided: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Organization {
-  id: string;
-  name: string;
-  description: string;
+  categories: Array<{ category: Category }>;
+  amenities: Array<{ amenity: Amenity }>;
+  attributes: Array<Attribute>;
 }
 
 export interface Address {
@@ -24,12 +14,34 @@ export interface Address {
   name: string;
   ward: string;
   county: string;
-  village?: string;
+  village: any;
   landmark: string;
-  latitude?: string;
-  metadata?: Record<string, any>;
-  longitude?: string;
+  latitude: any;
+  metadata: any;
+  longitude: any;
   subCounty: string;
   postalCode: string;
   description: string;
 }
+
+export interface Category {
+  id: string;
+  name: string;
+}
+
+export interface Amenity {
+  id: string;
+  name: string;
+}
+
+export interface Attribute {
+  value: string;
+  attribute: AttributeType;
+}
+
+export interface AttributeType {
+  id: string;
+  name: string;
+}
+
+export type ListingType = "sale" | "rental" | "lease" | "auction";

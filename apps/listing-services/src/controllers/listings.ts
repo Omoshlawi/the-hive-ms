@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { ListingModel } from "../models";
-import { ListingSchema } from "@/utils/validators";
+import { ListingFilterSchema, ListingSchema } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
@@ -8,7 +8,9 @@ import {
 } from "@hive/core-utils";
 import serviceClient from "@/services/service-client";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
-import { Property } from "@/types";
+import { ListingType, Property } from "@/types";
+import logger from "@/services/logger";
+import pick from "lodash/pick";
 
 export const getListings = async (
   req: Request,
@@ -16,8 +18,100 @@ export const getListings = async (
   next: NextFunction
 ) => {
   try {
+    const validation = await ListingFilterSchema.safeParseAsync(req.query);
+    if (!validation.success)
+      throw new APIException(400, validation.error.format());
+    const {
+      expiryDateEnd,
+      expiryDateStart,
+      listedDateEnd,
+      listedDateStart,
+      maxPrice,
+      minPrice,
+      search,
+      status,
+      tags,
+      types,
+      amenities,
+      categories,
+      attributes,
+    } = validation.data;
+    const listingTypes = (types?.split(",") ?? []) as ListingType[];
     const results = await ListingModel.findMany({
-      where: { voided: false },
+      where: {
+        AND: [
+          {
+            voided: false,
+            organizationId: req.context?.organizationId ?? undefined,
+            tags: tags
+              ? {
+                  hasSome: tags.split(","),
+                }
+              : undefined,
+            price: { gte: minPrice, lte: maxPrice },
+            expiryDate: {
+              gte: expiryDateStart,
+              lte: expiryDateEnd,
+            },
+            listedDate: {
+              gte: listedDateStart,
+              lte: listedDateEnd,
+            },
+            status,
+            rentalDetails: listingTypes.includes("rental")
+              ? { isNot: null }
+              : undefined,
+            leaseDetails: listingTypes.includes("lease")
+              ? { isNot: null }
+              : undefined,
+            auctionDetails: listingTypes.includes("auction")
+              ? { isNot: null }
+              : undefined,
+            saleDetails: listingTypes.includes("sale")
+              ? { isNot: null }
+              : undefined,
+            metadata: amenities
+              ? {
+                  path: ["amenities"],
+                  array_contains: amenities?.split(","),
+                }
+              : undefined,
+          },
+          ...(attributes?.split(",")?.map((v) => {
+            const [key, val] = v.split(":");
+            return {
+              metadata: {
+                path: ["attributes", key.trim()],
+                equals: val.trim(),
+              },
+            };
+          }) ?? []),
+          {
+            metadata: categories
+              ? {
+                  path: ["categories"],
+                  array_contains: categories?.split(","),
+                }
+              : undefined,
+          },
+
+          {
+            OR: search
+              ? [
+                  { title: { contains: search, mode: "insensitive" } },
+                  { description: { contains: search, mode: "insensitive" } },
+                  { property: { path: ["name"], string_contains: search } },
+                  {
+                    property: {
+                      path: ["description"],
+                      string_contains: search,
+                    },
+                  },
+                ]
+              : undefined,
+          },
+        ],
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json({ results });
@@ -68,11 +162,16 @@ export const addListing = async (
         await serviceClient.callService<Property>("@hive/properties-service", {
           method: "GET",
           url: `/properties/${validation.data.propertyId}`,
-          params: {
-            v: "custom:include(membershipRoles)",
-          },
           headers: sanitizeHeaders(req),
-        })
+          params: {
+            v: "custom:select(id,name,thumbnail,address,addressId,categories:select(category:select(id,name)),amenities:select(amenity:select(id,name)),attributes:select(value,attribute:select(id,name)))",
+          },
+        }),
+      (err) =>
+        logger.error(
+          "[Add listing]: Err fetching propertyy from @hive/properties-service: " +
+            JSON.stringify(err)
+        )
     )();
 
     if (!property)
@@ -97,8 +196,32 @@ export const addListing = async (
         },
         createdBy: req.context!.userId,
         organizationId: req.context!.organizationId!,
-        property: property as any,
+        property: pick(property, [
+          "id",
+          "name",
+          "thumbnail",
+          "addrressId",
+          "address",
+        ]) as any,
         organization: req.context?.organization,
+        metadata: {
+          amenities: property.amenities.reduce<Array<string>>(
+            (acc, cur) => [...acc, cur.amenity.name, cur.amenity.id],
+            []
+          ),
+          categories: property.categories.reduce<Array<string>>(
+            (acc, cur) => [...acc, cur.category.name, cur.category.id],
+            []
+          ),
+          attributes: property.attributes.reduce(
+            (acc, curr) => ({
+              ...acc,
+              [curr.attribute.id]: curr.value,
+              [curr.attribute.name]: curr.value,
+            }),
+            {}
+          ),
+        },
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });

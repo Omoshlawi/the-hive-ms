@@ -1,5 +1,6 @@
 // TODO Uncoment to unlock redist caching capabilities
 
+import { Property } from "@/types";
 import { generateDefaultKey } from "@hive/core-utils";
 
 // import logger from "@/services/logger";
@@ -61,3 +62,9 @@ import { generateDefaultKey } from "@hive/core-utils";
 //     batchSize: 500,
 //   });
 // };
+
+
+export const extractPropertyMetadata = (property:Property)=>{
+
+}
+
