@@ -8,19 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum ListingType {
-  SALE
-  RENT
-  LEASE
-  AUCTION
-  HOLIDAY_RENTAL
-  COMMERCIAL_LEASE
-  TIME_SHARE
-  SHORT_TERM_STAY
-  RENT_TO_OWN
-  CO_LIVING
-}
-
 enum ListingStatus {
   DRAFT
   ACTIVE
@@ -32,29 +19,16 @@ enum ListingStatus {
   EXPIRED
 }
 
-enum ListingMediaType {
-  IMAGE
-  VIDEO
-  DOCUMENT
-  VIRTUAL_TOUR
-  FLOOR_PLAN
-  TERMS_AND_CONDITIONS
-  AGREEMENT
-  POLICY
-  OTHER
-}
-
 model ListingMedia {
-  id        String  @id @default(uuid()) @db.Uuid
-  listingId String  @db.Uuid
-  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
-
-  type        ListingMediaType
+  id          String   @id @default(uuid()) @db.Uuid
+  listingId   String   @db.Uuid
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  tags        String[] @default([]) // Key words for SEO
   title       String
-  description String?          @db.Text
+  description String?  @db.Text
   url         String // URL to stored media
-  metadata    Json? // Flexible metadata storage for file info, version, language, etc.
-  order       Int              @default(0)
+  metadata    Json? // Flexible metadata storage for file info, etc.
+  order       Int      @default(0)
 
   // Tracking
   voided    Boolean  @default(false)
@@ -62,24 +36,23 @@ model ListingMedia {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([listingId, type])
+  @@index([listingId])
 }
 
 model Listing {
   id             String        @id @default(uuid()) @db.Uuid
   propertyId     String        @db.Uuid
   organizationId String        @db.Uuid
-  type           ListingType
+  tags           String[]      @default([]) // Key words for SEO
   status         ListingStatus @default(DRAFT)
   title          String
   description    String?       @db.Text
-
   // Common fields for all listing types
-  price      Decimal   @db.Decimal(12, 2)
-  currency   String    @default("KES")
-  listedDate DateTime  @default(now())
-  expiryDate DateTime?
-  featured   Boolean   @default(false)
+  price          Decimal       @db.Decimal(12, 2)
+  currency       String        @default("KES")
+  listedDate     DateTime      @default(now())
+  expiryDate     DateTime?
+  featured       Boolean       @default(false)
 
   // Type-specific details stored in related models
   saleDetails      SaleListing?
@@ -114,11 +87,11 @@ model SaleListing {
   downPayment       Decimal? @db.Decimal(12, 2)
   mortgageAvailable Boolean  @default(false)
   priceNegotiable   Boolean  @default(false)
-  ownershipType     String? // e.g., Freehold, Leasehold
+  // ownershipType     String? // e.g., Freehold, Leasehold
   titleDeedReady    Boolean  @default(false)
 
   // Financing options
-  financingOptions Json? // Array of accepted financing methods
+  financingOptions String[] @default([]) // Array of accepted financing methods e.g ["Cash", "Mortgage", "Installments"]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -138,22 +111,24 @@ model RentalListing {
   utilities           String[] @default([]) // Array of included utilities
   availableFrom       DateTime
 
-  // Additional charges
-  additionalCharges Json? // Array of {description, amount, frequency}
+  // TODO Additional charges (THINK OF MORE FLEXIBLE APROACH LIKE INTRODUCING A NEW Model)
+  // additionalCharges Json? // Array of {description, amount, frequency}
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model LeaseListing {
-  id      String  @id @db.Uuid
-  listing Listing @relation(fields: [id], references: [id], onDelete: Cascade)
+  id        String  @id @db.Uuid
+  listingId String  @unique @db.Uuid
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   // Lease-specific fields
   leaseTerm        Int // Duration in months
   securityDeposit  Decimal  @db.Decimal(12, 2)
-  maintenanceTerms String?  @db.Text
+  maintenanceTerms String?  @db.Text // TODO Remove and leav for files
   renewalOptions   Json? // Renewal terms and conditions e.g {"renewalAllowed": true, "increaseRate": 0.05, "maxRenewals": 2}
+  renewalAllowed   Boolean  @default(false)
   allowedUses      String[] @default([]) // Array of permitted property uses e.g ["Retail", "Office", "Medical Clinic"]
 
   // Commercial-specific
@@ -165,22 +140,50 @@ model LeaseListing {
 }
 
 model AuctionListing {
-  id      String  @id @db.Uuid
-  listing Listing @relation(fields: [id], references: [id], onDelete: Cascade)
+  id        String  @id @db.Uuid
+  listingId String  @unique @db.Uuid
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   // Auction-specific fields
-  startingBid     Decimal  @db.Decimal(12, 2) // is the lowest possible bid a buyer can place.
-  reservePrice    Decimal? @db.Decimal(12, 2) // the minimum amount the seller is willing to accept.
-  bidIncrement    Decimal  @db.Decimal(12, 2) // // Minimum increase per bid
-  auctionStart    DateTime
-  auctionEnd      DateTime
-  preRegistration Boolean  @default(false) // Require bidder registration?
-  bidderApproval  Boolean  @default(false) // Require approval before bidding?
+  startingBid            Decimal  @db.Decimal(12, 2) // is the lowest possible bid a buyer can place.
+  reservePrice           Decimal? @db.Decimal(12, 2) // the minimum amount the seller is willing to accept.
+  bidIncrement           Decimal  @db.Decimal(12, 2) // // Minimum increase per bid
+  auctionStart           DateTime
+  auctionEnd             DateTime
+  requirePreRegistration Boolean  @default(false) // Require bidder registration?
+  requireBidderApproval  Boolean  @default(false) // Require approval before bidding?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+// TODO Analyse bellow field models
+model RentToOwnListing {
+  id        String  @id @db.Uuid
+  listingId String  @unique @db.Uuid
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  // Rent-to-own specific fields
+  totalPurchasePrice Decimal @db.Decimal(12, 2)
+  monthlyRent        Decimal @db.Decimal(12, 2)
+  rentCredits        Decimal @db.Decimal(12, 2) // Amount of rent that goes to purchase
+  optionFee          Decimal @db.Decimal(12, 2) // Initial fee for the option to buy
+  optionPeriod       Int // Months until option expires
+
+  // Purchase terms
+  requiredDownPayment Decimal @db.Decimal(12, 2)
+  maintenanceTerms    String? @db.Text // TODO Remove and replace with terms document
+  purchaseTerms       String? @db.Text // TODO Remove and replace with terms document
+
+  // Financial requirements
+  minimumIncome       Decimal? @db.Decimal(12, 2)
+  creditScoreRequired Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// serviced listing (applies for AIRBNP and alike)
 model ShortTermListing {
   id        String  @id @db.Uuid
   listingId String  @unique @db.Uuid
@@ -192,8 +195,9 @@ model ShortTermListing {
   basePrice       Decimal  @db.Decimal(12, 2) // Per night price
   weeklyDiscount  Decimal? @db.Decimal(5, 2) // Percentage
   monthlyDiscount Decimal? @db.Decimal(5, 2) // Percentage
-  cleaningFee     Decimal? @db.Decimal(12, 2)
   securityDeposit Decimal  @db.Decimal(12, 2)
+
+  // TODO Look at additional services model and fee charges on top of them
 
   // Services and amenities
   selfCheckIn          Boolean @default(false)
@@ -210,31 +214,6 @@ model ShortTermListing {
   availabilityCalendar Json? // Blocked dates and special pricing
   checkInTime          String? // Default check-in time
   checkOutTime         String? // Default check-out time
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model RentToOwnListing {
-  id        String  @id @db.Uuid
-  listingId String  @unique @db.Uuid
-  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
-
-  // Rent-to-own specific fields
-  totalPurchasePrice Decimal @db.Decimal(12, 2)
-  monthlyRent        Decimal @db.Decimal(12, 2)
-  rentCredits        Decimal @db.Decimal(12, 2) // Amount of rent that goes to purchase
-  optionFee          Decimal @db.Decimal(12, 2) // Initial fee for the option to buy
-  optionPeriod       Int // Months until option expires
-
-  // Purchase terms
-  requiredDownPayment Decimal @db.Decimal(12, 2)
-  maintenanceTerms    String? @db.Text
-  purchaseTerms       String? @db.Text
-
-  // Financial requirements
-  minimumIncome       Decimal? @db.Decimal(12, 2)
-  creditScoreRequired Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

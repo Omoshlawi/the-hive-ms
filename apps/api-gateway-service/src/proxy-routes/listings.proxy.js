@@ -4,9 +4,9 @@ let serviceVersion
 module.exports = [
   {
     path: "/listings",
-    prefix: "/listing",
+    prefix: "/listings",
     serviceName,
     serviceVersion,
-    authenticate:true
+    authenticate:false
   },
 ]
