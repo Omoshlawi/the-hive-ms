@@ -68,7 +68,6 @@ export const AuctionListingSchema = z.object({
 });
 export const ListingSchema = z.object({
   propertyId: z.string().uuid(),
-  organizationId: z.string().uuid(),
   tags: z.string().min(1, "Required").array().optional(),
   status: z
     .enum([
@@ -90,10 +89,10 @@ export const ListingSchema = z.object({
   expiryDate: z.date({ coerce: true }).optional(),
   featured: z.boolean().optional(),
   contactPersonId: z.string().uuid(),
-  saleDetails: SaleListingSchema,
-  rentalDetails: RentalListingSchema,
-  leaseDetails: LeaseListingSchema,
-  auctionDetails: AuctionListingSchema,
+  saleDetails: SaleListingSchema.optional(),
+  rentalDetails: RentalListingSchema.optional(),
+  leaseDetails: LeaseListingSchema.optional(),
+  auctionDetails: AuctionListingSchema.optional(),
 });
 
 // TODO  cKEAN FIELDS AFTER MODEL ANALYSIS

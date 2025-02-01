@@ -14,10 +14,17 @@ export type DiskMulterFile = Pick<
   | "path"
 >;
 
+export type Organization = {
+  id: string;
+  name: string;
+  description: string;
+};
+
 export type Context = {
   userId: string;
   organizationId?: string;
   roles?: Array<string>;
+  organization?: Organization;
 };
 
 declare global {

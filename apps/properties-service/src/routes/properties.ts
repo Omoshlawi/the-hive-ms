@@ -16,10 +16,15 @@ import {
 } from "@hive/shared-middlewares";
 import mediaRouter from "./property-media";
 import attributesRouter from "./property-attributes";
+import serviceClient from "@/services/service-client";
 
 const router = Router({ mergeParams: true });
 router.get("/", [optionalContext], getProperties);
-router.post("/", [requireContext, requireOrganizationContext], addProperty);
+router.post(
+  "/",
+  [requireContext, requireOrganizationContext(serviceClient)],
+  addProperty
+);
 router.get(
   "/:propertyId",
   [validateUUIDPathParam("propertyId"), optionalContext],
@@ -30,7 +35,7 @@ router.patch(
   [
     validateUUIDPathParam("propertyId"),
     requireContext,
-    requireOrganizationContext,
+    requireOrganizationContext(serviceClient),
   ],
   patchProperty
 );
@@ -39,7 +44,7 @@ router.put(
   [
     validateUUIDPathParam("propertyId"),
     requireContext,
-    requireOrganizationContext,
+    requireOrganizationContext(serviceClient),
   ],
   updateProperty
 );
@@ -48,7 +53,7 @@ router.delete(
   [
     validateUUIDPathParam("propertyId"),
     requireContext,
-    requireOrganizationContext,
+    requireOrganizationContext(serviceClient),
   ],
   deleteProperty
 );
@@ -57,7 +62,7 @@ router.purge(
   [
     validateUUIDPathParam("propertyId"),
     requireContext,
-    requireOrganizationContext,
+    requireOrganizationContext(serviceClient),
   ],
   purgeProperty
 );

@@ -42,7 +42,9 @@ model ListingMedia {
 model Listing {
   id             String        @id @default(uuid()) @db.Uuid
   propertyId     String        @db.Uuid
+  property       Json?
   organizationId String        @db.Uuid
+  organization   Json?
   tags           String[]      @default([]) // Key words for SEO
   status         ListingStatus @default(DRAFT)
   title          String

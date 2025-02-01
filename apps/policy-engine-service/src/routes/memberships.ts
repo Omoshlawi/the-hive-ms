@@ -1,3 +1,8 @@
+import serviceClient from "@/services/service-client";
+import {
+  requireOrganizationContext,
+  validateUUIDPathParam,
+} from "@hive/shared-middlewares";
 import { Router } from "express";
 import {
   addOrganizationMembership,
@@ -8,15 +13,15 @@ import {
   purgeOrganizationMembership,
   updateOrganizationMembership,
 } from "../controllers/membershisps";
-import {
-  requireOrganizationContext,
-  validateUUIDPathParam,
-} from "@hive/shared-middlewares";
 
 const router = Router({ mergeParams: true });
 // Has context info
 router.get("/", getOrganizationMemberships);
-router.post("/", [requireOrganizationContext], addOrganizationMembership);
+router.post(
+  "/",
+  [requireOrganizationContext(serviceClient, true)],
+  addOrganizationMembership
+);
 router.get(
   "/:membershipId",
   [validateUUIDPathParam("membershipId")],

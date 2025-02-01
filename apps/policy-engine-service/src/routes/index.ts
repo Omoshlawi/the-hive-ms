@@ -1,19 +1,18 @@
-import { Router } from "express";
-import rolesRouter from "./roles";
-import membershipRouter from "./memberships";
-import organizationsRouter from "./organization";
-import privilegesRouter from "./privileges";
-import rolesPrivilegeRouter from "./role-privilege";
-import resourcesRouter from "./resources";
-import {
-  requireContext,
-  requireOrganizationContext,
-} from "@hive/shared-middlewares";
 import {
   getDatabaseSchemas,
   pullServiceDatabaseSchema,
   sourceServiceDBSchemaToResource,
 } from "@/controllers/db-schema";
+import {
+  requireContext
+} from "@hive/shared-middlewares";
+import { Router } from "express";
+import membershipRouter from "./memberships";
+import organizationsRouter from "./organization";
+import privilegesRouter from "./privileges";
+import resourcesRouter from "./resources";
+import rolesPrivilegeRouter from "./role-privilege";
+import rolesRouter from "./roles";
 const router = Router();
 router.get("/resources-schema", getDatabaseSchemas);
 router.post("/resources-schema", pullServiceDatabaseSchema);
