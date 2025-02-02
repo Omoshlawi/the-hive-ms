@@ -127,7 +127,11 @@ export const getListing = async (
 ) => {
   try {
     const item = await ListingModel.findUniqueOrThrow({
-      where: { id: req.params.listingId, voided: false },
+      where: {
+        id: req.params.listingId,
+        voided: false,
+        organizationId: req.context?.organizationId ?? undefined,
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
