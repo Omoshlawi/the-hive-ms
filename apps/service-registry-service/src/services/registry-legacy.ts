@@ -46,7 +46,7 @@ class Registry {
 
     // if service exist the update timestamp preventing timeout
     this.services[serviceIndex] = {
-      ...this.services[serviceIndex],
+      ...(this.services[serviceIndex] as any),
       timestamp: Date.now() / 1000,
     };
     logger.info(

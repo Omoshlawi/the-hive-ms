@@ -55,7 +55,8 @@ export const addHiveFile = async (
   next: NextFunction
 ) => {
   try {
-    const files: MemoryMulterFile[] = (req.files ?? []) as MemoryMulterFile[];
+    const files: MemoryMulterFile[] = ((req as any).files ??
+      []) as MemoryMulterFile[];
     if (files.length === 0)
       throw new APIException(400, {
         _errors: ["You must provide atleast one file"],
@@ -100,7 +101,7 @@ export const addHiveFile = async (
           if (curr.status === "fulfilled") return prev;
           return {
             ...prev,
-            [files[index].fieldname]: {
+            [files[index]!.fieldname]: {
               _errors:
                 curr.reason instanceof FileOperationError
                   ? [`${curr.reason.code}: ${curr.reason.message}`]
@@ -124,9 +125,9 @@ export const addHiveFile = async (
     });
     return res.json(
       items.reduce<{ [key: string]: HiveFile[] }>((prev, curr, idx) => {
-        const fieldName = files[idx].fieldname;
+        const fieldName = files[idx]!.fieldname;
         if (fieldName in prev) {
-          return { ...prev, [fieldName]: [...prev[fieldName], curr] };
+          return { ...prev, [fieldName]: [...(prev[fieldName] ?? []), curr] };
         }
         return { ...prev, [fieldName]: [curr] };
       }, {})

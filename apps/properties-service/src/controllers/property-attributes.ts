@@ -70,7 +70,7 @@ export const addPropertyAttribute = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await PropertyAttributesModel.create({
-      data: { ...validation.data, propertyId: req.params.propertyId },
+      data: { ...validation.data, propertyId: req.params.propertyId! },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     invalidateCachedResource(req, () => req.baseUrl);

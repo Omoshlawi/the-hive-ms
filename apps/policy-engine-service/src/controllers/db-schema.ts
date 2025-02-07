@@ -2,10 +2,7 @@ import { ResourcesModel } from "@/models";
 import db, { getTableFields } from "@/services/db";
 import serviceClient from "@/services/service-client";
 import { ServiceSchema } from "@/utils/validators";
-import {
-  APIException,
-  ResourcesSchemas
-} from "@hive/core-utils";
+import { APIException, ResourcesSchemas } from "@hive/core-utils";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
 import { NextFunction, Request, Response } from "express";
 
@@ -86,22 +83,22 @@ export const sourceServiceDBSchemaToResource = async (
           return await ResourcesModel.create({
             data: {
               name: resource,
-              dataPoints: schemas.schemas[resource].columnNames,
+              dataPoints: schemas.schemas[resource]?.columnNames,
               description: `${name}:${version ?? "*"} ${resource} Resource`,
             },
           });
         }
         const hasNotChanged =
           resourceExist.dataPoints.length ===
-            schemas.schemas[resource].columnNames.length &&
+            schemas.schemas[resource]?.columnNames?.length &&
           resourceExist.dataPoints.every((d) =>
-            schemas.schemas[resource].columnNames.includes(d)
+            schemas.schemas[resource]?.columnNames?.includes(d)
           ); // Ensures the resource datapoints hasent changed
         if (hasNotChanged) return resourceExist; // Return resource if no changes detected
 
         return await ResourcesModel.update({
           where: { name: resource },
-          data: { dataPoints: schemas.schemas[resource].columnNames },
+          data: { dataPoints: schemas.schemas[resource]?.columnNames },
         }); // update resource if changes detected
       });
     const result = await Promise.allSettled(dbTasks);

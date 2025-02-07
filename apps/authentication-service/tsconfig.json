@@ -1,16 +1,23 @@
 {
-  "extends": "@hive/typescript-config/express.json",
+  "extends": "@hive/typescript-config/tsconfig.express.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": "./"
   },
-  "include": [
-    "src/**/*"
-  ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "test",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "include": [
+    "src/**/*"
   ]
 }

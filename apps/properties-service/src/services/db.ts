@@ -61,8 +61,8 @@ export async function getTableFields(
           };
         }
   
-        tableFields[column.table_name].columnNames.push(column.column_name);
-        tableFields[column.table_name].orderedColumns.push({
+        tableFields[column.table_name]?.columnNames.push(column.column_name);
+        tableFields[column.table_name]?.orderedColumns.push({
           name: column.column_name,
           position: column.ordinal_position,
           type: column.data_type,
@@ -95,8 +95,8 @@ export async function getTableFields(
           };
         }
   
-        tableFields[column.table_name].columnNames.push(column.column_name);
-        tableFields[column.table_name].orderedColumns.push({
+        tableFields[column.table_name]?.columnNames.push(column.column_name);
+        tableFields[column.table_name]?.orderedColumns.push({
           name: column.column_name,
           position: column.ordinal_position,
           type: column.data_type,

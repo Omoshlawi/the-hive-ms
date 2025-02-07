@@ -81,8 +81,8 @@ export const getListings = async (
             const [key, val] = v.split(":");
             return {
               metadata: {
-                path: ["attributes", key.trim()],
-                equals: val.trim(),
+                path: ["attributes", key!.trim()],
+                equals: val!.trim(),
               },
             };
           }) ?? []),

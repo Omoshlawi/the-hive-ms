@@ -108,7 +108,7 @@ export const loginUser = async (
       };
     const user = users[passwordChecks.findIndex((val) => val)];
     const token = generateUserToken({
-      userId: user.id,
+      userId: user!.id,
       // personId: user.person?.id,
     });
     return res
@@ -177,8 +177,8 @@ export const refreshToken = async (
         });
       }
       // incase the role have changed, getting current ones nd setting to token
-      if (response.results[0].isAdmin) roles = "*";
-      else roles = response.results[0].membershipRoles.map((r) => r.roleId);
+      if (response.results[0]?.isAdmin) roles = "*";
+      else roles = response.results[0]?.membershipRoles.map((r) => r.roleId);
     }
     const token = generateUserToken({ userId: user.id, organizationId, roles });
     return res
@@ -235,8 +235,8 @@ export const changeOrganizationContext = async (
     if (!response.results.length) {
       throw new APIException(404, { detail: "Organization not found" });
     }
-    if (response.results[0].isAdmin) roles = "*";
-    else roles = response.results[0].membershipRoles.map((r) => r.roleId);
+    if (response.results[0]?.isAdmin) roles = "*";
+    else roles = response.results[0]?.membershipRoles.map((r) => r.roleId);
     const token = generateUserToken({ userId: user.id, organizationId, roles });
     return res
       .setHeader("x-access-token", token.accessToken)

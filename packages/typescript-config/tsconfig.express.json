@@ -6,6 +6,8 @@
         "isolatedModules": true,
         "noUncheckedIndexedAccess": true,
         "declaration": false,
-        "composite": false
+        "composite": false,
+        "strictNullChecks": true,
+        "exactOptionalPropertyTypes": false
     }
 }
