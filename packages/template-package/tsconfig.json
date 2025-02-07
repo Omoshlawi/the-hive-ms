@@ -1,18 +1,23 @@
 {
-  "extends": "@hive/typescript-config/packages.json",
+  "extends": "@hive/typescript-config/tsconfig.packages.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
     "outDir": "./dist",
     "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "baseUrl": "./"
   },
-  "include": [
-    "src/**/*"
-  ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "test",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "include": [
+    "src/**/*"
   ]
 }

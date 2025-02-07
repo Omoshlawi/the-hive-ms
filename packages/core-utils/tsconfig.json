@@ -1,26 +1,23 @@
 {
-  "extends": "@hive/typescript-config/packages.json",
+  "extends": "@hive/typescript-config/tsconfig.packages.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "commonjs",
-    "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": "./",
     "paths": {
       "@/*": [
         "src/*"
-      ],
-      "winston": [
-        "./node_modules/winston",
-        "../../node_modules/winston"
-      ],
+      ]
     },
+    "outDir": "./dist",
+    "rootDir": "./src",
   },
-  "include": [
-    "src/**/*"
-  ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "test",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "include": [
+    "src/**/*"
   ]
 }

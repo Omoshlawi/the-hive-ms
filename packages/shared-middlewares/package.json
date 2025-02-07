@@ -20,6 +20,9 @@
     "sharp": "^0.33.4",
     "slugify": "^1.6.6"
   },
+  "peerDependencies": {
+    "@hive/core-utils": "workspace:*"
+  },
   "devDependencies": {
     "@hive/core-utils": "workspace:*",
     "@hive/eslint-config": "workspace:*",

@@ -1,0 +1,11 @@
+{
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "sourceMap": true,
+        "inlineSources": true,
+        "isolatedModules": true,
+        "noUncheckedIndexedAccess": true,
+        "declaration": false,
+        "composite": false
+    }
+}
