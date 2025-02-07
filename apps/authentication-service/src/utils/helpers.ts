@@ -64,7 +64,6 @@ import { generateDefaultKey } from "@hive/core-utils";
 //   });
 // };
 
-
 export const hashPassword = async (password: string) => {
   const salt = await bcrypt.genSalt(10);
   const hash = await bcrypt.hash(password, salt);
@@ -83,13 +82,13 @@ export function generateUserToken(payload: {
   };
   const refreshPayload: TokenPayload = { ...payload, type: "refresh" };
   const accessToken = jwt.sign(accessPayload, configuration.auth.auth_secrete, {
-    expiresIn: configuration.auth.access_token_age,
+    expiresIn: configuration.auth.access_token_age as any,
   });
   const refreshToken = jwt.sign(
     refreshPayload,
     configuration.auth.auth_secrete,
     {
-      expiresIn: configuration.auth.refresh_token_age,
+      expiresIn: configuration.auth.refresh_token_age as any,
     }
   );
   return { accessToken, refreshToken };
