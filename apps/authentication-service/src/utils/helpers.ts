@@ -1,5 +1,5 @@
 import { TokenPayload } from "@/types";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { configuration } from "./constants";
 import { generateDefaultKey } from "@hive/core-utils";
