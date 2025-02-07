@@ -16,7 +16,6 @@
     "@hive/shared-middlewares": "workspace:*",
     "@prisma/client": "^6.1.0",
     "axios": "^1.7.3",
-    "bcrypt": "^5.1.1",
     "config": "^3.3.12",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -31,7 +30,6 @@
   },
   "devDependencies": {
     "@hive/typescript-config": "workspace:*",
-    "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.6",
     "@types/config": "^3.3.3",
     "@types/cors": "^2.8.17",

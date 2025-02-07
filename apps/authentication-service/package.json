@@ -17,6 +17,7 @@
     "@hive/core-utils": "workspace:*",
     "@hive/shared-middlewares": "workspace:*",
     "@prisma/client": "^6.1.0",
+    "bcrypt": "^5.1.1",
     "axios": "^1.7.3",
     "config": "^3.3.12",
     "cors": "^2.8.5",

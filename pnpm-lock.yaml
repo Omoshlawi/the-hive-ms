@@ -35,9 +35,6 @@ importers:
       axios:
         specifier: ^1.7.3
         version: 1.7.9
-      bcrypt:
-        specifier: ^5.1.1
-        version: 5.1.1
       config:
         specifier: ^3.3.12
         version: 3.3.12
@@ -75,9 +72,6 @@ importers:
       '@hive/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      '@types/bcrypt':
-        specifier: ^5.0.2
-        version: 5.0.2
       '@types/config':
         specifier: ^3.3.3
         version: 3.3.5
@@ -141,6 +135,9 @@ importers:
       axios:
         specifier: ^1.7.3
         version: 1.7.9
+      bcrypt:
+        specifier: ^5.1.1
+        version: 5.1.1
       config:
         specifier: ^3.3.12
         version: 3.3.12
@@ -278,9 +275,6 @@ importers:
       axios:
         specifier: ^1.7.3
         version: 1.7.9
-      bcrypt:
-        specifier: ^5.1.1
-        version: 5.1.1
       config:
         specifier: ^3.3.12
         version: 3.3.12
@@ -318,9 +312,6 @@ importers:
       '@hive/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      '@types/bcrypt':
-        specifier: ^5.0.2
-        version: 5.0.2
       '@types/config':
         specifier: ^3.3.3
         version: 3.3.5
@@ -384,9 +375,6 @@ importers:
       axios:
         specifier: ^1.7.3
         version: 1.7.9
-      bcrypt:
-        specifier: ^5.1.1
-        version: 5.1.1
       config:
         specifier: ^3.3.12
         version: 3.3.12
@@ -421,9 +409,6 @@ importers:
       '@hive/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      '@types/bcrypt':
-        specifier: ^5.0.2
-        version: 5.0.2
       '@types/config':
         specifier: ^3.3.3
         version: 3.3.5
@@ -484,9 +469,6 @@ importers:
       axios:
         specifier: ^1.7.3
         version: 1.7.9
-      bcrypt:
-        specifier: ^5.1.1
-        version: 5.1.1
       config:
         specifier: ^3.3.12
         version: 3.3.12
@@ -521,9 +503,6 @@ importers:
       '@hive/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      '@types/bcrypt':
-        specifier: ^5.0.2
-        version: 5.0.2
       '@types/config':
         specifier: ^3.3.3
         version: 3.3.5
@@ -584,9 +563,6 @@ importers:
       axios:
         specifier: ^1.7.3
         version: 1.7.9
-      bcrypt:
-        specifier: ^5.1.1
-        version: 5.1.1
       config:
         specifier: ^3.3.12
         version: 3.3.12
@@ -621,9 +597,6 @@ importers:
       '@hive/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      '@types/bcrypt':
-        specifier: ^5.0.2
-        version: 5.0.2
       '@types/config':
         specifier: ^3.3.3
         version: 3.3.5
@@ -684,9 +657,6 @@ importers:
       axios:
         specifier: ^1.7.3
         version: 1.7.9
-      bcrypt:
-        specifier: ^5.1.1
-        version: 5.1.1
       config:
         specifier: ^3.3.12
         version: 3.3.12
@@ -721,9 +691,6 @@ importers:
       '@hive/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      '@types/bcrypt':
-        specifier: ^5.0.2
-        version: 5.0.2
       '@types/config':
         specifier: ^3.3.3
         version: 3.3.5
@@ -784,9 +751,6 @@ importers:
       axios:
         specifier: ^1.7.3
         version: 1.7.9
-      bcrypt:
-        specifier: ^5.1.1
-        version: 5.1.1
       config:
         specifier: ^3.3.12
         version: 3.3.12
@@ -821,9 +785,6 @@ importers:
       '@hive/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      '@types/bcrypt':
-        specifier: ^5.0.2
-        version: 5.0.2
       '@types/config':
         specifier: ^3.3.3
         version: 3.3.5
@@ -884,9 +845,6 @@ importers:
       axios:
         specifier: ^1.7.3
         version: 1.7.9
-      bcrypt:
-        specifier: ^5.1.1
-        version: 5.1.1
       config:
         specifier: ^3.3.12
         version: 3.3.12
@@ -921,9 +879,6 @@ importers:
       '@hive/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      '@types/bcrypt':
-        specifier: ^5.0.2
-        version: 5.0.2
       '@types/config':
         specifier: ^3.3.3
         version: 3.3.5
@@ -6418,7 +6373,7 @@ snapshots:
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.7.0(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1)
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@7.2.0(eslint@8.57.1)(typescript@5.5.4))(eslint-import-resolver-typescript@3.7.0)(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@7.2.0(eslint@8.57.1)(typescript@5.5.4))(eslint-import-resolver-typescript@3.7.0(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.4(eslint@8.57.1)
       eslint-plugin-react-hooks: 5.0.0-canary-7118f5dd7-20230705(eslint@8.57.1)
@@ -6463,7 +6418,7 @@ snapshots:
       is-glob: 4.0.3
       stable-hash: 0.0.4
     optionalDependencies:
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@7.2.0(eslint@8.57.1)(typescript@5.5.4))(eslint-import-resolver-typescript@3.7.0)(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@7.2.0(eslint@8.57.1)(typescript@5.5.4))(eslint-import-resolver-typescript@3.7.0(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -6539,7 +6494,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.2.0(eslint@8.57.1)(typescript@5.5.4))(eslint-import-resolver-typescript@3.7.0)(eslint@8.57.1):
+  eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.2.0(eslint@8.57.1)(typescript@5.5.4))(eslint-import-resolver-typescript@3.7.0(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.8

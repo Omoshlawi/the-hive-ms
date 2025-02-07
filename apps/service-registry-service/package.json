@@ -16,7 +16,6 @@
     "@hive/shared-middlewares": "workspace:*",
     "@prisma/client": "^6.1.0",
     "axios": "^1.7.3",
-    "bcrypt": "^5.1.1",
     "config": "^3.3.12",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -30,7 +29,6 @@
   },
   "devDependencies": {
     "@hive/typescript-config": "workspace:*",
-    "@types/bcrypt": "^5.0.2",
     "@types/config": "^3.3.3",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
