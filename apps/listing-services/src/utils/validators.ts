@@ -22,6 +22,7 @@ export const SaleListingSchema = z.object({
   downPayment: z.number({ coerce: true }).nonnegative().optional(),
   mortgageAvailable: z.boolean().optional(),
   priceNegotiable: z.boolean().optional(),
+  ownershipType: z.enum(["Freehold", "Leasehold"]),
   titleDeedReady: z.boolean().optional(),
   financingOptions: z
     .enum(["Cash", "Mortgage", "Installments"]) // TODO Think of additional model with more info

@@ -89,7 +89,7 @@ model SaleListing {
   downPayment       Decimal? @db.Decimal(12, 2)
   mortgageAvailable Boolean  @default(false)
   priceNegotiable   Boolean  @default(false)
-  // ownershipType     String? // e.g., Freehold, Leasehold
+  ownershipType     String? // e.g., Freehold, Leasehold
   titleDeedReady    Boolean  @default(false)
 
   // Financing options
