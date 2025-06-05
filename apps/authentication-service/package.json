@@ -17,6 +17,7 @@
     "@hive/core-utils": "workspace:*",
     "@hive/shared-middlewares": "workspace:*",
     "@prisma/client": "^6.1.0",
+    "jsonwebtoken": "^9.0.2",
     "axios": "^1.7.3",
     "bcryptjs": "^2.4.3",
     "config": "^3.3.12",
