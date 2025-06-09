@@ -63,7 +63,7 @@ export const PropertyLocation = z.object({
 // Property
 export const PropertySchema = z.object({
   name: z.string(),
-  thumbnail: z.string().min(1, "Required"),
+  thumbnail: z.string().optional(),
   attributes: z
     .array(
       z.object({
@@ -82,6 +82,7 @@ export const PropertySchema = z.object({
 // Property
 export const PropertyfiltersSchema = z.object({
   search: z.string().optional(),
+  status: z.enum(["Published", "Draft"]).optional(),
 });
 
 // RelationshipType

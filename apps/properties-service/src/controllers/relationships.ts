@@ -36,7 +36,7 @@ export const getRelationships = async (
             },
             {
               OR: propertyId
-                ? [{ propertyAId: propertyId, propertyBId: propertyId }]
+                ? [{ propertyAId: propertyId }, { propertyBId: propertyId }]
                 : undefined,
             },
 

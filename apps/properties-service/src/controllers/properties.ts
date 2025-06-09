@@ -1,5 +1,5 @@
 import serviceClient from "@/services/service-client";
-import { Address, OrganizationMembership } from "@/types";
+import { Address } from "@/types";
 import { getCachedResource, invalidateCachedResource } from "@/utils";
 import { PropertyfiltersSchema, PropertySchema } from "@/utils/validators";
 import {
@@ -22,7 +22,7 @@ export const getProperties = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
 
-    const { search } = validation.data;
+    const { search, status } = validation.data;
     const results = await getCachedResource(req, () =>
       PropertiesModel.findMany({
         where: {
@@ -30,8 +30,8 @@ export const getProperties = async (
             {
               voided: false,
               organizationId: req.context?.organizationId ?? undefined,
+              status,
             },
-
             {
               OR: search
                 ? [{ name: { contains: search, mode: "insensitive" } }]
