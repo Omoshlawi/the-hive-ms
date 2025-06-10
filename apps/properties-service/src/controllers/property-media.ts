@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { PropertyMediaModel } from "../models";
-import { PropertyMediaSchema } from "@/utils/validators";
+import {
+  PropertyMediaFilterSchema,
+  PropertyMediaSchema,
+} from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
@@ -13,9 +16,14 @@ export const getPropertiesMedias = async (
   next: NextFunction
 ) => {
   try {
+    const validation = await PropertyMediaFilterSchema.safeParseAsync(req.body);
+    if (!validation.success)
+      throw new APIException(400, validation.error.format());
+    const { type, memeType, size } = validation.data;
+    // TODO Filter by size and meme type metadata json filed
     const results = await getCachedResource(req, () =>
       PropertyMediaModel.findMany({
-        where: { voided: false, propertyId: req.params.propertyId },
+        where: { voided: false, propertyId: req.params.propertyId, type },
         ...getMultipleOperationCustomRepresentationQeury(
           req.query?.v as string
         ),

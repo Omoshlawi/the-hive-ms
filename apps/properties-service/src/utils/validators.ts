@@ -43,7 +43,14 @@ export const PropertyMediaSchema = z.object({
       coerce: true,
     }),
     memeType: z.string().min(1, "Required").optional(),
+    id: z.string().min(1, "Required").uuid().optional(),
   }),
+});
+// Property Filter
+export const PropertyMediaFilterSchema = z.object({
+  type: z.enum(["Image", "Video", "Document", "Tour_3D"]).optional(),
+  size: z.number({ coerce: true }).optional(),
+  memeType: z.string().optional(),
 });
 
 // Property Location
