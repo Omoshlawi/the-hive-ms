@@ -1,15 +1,10 @@
-import { NextFunction, Request, Response } from "express";
-import {
-  PropertiesModel,
-  PropertyMediaModel,
-  PropertyStatusHistoryModel,
-} from "../models";
+import { invalidateCachedResource } from "@/utils";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
-  invalidateCache,
 } from "@hive/core-utils";
-import { invalidateCachedResource } from "@/utils";
+import { NextFunction, Request, Response } from "express";
+import { PropertiesModel, PropertyStatusHistoryModel } from "../models";
 
 export const getPropertyStatusHostory = async (
   req: Request,
@@ -75,7 +70,6 @@ export const submitForReview = async (
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    console.log(req.baseUrl);
 
     invalidateCachedResource(req, () => "/properties");
     return res.json(item);
@@ -100,16 +94,20 @@ export const approveProperty = async (
         detail: "operation alloewed ony for properties pending approval",
       });
     //TODO validate property info to ensure all required info and propertly entered
-
+    await PropertiesModel.update({
+      where: { id: propertyId },
+      data: { status: "Approved" },
+    });
     const item = await PropertyStatusHistoryModel.create({
       data: {
         propertyId,
         previousStatus: property.status,
-        newStatus: "Pending",
+        newStatus: "Approved",
         changedBy: user,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
+    invalidateCachedResource(req, () => "/properties");
     return res.json(item);
   } catch (error) {
     next(error);
