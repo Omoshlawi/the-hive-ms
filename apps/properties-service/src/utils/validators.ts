@@ -89,7 +89,17 @@ export const PropertySchema = z.object({
 // Property
 export const PropertyfiltersSchema = z.object({
   search: z.string().optional(),
-  status: z.enum(["Published", "Draft"]).optional(),
+  status: z
+    .enum([
+      "Blocked",
+      "Draft",
+      "Archived",
+      "Approved",
+      "Rejected",
+      "Paused",
+      "Pending",
+    ])
+    .optional(),
 });
 
 // RelationshipType

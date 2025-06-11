@@ -53,8 +53,24 @@ model Category {
 }
 
 enum PropertyStatus {
-  Draft
-  Published
+  Draft //  signifies that the record is incomplete and actively being worked on. It allows for saving partial data without requiring full validation.
+  Blocked //Admin-flagged as problematic (fraud, legal issues, etc.)
+  Archived // Historic data; property no longer tracked actively (e.g., sold long ago)
+  Approved // has successfully passed all internal validation and review processes and considered complete, accurate, and fully compliant with internal standards hence eligible for Listing 
+  Rejected // Rejected due to invalid/incomplete/unverifiable information
+  Paused // Temporarily not in use (e.g., maintenance, dispute, owner unavailable)
+  Pending // Property has been submitted by an agent/user and is under internal review
+}
+
+model PropertyStatusHistory {
+  id             String         @id @default(uuid()) @db.Uuid
+  propertyId     String         @db.Uuid
+  property       Property       @relation(fields: [propertyId], onDelete: Cascade, references: [id])
+  previousStatus PropertyStatus
+  newStatus      PropertyStatus
+  changedBy      String?
+  reason         String?        @db.Text
+  createdAt      DateTime       @default(now())
 }
 
 model Property {
@@ -77,10 +93,11 @@ model Property {
   amenities        PropertyAmenity[]
   categories       PropertyCategory[]
 
-  createdBy String   @db.Uuid
-  voided    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdBy     String                  @db.Uuid
+  voided        Boolean                 @default(false)
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  statusHistory PropertyStatusHistory[]
 }
 
 model RelationshipType {

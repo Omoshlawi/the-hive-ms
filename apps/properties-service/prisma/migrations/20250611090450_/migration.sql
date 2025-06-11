@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "PropertyStatus" AS ENUM ('Draft', 'Blocked', 'Archived', 'Approved', 'Rejected', 'Paused', 'Pending');
+
+-- CreateEnum
 CREATE TYPE "PropertyMediaType" AS ENUM ('Image', 'Video', 'Document', 'Tour_3D');
 
 -- CreateTable
@@ -41,11 +44,25 @@ CREATE TABLE "Category" (
 );
 
 -- CreateTable
+CREATE TABLE "PropertyStatusHistory" (
+    "id" UUID NOT NULL,
+    "propertyId" UUID NOT NULL,
+    "previousStatus" "PropertyStatus" NOT NULL,
+    "newStatus" "PropertyStatus" NOT NULL,
+    "changedBy" TEXT,
+    "reason" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PropertyStatusHistory_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Property" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
-    "thumbnail" TEXT NOT NULL,
+    "thumbnail" TEXT,
+    "status" "PropertyStatus" NOT NULL DEFAULT 'Draft',
     "organizationId" TEXT NOT NULL,
     "organization" JSONB,
     "addressId" TEXT NOT NULL,
@@ -153,6 +170,18 @@ CREATE UNIQUE INDEX "Amenity_name_organizationId_key" ON "Amenity"("name", "orga
 CREATE UNIQUE INDEX "Category_name_organizationId_key" ON "Category"("name", "organizationId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "RelationshipType_aIsToB_key" ON "RelationshipType"("aIsToB");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RelationshipType_bIsToA_key" ON "RelationshipType"("bIsToA");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RelationshipType_aIsToB_bIsToA_key" ON "RelationshipType"("aIsToB", "bIsToA");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Relationship_propertyAId_propertyBId_typeId_key" ON "Relationship"("propertyAId", "propertyBId", "typeId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "PropertyAttribute_propertyId_attributeId_key" ON "PropertyAttribute"("propertyId", "attributeId");
 
 -- CreateIndex
@@ -160,6 +189,9 @@ CREATE UNIQUE INDEX "PropertyAmenity_propertyId_amenityId_key" ON "PropertyAmeni
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PropertyCategory_propertyId_categoryId_key" ON "PropertyCategory"("propertyId", "categoryId");
+
+-- AddForeignKey
+ALTER TABLE "PropertyStatusHistory" ADD CONSTRAINT "PropertyStatusHistory_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "Property"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Relationship" ADD CONSTRAINT "Relationship_typeId_fkey" FOREIGN KEY ("typeId") REFERENCES "RelationshipType"("id") ON DELETE CASCADE ON UPDATE CASCADE;

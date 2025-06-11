@@ -9,3 +9,4 @@ export const RelationshipsModel = db.relationship;
 export const RelationshipTypesModel = db.relationshipType;
 export const PropertyAttributesModel = db.propertyAttribute;
 export const PropertyAmenities = db.propertyAmenity;
+export const PropertyStatusHistoryModel = db.propertyStatusHistory;

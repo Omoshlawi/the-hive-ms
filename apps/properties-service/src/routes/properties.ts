@@ -17,6 +17,7 @@ import {
 import mediaRouter from "./property-media";
 import attributesRouter from "./property-attributes";
 import serviceClient from "@/services/service-client";
+import propertyStatusRouter from "./property-status";
 
 const router = Router({ mergeParams: true });
 router.get("/", [optionalContext], getProperties);
@@ -76,6 +77,11 @@ router.use(
   "/:propertyId/attributes",
   [validateUUIDPathParam("propertyId"), optionalContext],
   attributesRouter
+);
+router.use(
+  "/:propertyId/status",
+  [validateUUIDPathParam("propertyId"), optionalContext],
+  propertyStatusRouter
 );
 
 export default router;
