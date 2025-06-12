@@ -9,28 +9,54 @@ datasource db {
 }
 
 enum ListingStatus {
-  DRAFT
-  ACTIVE
-  UNDER_CONTRACT
-  SOLD
-  LEASED
-  RENTED
-  WITHDRAWN
-  EXPIRED
+  Draft
+  Pending //Pending Review (Internal)
+  Blocked //Admin-flagged as problematic (fraud, legal issues, etc.)
+  Approved
+  Rejected // Rejected due to invalid/incomplete/unverifiable information
+  Contracted
+  Sold
+  Leased
+  Rented
+  Withdrawn
+  Expired
+}
+
+model ListingStatusHistory {
+  id             String        @id @default(uuid()) @db.Uuid
+  listingId      String        @db.Uuid
+  listing        Listing       @relation(fields: [listingId], onDelete: Cascade, references: [id])
+  previousStatus ListingStatus
+  newStatus      ListingStatus
+  changedBy      String?
+  reason         String?       @db.Text
+  createdAt      DateTime      @default(now())
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  FLOOR_PLAN
+  LEGAL_DOC
+  CONTRACT
+  OTHER
 }
 
 model ListingMedia {
-  id          String   @id @default(uuid()) @db.Uuid
-  listingId   String   @db.Uuid
-  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  tags        String[] @default([]) // Key words for SEO
-  title       String
-  description String?  @db.Text
-  url         String // URL to stored media
-  metadata    Json? // Flexible metadata storage for file info, etc.
-  order       Int      @default(0)
+  id        String  @id @default(uuid()) @db.Uuid
+  listingId String  @db.Uuid
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
-  // Tracking
+  tags            String[]  @default([])
+  title           String
+  description     String?   @db.Text
+  url             String
+  metadata        Json?
+  mediaType       MediaType @default(IMAGE) // New!
+  documentPurpose String? // e.g., “terms”, “renewalPolicy”, “maintenanceAgreement”
+
+  order     Int      @default(0)
   voided    Boolean  @default(false)
   createdBy String   @db.Uuid
   createdAt DateTime @default(now())
@@ -46,7 +72,7 @@ model Listing {
   organizationId String        @db.Uuid
   organization   Json?
   tags           String[]      @default([]) // Key words for SEO
-  status         ListingStatus @default(DRAFT)
+  status         ListingStatus @default(Draft)
   title          String
   description    String?       @db.Text
   // Common fields for all listing types
@@ -72,12 +98,13 @@ model Listing {
   contactPerson   Json? // Minimal person info
 
   // Metadata
-  metadata  Json? // For flexible additional data
-  views     Int      @default(0)
-  createdBy String   @db.Uuid
-  voided    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  metadata      Json? // For flexible additional data
+  views         Int                    @default(0)
+  createdBy     String                 @db.Uuid
+  voided        Boolean                @default(false)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  statusHistory ListingStatusHistory[]
 }
 
 model SaleListing {
@@ -105,13 +132,13 @@ model RentalListing {
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   // Rental-specific fields
-  rentPeriod          String // Monthly, Weekly, Daily
-  minimumRentalPeriod Int // Number of periods
-  securityDeposit     Decimal  @db.Decimal(12, 2)
-  petsAllowed         Boolean  @default(false)
-  furnished           Boolean  @default(false)
-  utilities           String[] @default([]) // Array of included utilities
-  availableFrom       DateTime
+  rentPeriod      String // Monthly, Weekly, Daily
+  minimumStay     Int // Number of periods
+  securityDeposit Decimal  @db.Decimal(12, 2)
+  petsAllowed     Boolean  @default(false)
+  furnished       Boolean  @default(false)
+  utilities       String[] @default([]) // Array of included utilities
+  availableFrom   DateTime
 
   // TODO Additional charges (THINK OF MORE FLEXIBLE APROACH LIKE INTRODUCING A NEW Model)
   // additionalCharges Json? // Array of {description, amount, frequency}
@@ -259,3 +286,31 @@ model CoLivingListing {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// enum ChargeFrequency {
+//   ONE_TIME
+//   MONTHLY
+//   WEEKLY
+//   PER_NIGHT
+//   ANNUALLY
+// }
+
+// model ListingCharge {
+//   id         String          @id @default(uuid()) @db.Uuid
+//   listingId  String          @db.Uuid
+//   listing    Listing         @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+//   name       String          // e.g., "Cleaning Fee", "Pet Fee", "Parking"
+//   description String?
+//   amount     Decimal         @db.Decimal(12, 2)
+//   currency   String          @default("KES")
+//   frequency  ChargeFrequency @default(ONE_TIME)
+//   mandatory  Boolean         @default(true)
+
+//   metadata   Json?
+
+//   createdAt  DateTime        @default(now())
+//   updatedAt  DateTime        @updatedAt
+
+//   @@index([listingId])
+// }
