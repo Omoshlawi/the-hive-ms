@@ -17,15 +17,18 @@ export const ListingMediaSchema = z.object({
   }),
 });
 
+export const SaleListingFinancingOptionSchema = z.object({
+  listingId: z.string().uuid("Invalid"),
+  optionId: z.string().uuid("Invalid"),
+});
+
 export const SaleListingSchema = z.object({
   //   listingId: z.string().uuid(),
   downPayment: z.number({ coerce: true }).nonnegative().optional(),
-  mortgageAvailable: z.boolean().optional(),
   priceNegotiable: z.boolean().optional(),
-  ownershipType: z.enum(["Freehold", "Leasehold"]),
+  ownershipTypeId: z.string().uuid("Invalid"),
   titleDeedReady: z.boolean().optional(),
-  financingOptions: z
-    .enum(["Cash", "Mortgage", "Installments"]) // TODO Think of additional model with more info
+  financingOptions: SaleListingFinancingOptionSchema.omit({ listingId: true })
     .array()
     .nonempty("Atleast one payment option required"),
 });
@@ -33,9 +36,8 @@ export const SaleListingSchema = z.object({
 export const RentalListingSchema = z.object({
   //   listingId: z.string().uuid(),
   rentPeriod: z.enum(["Monthly", "Weekly", "Daily", "Yearly"]),
-  minimumRentalPeriod: z.number({ coerce: true }).nonnegative(),
+  minimumStay: z.number({ coerce: true }).nonnegative(),
   securityDeposit: z.number({ coerce: true }).nonnegative(),
-  petsAllowed: z.boolean().optional(),
   furnished: z.boolean().optional(),
   utilities: z.array(z.string().min(1, "Required")).optional(),
   availableFrom: z.date({ coerce: true }),
@@ -43,19 +45,10 @@ export const RentalListingSchema = z.object({
 });
 
 export const LeaseListingSchema = z.object({
-  leaseTerm: z.number({ coerce: true }).nonnegative(),
+  leaseTermInMoths: z.number({ coerce: true }).nonnegative(),
   securityDeposit: z.number({ coerce: true }).nonnegative(),
-  maintenanceTerms: z.string().optional(),
-  renewalOptions: z
-    .object({
-      renewalAllowed: z.boolean(),
-      increaseRate: z.number({ coerce: true }).nonnegative(),
-      maxRenewals: z.number({ coerce: true }).optional().nullable(),
-    })
-    .optional(),
+  renewalAllowed: z.boolean().optional(),
   allowedUses: z.array(z.string()).optional(),
-  isCommercial: z.boolean().optional(),
-  buildOutAllowance: z.number({ coerce: true }).nonnegative().optional(),
 });
 
 export const AuctionListingSchema = z.object({
@@ -67,26 +60,31 @@ export const AuctionListingSchema = z.object({
   requirePreRegistration: z.boolean().optional(),
   requireBidderApproval: z.boolean().optional(),
 });
+
+export const ListingAdditionalCharges = z.object({
+  listingId: z.string().uuid("invalid"),
+  name: z.string().nonempty("Required"),
+  description: z.string().optional(),
+  amount: z.number().nonnegative(),
+  frequency: z.enum(["ONE_TIME", "MONTHLY", "WEEKLY", "PER_NIGHT", "ANNUALLY"]),
+  mandatory: z.boolean(),
+});
 export const ListingSchema = z.object({
   propertyId: z.string().uuid(),
   tags: z.string().min(1, "Required").array().optional(),
-  status: z
-    .enum([
-      "DRAFT",
-      "ACTIVE",
-      "UNDER_CONTRACT",
-      "SOLD",
-      "LEASED",
-      "RENTED",
-      "WITHDRAWN",
-      "EXPIRED",
-    ])
-    .optional(),
   title: z.string().min(4),
+  type: z.enum([
+    "RENTAL",
+    "SALE",
+    "LEASE",
+    "AUCTION",
+    "RENT_TO_OWN",
+    "SHORT_TERM",
+    "CO_LIVING",
+  ]),
+  coverImage: z.string().optional(),
   description: z.string().optional(),
   price: z.number({ coerce: true }).nonnegative(),
-  currency: z.string().optional(),
-  listedDate: z.date({ coerce: true }).optional(),
   expiryDate: z.date({ coerce: true }).optional(),
   featured: z.boolean().optional(),
   contactPersonId: z.string().uuid(),
@@ -94,24 +92,32 @@ export const ListingSchema = z.object({
   rentalDetails: RentalListingSchema.optional(),
   leaseDetails: LeaseListingSchema.optional(),
   auctionDetails: AuctionListingSchema.optional(),
+  additionalCharges: ListingAdditionalCharges.array().optional(),
 });
+
+export const OwnershipTypeSchema = z.object({
+  name: z.string().nonempty("required"),
+  description: z.string().optional(),
+});
+
+export const FinancingOptionSchema = z.object({
+  name: z.string().nonempty("required"),
+  description: z.string().optional(),
+});
+
 export const ListingFilterSchema = z.object({
   search: z.string().optional(),
   tags: z
-    .string()
-    .optional()
-    .transform((a) =>
-      a
-        ?.split(",")
-        ?.map((a) => a.trim())
-        ?.filter(Boolean)
-        ?.join(",")
-    ),
+    .string().array()
+    .optional(),
   status: z
     .enum([
       "DRAFT",
-      "ACTIVE",
-      "UNDER_CONTRACT",
+      "PENDING",
+      "BLOCKED",
+      "APPROVED",
+      "REJECTED",
+      "UNDER_CONTRACTED",
       "SOLD",
       "LEASED",
       "RENTED",
@@ -126,52 +132,23 @@ export const ListingFilterSchema = z.object({
   expiryDateStart: z.date({ coerce: true }).optional(),
   expiryDateEnd: z.date({ coerce: true }).optional(),
   types: z
-    .string()
-    .optional()
-    .refine((data) => {
-      if (!data) return true;
-      if (
-        data
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .every((d) => ["sale", "rental", "lease", "auction"].includes(d))
-      ) {
-        return true;
-      }
-      return false;
-    })
-    .transform((a) =>
-      a
-        ?.split(",")
-        ?.map((a) => a.trim())
-        ?.filter(Boolean)
-        ?.join(",")
-    ),
-  amenities: z
-    .string()
-    .optional()
-    .transform((a) =>
-      a
-        ?.split(",")
-        ?.map((a) => a.trim())
-        ?.filter(Boolean)
-        ?.join(",")
-    ),
-  categories: z
-    .string()
-    .optional()
-    .transform((a) =>
-      a
-        ?.split(",")
-        ?.map((a) => a.trim())
-        ?.filter(Boolean)
-        ?.join(",")
-    ),
-  attributes: z
-    .string()
-    .regex(/^\s*([^:]+:[^,]+)(,\s*[^:]+:[^,]+)*\s*$/)
+    .enum([
+      "RENTAL",
+      "SALE",
+      "LEASE",
+      "AUCTION",
+      "RENT_TO_OWN",
+      "SHORT_TERM",
+      "CO_LIVING",
+    ])
+    .array()
     .optional(),
+  amenities: z.string().array().optional(),
+  categories: z.string().array().optional(),
+  // attributes: z
+  //   .string()
+  //   .regex(/^\s*([^:]+:[^,]+)(,\s*[^:]+:[^,]+)*\s*$/)
+  //   .optional(),
 });
 
 // TODO  cKEAN FIELDS AFTER MODEL ANALYSIS

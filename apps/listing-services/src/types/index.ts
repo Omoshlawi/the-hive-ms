@@ -1,3 +1,5 @@
+import { ListingFilterSchema } from "@/utils/validators";
+import z from "zod"
 export interface Property {
   id: string;
   name: string;
@@ -44,4 +46,4 @@ export interface AttributeType {
   name: string;
 }
 
-export type ListingType = "sale" | "rental" | "lease" | "auction";
+export type ListingFilterData = z.infer<typeof ListingFilterSchema>

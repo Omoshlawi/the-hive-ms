@@ -1,8 +1,14 @@
 -- CreateEnum
-CREATE TYPE "ListingStatus" AS ENUM ('Draft', 'Pending', 'Blocked', 'Approved', 'Rejected', 'Contracted', 'Sold', 'Leased', 'Rented', 'Withdrawn', 'Expired');
+CREATE TYPE "ListingStatus" AS ENUM ('DRAFT', 'PENDING', 'BLOCKED', 'APPROVED', 'REJECTED', 'UNDER_CONTRACTED', 'SOLD', 'LEASED', 'RENTED', 'WITHDRAWN', 'EXPIRED');
 
 -- CreateEnum
 CREATE TYPE "MediaType" AS ENUM ('IMAGE', 'VIDEO', 'DOCUMENT', 'FLOOR_PLAN', 'LEGAL_DOC', 'CONTRACT', 'OTHER');
+
+-- CreateEnum
+CREATE TYPE "ListingType" AS ENUM ('RENTAL', 'SALE', 'LEASE', 'AUCTION', 'RENT_TO_OWN', 'SHORT_TERM', 'CO_LIVING');
+
+-- CreateEnum
+CREATE TYPE "ChargeFrequency" AS ENUM ('ONE_TIME', 'MONTHLY', 'WEEKLY', 'PER_NIGHT', 'ANNUALLY');
 
 -- CreateTable
 CREATE TABLE "ListingStatusHistory" (
@@ -45,16 +51,16 @@ CREATE TABLE "Listing" (
     "organizationId" UUID NOT NULL,
     "organization" JSONB,
     "tags" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "status" "ListingStatus" NOT NULL DEFAULT 'Draft',
+    "status" "ListingStatus" NOT NULL DEFAULT 'DRAFT',
     "title" TEXT NOT NULL,
     "description" TEXT,
+    "type" "ListingType" NOT NULL,
+    "coverImage" TEXT,
     "price" DECIMAL(12,2) NOT NULL,
-    "currency" TEXT NOT NULL DEFAULT 'KES',
-    "listedDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "listedDate" TIMESTAMP(3),
     "expiryDate" TIMESTAMP(3),
     "featured" BOOLEAN NOT NULL DEFAULT false,
     "contactPersonId" UUID NOT NULL,
-    "contactPerson" JSONB,
     "metadata" JSONB,
     "views" INTEGER NOT NULL DEFAULT 0,
     "createdBy" UUID NOT NULL,
@@ -66,19 +72,44 @@ CREATE TABLE "Listing" (
 );
 
 -- CreateTable
+CREATE TABLE "OwnershipType" (
+    "id" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+
+    CONSTRAINT "OwnershipType_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "FinancingOption" (
+    "id" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+
+    CONSTRAINT "FinancingOption_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "SaleListing" (
     "id" UUID NOT NULL,
     "listingId" UUID NOT NULL,
     "downPayment" DECIMAL(12,2),
-    "mortgageAvailable" BOOLEAN NOT NULL DEFAULT false,
     "priceNegotiable" BOOLEAN NOT NULL DEFAULT false,
-    "ownershipType" TEXT,
+    "ownershipTypeId" UUID NOT NULL,
     "titleDeedReady" BOOLEAN NOT NULL DEFAULT false,
-    "financingOptions" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "SaleListing_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SaleListingFinancingOption" (
+    "id" UUID NOT NULL,
+    "listingId" UUID NOT NULL,
+    "optionId" UUID NOT NULL,
+
+    CONSTRAINT "SaleListingFinancingOption_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -88,7 +119,6 @@ CREATE TABLE "RentalListing" (
     "rentPeriod" TEXT NOT NULL,
     "minimumStay" INTEGER NOT NULL,
     "securityDeposit" DECIMAL(12,2) NOT NULL,
-    "petsAllowed" BOOLEAN NOT NULL DEFAULT false,
     "furnished" BOOLEAN NOT NULL DEFAULT false,
     "utilities" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "availableFrom" TIMESTAMP(3) NOT NULL,
@@ -102,14 +132,10 @@ CREATE TABLE "RentalListing" (
 CREATE TABLE "LeaseListing" (
     "id" UUID NOT NULL,
     "listingId" UUID NOT NULL,
-    "leaseTerm" INTEGER NOT NULL,
+    "leaseTermInMoths" INTEGER NOT NULL,
     "securityDeposit" DECIMAL(12,2) NOT NULL,
-    "maintenanceTerms" TEXT,
-    "renewalOptions" JSONB,
     "renewalAllowed" BOOLEAN NOT NULL DEFAULT false,
     "allowedUses" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "isCommercial" BOOLEAN NOT NULL DEFAULT false,
-    "buildOutAllowance" DECIMAL(12,2),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -208,6 +234,22 @@ CREATE TABLE "CoLivingListing" (
     CONSTRAINT "CoLivingListing_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "ListingCharge" (
+    "id" UUID NOT NULL,
+    "listingId" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "amount" DECIMAL(12,2) NOT NULL,
+    "frequency" "ChargeFrequency" NOT NULL DEFAULT 'ONE_TIME',
+    "mandatory" BOOLEAN NOT NULL DEFAULT true,
+    "metadata" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ListingCharge_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE INDEX "ListingMedia_listingId_idx" ON "ListingMedia"("listingId");
 
@@ -232,6 +274,9 @@ CREATE UNIQUE INDEX "ShortTermListing_listingId_key" ON "ShortTermListing"("list
 -- CreateIndex
 CREATE UNIQUE INDEX "CoLivingListing_listingId_key" ON "CoLivingListing"("listingId");
 
+-- CreateIndex
+CREATE INDEX "ListingCharge_listingId_idx" ON "ListingCharge"("listingId");
+
 -- AddForeignKey
 ALTER TABLE "ListingStatusHistory" ADD CONSTRAINT "ListingStatusHistory_listingId_fkey" FOREIGN KEY ("listingId") REFERENCES "Listing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -240,6 +285,15 @@ ALTER TABLE "ListingMedia" ADD CONSTRAINT "ListingMedia_listingId_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "SaleListing" ADD CONSTRAINT "SaleListing_listingId_fkey" FOREIGN KEY ("listingId") REFERENCES "Listing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SaleListing" ADD CONSTRAINT "SaleListing_ownershipTypeId_fkey" FOREIGN KEY ("ownershipTypeId") REFERENCES "OwnershipType"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SaleListingFinancingOption" ADD CONSTRAINT "SaleListingFinancingOption_listingId_fkey" FOREIGN KEY ("listingId") REFERENCES "SaleListing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SaleListingFinancingOption" ADD CONSTRAINT "SaleListingFinancingOption_optionId_fkey" FOREIGN KEY ("optionId") REFERENCES "FinancingOption"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "RentalListing" ADD CONSTRAINT "RentalListing_listingId_fkey" FOREIGN KEY ("listingId") REFERENCES "Listing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -258,3 +312,6 @@ ALTER TABLE "ShortTermListing" ADD CONSTRAINT "ShortTermListing_listingId_fkey" 
 
 -- AddForeignKey
 ALTER TABLE "CoLivingListing" ADD CONSTRAINT "CoLivingListing_listingId_fkey" FOREIGN KEY ("listingId") REFERENCES "Listing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ListingCharge" ADD CONSTRAINT "ListingCharge_listingId_fkey" FOREIGN KEY ("listingId") REFERENCES "Listing"("id") ON DELETE CASCADE ON UPDATE CASCADE;

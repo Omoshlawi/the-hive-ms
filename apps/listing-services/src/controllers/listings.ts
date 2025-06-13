@@ -1,6 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { ListingModel } from "../models";
-import { ListingFilterSchema, ListingSchema } from "@/utils/validators";
+import {
+  ListingFilterSchema,
+  ListingSchema,
+  SaleListingSchema,
+} from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
@@ -8,7 +12,7 @@ import {
 } from "@hive/core-utils";
 import serviceClient from "@/services/service-client";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
-import { ListingType, Property } from "@/types";
+import { Property } from "@/types";
 import logger from "@/services/logger";
 import pick from "lodash/pick";
 
@@ -18,7 +22,21 @@ export const getListings = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await ListingFilterSchema.safeParseAsync(req.query);
+    const validation = await ListingFilterSchema.safeParseAsync({
+      ...req.query,
+      types: (req.query?.types as string)
+        ?.split(",")
+        ?.map((type) => type.trim()),
+      amenities: (req.query?.amenities as string)
+        ?.split(",")
+        ?.map((type) => type.trim()),
+      tags: (req.query?.tags as string)
+        ?.split(",")
+        ?.map((type) => type.trim()),
+      categories: (req.query?.categories as string)
+        ?.split(",")
+        ?.map((type) => type.trim()),
+    });
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const {
@@ -34,9 +52,8 @@ export const getListings = async (
       types,
       amenities,
       categories,
-      attributes,
+      // attributes,
     } = validation.data;
-    const listingTypes = (types?.split(",") ?? []) as ListingType[];
     const results = await ListingModel.findMany({
       where: {
         AND: [
@@ -45,7 +62,7 @@ export const getListings = async (
             organizationId: req.context?.organizationId ?? undefined,
             tags: tags
               ? {
-                  hasSome: tags.split(","),
+                  hasSome: tags,
                 }
               : undefined,
             price: { gte: minPrice, lte: maxPrice },
@@ -58,39 +75,32 @@ export const getListings = async (
               lte: listedDateEnd,
             },
             status,
-            rentalDetails: listingTypes.includes("rental")
-              ? { isNot: null }
-              : undefined,
-            leaseDetails: listingTypes.includes("lease")
-              ? { isNot: null }
-              : undefined,
-            auctionDetails: listingTypes.includes("auction")
-              ? { isNot: null }
-              : undefined,
-            saleDetails: listingTypes.includes("sale")
-              ? { isNot: null }
+            type: types?.length
+              ? {
+                  in: types,
+                }
               : undefined,
             metadata: amenities
               ? {
                   path: ["amenities"],
-                  array_contains: amenities?.split(","),
+                  array_contains: amenities,
                 }
               : undefined,
           },
-          ...(attributes?.split(",")?.map((v) => {
-            const [key, val] = v.split(":");
-            return {
-              metadata: {
-                path: ["attributes", key!.trim()],
-                equals: val!.trim(),
-              },
-            };
-          }) ?? []),
+          // ...(attributes?.split(",")?.map((v) => {
+          //   const [key, val] = v.split(":");
+          //   return {
+          //     metadata: {
+          //       path: ["attributes", key!.trim()],
+          //       equals: val!.trim(),
+          //     },
+          //   };
+          // }) ?? []),
           {
             metadata: categories
               ? {
                   path: ["categories"],
-                  array_contains: categories?.split(","),
+                  array_contains: categories,
                 }
               : undefined,
           },
@@ -149,17 +159,18 @@ export const addListing = async (
     const validation = await ListingSchema.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const allUnprovided = [
-      "saleDetails",
-      "rentalDetails",
-      "auctionDetails",
-      "leaseDetails",
-    ];
-
-    if (allUnprovided.every((field) => !(validation.data as any)[field]))
+    const { type } = validation.data;
+    if (type === "RENTAL" && !validation.data.rentalDetails)
+      throw new APIException(400, { rentalDetails: { _errors: ["Required"] } });
+    if (type === "SALE" && !validation.data.saleDetails)
+      throw new APIException(400, { saleDetails: { _errors: ["Required"] } });
+    if (type === "AUCTION" && !validation.data.auctionDetails)
       throw new APIException(400, {
-        _errors: ["You must provide atleast " + allUnprovided.join(", ")],
+        auctionDetails: { _errors: ["Required"] },
       });
+    if (type === "LEASE" && !validation.data.leaseDetails)
+      throw new APIException(400, { leaseDetails: { _errors: ["Required"] } });
+    // TODO Add for other listing types
 
     const property = await nullifyExceptionAsync(
       async () =>
@@ -186,19 +197,47 @@ export const addListing = async (
     const item = await ListingModel.create({
       data: {
         ...validation.data,
-        saleDetails: {
-          create: validation.data.saleDetails,
-        },
-        rentalDetails: {
-          create: validation.data.rentalDetails,
-        },
-        auctionDetails: {
-          create: validation.data.auctionDetails,
-        },
-        leaseDetails: {
-          create: validation.data.leaseDetails,
-        },
-        createdBy: req.context!.userId,
+        additionalCharges: validation.data?.additionalCharges?.length
+          ? {
+              createMany: {
+                data: validation.data.additionalCharges,
+                skipDuplicates: true,
+              },
+            }
+          : undefined,
+        saleDetails:
+          type === "SALE"
+            ? {
+                create: {
+                  ...validation.data.saleDetails!,
+                  financingOptions: {
+                    createMany: {
+                      skipDuplicates: true,
+                      data: validation.data.saleDetails!.financingOptions ?? [],
+                    },
+                  },
+                },
+              }
+            : undefined,
+        rentalDetails:
+          type === "RENTAL"
+            ? {
+                create: validation.data.rentalDetails,
+              }
+            : undefined,
+        auctionDetails:
+          type === "AUCTION"
+            ? {
+                create: validation.data.auctionDetails,
+              }
+            : undefined,
+        leaseDetails:
+          type === "LEASE"
+            ? {
+                create: validation.data.leaseDetails,
+              }
+            : undefined,
+        createdBy: req.context!.userId!,
         organizationId: req.context!.organizationId!,
         property: pick(property, [
           "id",
@@ -243,62 +282,70 @@ export const updateListing = async (
   try {
     const validation = await ListingSchema.omit({
       propertyId: true,
-    }).safeParseAsync(req.body);
+      additionalCharges: true,
+    })
+      .extend({
+        saleDetails: SaleListingSchema.omit({
+          financingOptions: true,
+        }).optional(),
+      })
+      .safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
 
-    const allUnprovided = [
-      "saleDetails",
-      "rentalDetails",
-      "auctionDetails",
-      "leaseDetails",
-    ];
-
-    if (allUnprovided.every((field) => !(validation.data as any)[field]))
+    const { type } = validation.data;
+    if (type === "RENTAL" && !validation.data.rentalDetails)
+      throw new APIException(400, { rentalDetails: { _errors: ["Required"] } });
+    if (type === "SALE" && !validation.data.saleDetails)
+      throw new APIException(400, { saleDetails: { _errors: ["Required"] } });
+    if (type === "AUCTION" && !validation.data.auctionDetails)
       throw new APIException(400, {
-        _errors: ["You must provide atleast " + allUnprovided.join(", ")],
+        auctionDetails: { _errors: ["Required"] },
       });
+    if (type === "LEASE" && !validation.data.leaseDetails)
+      throw new APIException(400, { leaseDetails: { _errors: ["Required"] } });
+    // TODO Add for other listing types
 
     const item = await ListingModel.update({
       where: { id: req.params.listingId, voided: false },
       data: {
         ...validation.data,
-        saleDetails: validation.data.saleDetails
-          ? {
-              upsert: {
-                where: { listingId: req.params.listingId },
-                create: validation.data.saleDetails,
-                update: validation.data.saleDetails,
-              },
-            }
-          : undefined,
-        rentalDetails: validation.data.rentalDetails
-          ? {
-              upsert: {
-                where: { listingId: req.params.listingId },
-                create: validation.data.rentalDetails,
-                update: validation.data.rentalDetails,
-              },
-            }
-          : undefined,
-        auctionDetails: validation.data.auctionDetails
-          ? {
-              upsert: {
-                where: { listingId: req.params.listingId },
-                create: validation.data.auctionDetails,
-                update: validation.data.auctionDetails,
-              },
-            }
-          : undefined,
-        leaseDetails: validation.data.leaseDetails
-          ? {
-              upsert: {
-                where: { listingId: req.params.listingId },
-                create: validation.data.leaseDetails,
-                update: validation.data.leaseDetails,
-              },
-            }
-          : undefined,
+        saleDetails:
+          type === "SALE"
+            ? {
+                update: {
+                  where: { listingId: req.params.listingId },
+                  data: validation.data.saleDetails!,
+                },
+              }
+            : undefined,
+        rentalDetails:
+          type === "RENTAL"
+            ? {
+                update: {
+                  where: { listingId: req.params.listingId },
+                  data: validation.data.rentalDetails!,
+                },
+              }
+            : undefined,
+        auctionDetails:
+          type === "AUCTION"
+            ? {
+                update: {
+                  where: { listingId: req.params.listingId },
+                  data: validation.data.auctionDetails!,
+                },
+              }
+            : undefined,
+        leaseDetails:
+          type === "LEASE"
+            ? {
+                update: {
+                  where: { listingId: req.params.listingId },
+                  data: validation.data.leaseDetails!,
+                },
+              }
+            : undefined,
         createdBy: req.context!.userId,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
@@ -315,51 +362,71 @@ export const patchListing = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await ListingSchema.omit({ propertyId: true })
+    const validation = await ListingSchema.omit({
+      propertyId: true,
+      additionalCharges: true,
+    })
+      .extend({
+        saleDetails: SaleListingSchema.omit({
+          financingOptions: true,
+        }).optional(),
+      })
       .partial()
       .safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
+    const { type } = validation.data;
+    if (type === "RENTAL" && !validation.data.rentalDetails)
+      throw new APIException(400, { rentalDetails: { _errors: ["Required"] } });
+    if (type === "SALE" && !validation.data.saleDetails)
+      throw new APIException(400, { saleDetails: { _errors: ["Required"] } });
+    if (type === "AUCTION" && !validation.data.auctionDetails)
+      throw new APIException(400, {
+        auctionDetails: { _errors: ["Required"] },
+      });
+    if (type === "LEASE" && !validation.data.leaseDetails)
+      throw new APIException(400, { leaseDetails: { _errors: ["Required"] } });
+    // TODO Add for other listing types
     const item = await ListingModel.update({
       where: { id: req.params.listingId, voided: false },
       data: {
         ...validation.data,
-        saleDetails: validation.data.saleDetails
-          ? {
-              upsert: {
-                where: { listingId: req.params.listingId },
-                create: validation.data.saleDetails,
-                update: validation.data.saleDetails,
-              },
-            }
-          : undefined,
-        rentalDetails: validation.data.rentalDetails
-          ? {
-              upsert: {
-                where: { listingId: req.params.listingId },
-                create: validation.data.rentalDetails,
-                update: validation.data.rentalDetails,
-              },
-            }
-          : undefined,
-        auctionDetails: validation.data.auctionDetails
-          ? {
-              upsert: {
-                where: { listingId: req.params.listingId },
-                create: validation.data.auctionDetails,
-                update: validation.data.auctionDetails,
-              },
-            }
-          : undefined,
-        leaseDetails: validation.data.leaseDetails
-          ? {
-              upsert: {
-                where: { listingId: req.params.listingId },
-                create: validation.data.leaseDetails,
-                update: validation.data.leaseDetails,
-              },
-            }
-          : undefined,
+        saleDetails:
+          type === "SALE"
+            ? {
+                update: {
+                  where: { listingId: req.params.listingId },
+                  data: validation.data.saleDetails!,
+                },
+              }
+            : undefined,
+        rentalDetails:
+          type === "RENTAL"
+            ? {
+                update: {
+                  where: { listingId: req.params.listingId },
+                  data: validation.data.rentalDetails!,
+                },
+              }
+            : undefined,
+        auctionDetails:
+          type === "AUCTION"
+            ? {
+                update: {
+                  where: { listingId: req.params.listingId },
+                  data: validation.data.auctionDetails!,
+                },
+              }
+            : undefined,
+        leaseDetails:
+          type === "LEASE"
+            ? {
+                update: {
+                  where: { listingId: req.params.listingId },
+                  data: validation.data.leaseDetails!,
+                },
+              }
+            : undefined,
         createdBy: req.context!.userId,
         organizationId: req.context!.organizationId!,
       },

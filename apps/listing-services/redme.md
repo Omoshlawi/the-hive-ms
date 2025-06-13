@@ -293,3 +293,87 @@ Key features:
 - Used for high-value properties or exclusive auctions.
 - 💡 Example:
   A KES 50M luxury home auction requires bidder approval to ensure serious buyers only.
+
+
+---
+
+# Property Ownership Types
+
+Understanding the different types of property ownership is fundamental in real estate. These categories define the nature of rights and responsibilities held by the owner(s) over a piece of land or a unit within a building.
+
+---
+
+### 1. **Freehold**
+* **Definition:** This is the most complete form of private property ownership. The owner holds the absolute right to the land and any buildings on it, indefinitely, without any time limit.
+* **Key Characteristics:**
+    * **Perpetual Ownership:** Ownership lasts forever, inherited by heirs.
+    * **Full Control:** The owner has maximum control over the property, subject only to general planning laws and regulations (e.g., zoning, environmental laws).
+    * **No Ground Rent:** Typically no ongoing rent is paid to a superior landlord (though property taxes and service charges for shared amenities may apply).
+    * **Kenya Context:** Commonly referred to as "absolute ownership" and typically granted for terms exceeding 99 years, often effectively perpetual, though the specific legal term might be "fee simple" or similar, usually a grant for 999 years or freehold.
+
+### 2. **Leasehold**
+* **Definition:** Ownership of a property for a fixed period of time, as defined by a lease agreement. The leaseholder owns the right to occupy and use the property for the duration of the lease, but the land itself remains owned by the freeholder (landlord).
+* **Key Characteristics:**
+    * **Time-Limited:** Ownership reverts to the freeholder at the end of the lease term.
+    * **Ground Rent:** Leaseholders typically pay ground rent to the freeholder.
+    * **Lease Covenants:** Subject to the terms and conditions (covenants) stipulated in the lease agreement.
+    * **Kenya Context:** Common for urban properties, particularly in larger cities. Leases are typically granted for 99 years for Kenyans and 99 years for non-Kenyans from the date of the grant. Renewals are often possible but not guaranteed.
+
+### 3. **Strata Title / Condominium**
+* **Definition:** A form of ownership primarily used for units within multi-unit developments (apartments, townhouses). The owner holds outright ownership of their individual unit, plus a proportional share of the common property (e.g., land, hallways, roofs, gardens, shared facilities like gyms or pools).
+* **Key Characteristics:**
+    * **Dual Ownership:** Individual unit ownership + shared ownership of common areas.
+    * **Body Corporate/Management Company:** An owners' association (e.g., Management Company in Kenya, Body Corporate, HOA) manages and maintains the common areas, funded by service charges or levies from all unit owners.
+    * **Kenya Context:** Increasingly common for apartments and gated communities. The legal framework often involves the registration of a management company that holds the reversionary interest of the land, while individual unit owners are granted long-term leases (e.g., 99 years) over their units and shares in the management company. This acts very similarly to a global condominium model.
+
+### 4. **Commonhold (Primarily UK)**
+* **Definition:** A modern alternative to leasehold for multi-unit properties. Unit owners own the freehold of their individual unit and collectively own and manage the common parts of the building through a commonhold association.
+* **Key Characteristics:**
+    * **Perpetual Unit Ownership:** Unlike leasehold, individual unit ownership is not time-limited.
+    * **No Ground Rent:** No ground rent is paid to a superior landlord.
+    * **Collective Management:** Owners democratically manage the building's common areas.
+* **Note:** While similar in principle to Strata Title/Condominium, it's a specific legal framework primarily in the UK.
+
+### 5. **Co-ownership (How multiple individuals hold an interest)**
+These describe how multiple individuals hold a freehold or leasehold interest in a single property.
+
+* **Joint Tenancy**
+    * **Definition:** Two or more people own the entire property together with equal rights and interests.
+    * **Key Characteristic:** Includes the "right of survivorship" – if one joint tenant dies, their share automatically passes to the surviving joint tenant(s), regardless of their will.
+    * **Common Use:** Often used by married couples.
+
+* **Tenancy in Common**
+    * **Definition:** Two or more people own distinct, undivided shares of a property. These shares can be equal or unequal.
+    * **Key Characteristic:** No right of survivorship – if one tenant in common dies, their share passes according to their will or the laws of intestacy, not automatically to the other co-owner(s).
+    * **Common Use:** Friends or business partners buying property together, or family members who wish to ensure their share passes to their heirs.
+
+### 6. **Trust Ownership**
+* **Definition:** A property is legally owned by a trustee (an individual or entity) who holds the legal title, but manages it for the benefit of one or more beneficiaries who hold the equitable or beneficial interest.
+* **Key Characteristics:**
+    * **Separation of Legal & Beneficial Ownership:** The trustee has legal control, beneficiaries receive benefits.
+    * **Purpose:** Often used for estate planning, asset protection, managing property for minors, or for charitable purposes.
+    * **Kenya Context:** Trusts are legally recognized in Kenya and are used for various purposes, including land ownership.
+
+### 7. **Company / Corporate Ownership**
+* **Definition:** A legal entity (a company or corporation) owns the property. Individuals involved own shares in the company, which in turn owns the property.
+* **Key Characteristics:**
+    * **Limited Liability:** Owners of the company have limited liability for company debts.
+    * **Ease of Transfer:** Ownership can be transferred by selling shares in the company, which can sometimes simplify property transfer processes.
+    * **Tax Implications:** Specific tax treatments apply to company-owned properties.
+    * **Kenya Context:** Very common for commercial properties, large developments, and sometimes for residential properties held by investors.
+
+### 8. **Shared Ownership (Assisted Homeownership)**
+* **Definition:** A model, often government-backed, where a buyer purchases a percentage of a property (e.g., 25% to 75%) and pays rent on the remaining percentage, which is owned by a housing association or similar body.
+* **Key Characteristics:**
+    * **Phased Ownership:** The buyer can typically buy additional shares over time ("staircasing") until they own the entire property.
+    * **Affordability:** Designed to make homeownership more accessible for those who cannot afford to buy outright.
+* **Kenya Context:** Similar concepts exist in Kenya through various affordable housing schemes or specific arrangements, though not always under this exact nomenclature.
+
+### 9. **Customary Land Tenure (Highly Relevant in Kenya)**
+* **Definition:** A traditional system of land ownership based on the customs, norms, and practices of a particular community, clan, or ethnic group. Land is often held communally, with individual rights to use or occupy land derived from membership in that community.
+* **Key Characteristics:**
+    * **Community/Clan Based:** Rights are rooted in community membership rather than individual title deeds initially.
+    * **Unwritten Rules:** Historically governed by unwritten traditional laws, though increasingly being documented and recognized.
+    * **Kenya Context:** This is a very significant form of land tenure in Kenya, especially in rural areas. The **Constitution of Kenya (2010)** and the **Community Land Act (2016)** explicitly recognize and provide for the registration of community land and customary land rights, aiming to formalize and secure these traditional forms of ownership.
+
+---

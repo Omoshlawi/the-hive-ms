@@ -1,6 +1,9 @@
 import db from "@/services/db";
 
 export const ListingMediaModel = db.listingMedia;
+export const OwnershipTypesModel = db.ownershipType;
+export const FinancingOptionsModel = db.financingOption;
+export const SaleListingFinancingOptionsModel = db.saleListingFinancingOption;
 export const ListingModel = db.listing;
 export const SaleListingModel = db.saleListing;
 export const RentalListingModel = db.rentalListing;
