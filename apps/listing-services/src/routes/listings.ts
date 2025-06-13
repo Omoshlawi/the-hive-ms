@@ -17,6 +17,7 @@ import {
 } from "../controllers/listings";
 import listingAdditionalChargesRouter from "./listing-additional-charges";
 import listingFinancingRouter from "./listing-financial-options";
+import listingStatusRouter from "./listing-status";
 const router = Router({ mergeParams: true });
 
 router.get("/", getListings);
@@ -79,6 +80,15 @@ router.use(
   "/:listingId/additional-charges",
   [validateUUIDPathParam("listingId")],
   listingAdditionalChargesRouter
+);
+router.use(
+  "/:listingId/status",
+  [
+    requireAuthentication(serviceClient),
+    requireContext,
+    requireOrganizationContext(serviceClient),
+  ],
+  listingStatusRouter
 );
 
 export default router;

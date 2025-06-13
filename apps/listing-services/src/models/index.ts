@@ -5,6 +5,7 @@ export const OwnershipTypesModel = db.ownershipType;
 export const FinancingOptionsModel = db.financingOption;
 export const SaleListingFinancingOptionsModel = db.saleListingFinancingOption;
 export const ListingModel = db.listing;
+export const ListingStatusModel = db.listingStatusHistory;
 export const ListingAdditionalChargesModel = db.listingCharge;
 export const SaleListingModel = db.saleListing;
 export const RentalListingModel = db.rentalListing;
