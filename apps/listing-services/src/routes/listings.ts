@@ -15,7 +15,8 @@ import {
   purgeListing,
   updateListing,
 } from "../controllers/listings";
-
+import listingAdditionalChargesRouter from "./listing-additional-charges";
+import listingFinancingRouter from "./listing-financial-options";
 const router = Router({ mergeParams: true });
 
 router.get("/", getListings);
@@ -68,6 +69,16 @@ router.purge(
     requireOrganizationContext(serviceClient),
   ],
   purgeListing
+);
+router.use(
+  "/:listingId/financing-options",
+  [validateUUIDPathParam("listingId")],
+  listingFinancingRouter
+);
+router.use(
+  "/:listingId/additional-charges",
+  [validateUUIDPathParam("listingId")],
+  listingAdditionalChargesRouter
 );
 
 export default router;
