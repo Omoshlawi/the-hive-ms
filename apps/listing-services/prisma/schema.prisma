@@ -122,17 +122,20 @@ model Listing {
 model OwnershipType {
   id          String        @id @default(uuid()) @db.Uuid
   name        String
-  description String        @db.Text
+  description String?       @db.Text
   listings    SaleListing[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  voided      Boolean       @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model FinancingOption {
   id          String                       @id @default(uuid()) @db.Uuid
   name        String
-  description String                       @db.Text
+  description String?                      @db.Text
   listings    SaleListingFinancingOption[]
+  voided      Boolean                      @default(false)
   createdAt   DateTime                     @default(now())
   updatedAt   DateTime                     @updatedAt
 }
@@ -161,8 +164,11 @@ model SaleListingFinancingOption {
   listing   SaleListing     @relation(fields: [listingId], onDelete: Cascade, references: [id])
   optionId  String          @db.Uuid
   option    FinancingOption @relation(fields: [optionId], onDelete: Cascade, references: [id])
+  voided    Boolean         @default(false)
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
+
+  @@unique([listingId, optionId])
 }
 
 model RentalListing {
@@ -342,6 +348,7 @@ model ListingCharge {
   mandatory   Boolean         @default(true)
 
   metadata Json?
+  voided   Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

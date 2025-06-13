@@ -12,9 +12,23 @@ import {
 } from "@hive/core-utils";
 import serviceClient from "@/services/service-client";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
-import { Property } from "@/types";
+import { ListingData, Property } from "@/types";
 import logger from "@/services/logger";
 import pick from "lodash/pick";
+
+const validateTypes = (type: ListingData["type"] | undefined, data: any) => {
+  if (type === "RENTAL" && !data.rentalDetails)
+    throw new APIException(400, { rentalDetails: { _errors: ["Required"] } });
+  if (type === "SALE" && !data.saleDetails)
+    throw new APIException(400, { saleDetails: { _errors: ["Required"] } });
+  if (type === "AUCTION" && !data.auctionDetails)
+    throw new APIException(400, {
+      auctionDetails: { _errors: ["Required"] },
+    });
+  if (type === "LEASE" && !data.leaseDetails)
+    throw new APIException(400, { leaseDetails: { _errors: ["Required"] } });
+  // TODO Add for other listing types
+};
 
 export const getListings = async (
   req: Request,
@@ -30,9 +44,7 @@ export const getListings = async (
       amenities: (req.query?.amenities as string)
         ?.split(",")
         ?.map((type) => type.trim()),
-      tags: (req.query?.tags as string)
-        ?.split(",")
-        ?.map((type) => type.trim()),
+      tags: (req.query?.tags as string)?.split(",")?.map((type) => type.trim()),
       categories: (req.query?.categories as string)
         ?.split(",")
         ?.map((type) => type.trim()),
@@ -160,17 +172,7 @@ export const addListing = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { type } = validation.data;
-    if (type === "RENTAL" && !validation.data.rentalDetails)
-      throw new APIException(400, { rentalDetails: { _errors: ["Required"] } });
-    if (type === "SALE" && !validation.data.saleDetails)
-      throw new APIException(400, { saleDetails: { _errors: ["Required"] } });
-    if (type === "AUCTION" && !validation.data.auctionDetails)
-      throw new APIException(400, {
-        auctionDetails: { _errors: ["Required"] },
-      });
-    if (type === "LEASE" && !validation.data.leaseDetails)
-      throw new APIException(400, { leaseDetails: { _errors: ["Required"] } });
-    // TODO Add for other listing types
+    validateTypes(type, validation.data);
 
     const property = await nullifyExceptionAsync(
       async () =>
@@ -294,17 +296,7 @@ export const updateListing = async (
       throw new APIException(400, validation.error.format());
 
     const { type } = validation.data;
-    if (type === "RENTAL" && !validation.data.rentalDetails)
-      throw new APIException(400, { rentalDetails: { _errors: ["Required"] } });
-    if (type === "SALE" && !validation.data.saleDetails)
-      throw new APIException(400, { saleDetails: { _errors: ["Required"] } });
-    if (type === "AUCTION" && !validation.data.auctionDetails)
-      throw new APIException(400, {
-        auctionDetails: { _errors: ["Required"] },
-      });
-    if (type === "LEASE" && !validation.data.leaseDetails)
-      throw new APIException(400, { leaseDetails: { _errors: ["Required"] } });
-    // TODO Add for other listing types
+    validateTypes(type, validation.data);
 
     const item = await ListingModel.update({
       where: { id: req.params.listingId, voided: false },
@@ -376,17 +368,8 @@ export const patchListing = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { type } = validation.data;
-    if (type === "RENTAL" && !validation.data.rentalDetails)
-      throw new APIException(400, { rentalDetails: { _errors: ["Required"] } });
-    if (type === "SALE" && !validation.data.saleDetails)
-      throw new APIException(400, { saleDetails: { _errors: ["Required"] } });
-    if (type === "AUCTION" && !validation.data.auctionDetails)
-      throw new APIException(400, {
-        auctionDetails: { _errors: ["Required"] },
-      });
-    if (type === "LEASE" && !validation.data.leaseDetails)
-      throw new APIException(400, { leaseDetails: { _errors: ["Required"] } });
-    // TODO Add for other listing types
+    validateTypes(type, validation.data);
+
     const item = await ListingModel.update({
       where: { id: req.params.listingId, voided: false },
       data: {

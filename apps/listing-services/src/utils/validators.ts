@@ -18,7 +18,7 @@ export const ListingMediaSchema = z.object({
 });
 
 export const SaleListingFinancingOptionSchema = z.object({
-  listingId: z.string().uuid("Invalid"),
+  // listingId: z.string().uuid("Invalid"),
   optionId: z.string().uuid("Invalid"),
 });
 
@@ -28,7 +28,7 @@ export const SaleListingSchema = z.object({
   priceNegotiable: z.boolean().optional(),
   ownershipTypeId: z.string().uuid("Invalid"),
   titleDeedReady: z.boolean().optional(),
-  financingOptions: SaleListingFinancingOptionSchema.omit({ listingId: true })
+  financingOptions: SaleListingFinancingOptionSchema//.omit({ listingId: true })
     .array()
     .nonempty("Atleast one payment option required"),
 });
@@ -62,7 +62,7 @@ export const AuctionListingSchema = z.object({
 });
 
 export const ListingAdditionalCharges = z.object({
-  listingId: z.string().uuid("invalid"),
+  // listingId: z.string().uuid("invalid"),
   name: z.string().nonempty("Required"),
   description: z.string().optional(),
   amount: z.number().nonnegative(),
