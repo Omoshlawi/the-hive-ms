@@ -53,13 +53,13 @@ model Category {
 }
 
 enum PropertyStatus {
-  Draft //  signifies that the record is incomplete and actively being worked on. It allows for saving partial data without requiring full validation.
-  Blocked //Admin-flagged as problematic (fraud, legal issues, etc.)
-  Archived // Historic data; property no longer tracked actively (e.g., sold long ago)
-  Approved // has successfully passed all internal validation and review processes and considered complete, accurate, and fully compliant with internal standards hence eligible for Listing 
-  Rejected // Rejected due to invalid/incomplete/unverifiable information
-  Paused // Temporarily not in use (e.g., maintenance, dispute, owner unavailable)
-  Pending // Property has been submitted by an agent/user and is under internal review
+  DRAFT //  signifies that the record is incomplete and actively being worked on. It allows for saving partial data without requiring full validation.
+  BLOCKED //Admin-flagged as problematic (fraud, legal issues, etc.)
+  ARCHIVED // Historic data; property no longer tracked actively (e.g., sold long ago)
+  APPROVED // has successfully passed all internal validation and review processes and considered complete, accurate, and fully compliant with internal standards hence eligible for Listing 
+  REJECTED // Rejected due to invalid/incomplete/unverifiable information
+  PAUSED // Temporarily not in use (e.g., maintenance, dispute, owner unavailable)
+  PENDING // Property has been submitted by an agent/user and is under internal review
 }
 
 model PropertyStatusHistory {
@@ -80,7 +80,7 @@ model Property {
   thumbnail   String?
   isVirtual   Boolean @default(false) // used to group or organize real properties for logical, operational, or hierarchical purposes.Also perfome batch operations on related real properties
 
-  status PropertyStatus @default(Draft)
+  status PropertyStatus @default(DRAFT)
 
   organizationId String
   organization   Json?
@@ -153,10 +153,10 @@ model PropertyMedia {
 }
 
 enum PropertyMediaType {
-  Image
-  Video
-  Document
-  Tour_3D
+  IMAGE
+  VIDEO
+  DOCUMENT
+  TOUR_3D
 }
 
 model PropertyAttribute {

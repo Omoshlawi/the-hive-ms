@@ -191,7 +191,7 @@ export const addListing = async (
         )
     )();
 
-    if (!property)
+    if (!property || property.status !== "APPROVED")
       throw new APIException(400, {
         propertyId: { _errors: ["Invalid property"] },
       });

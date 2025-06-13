@@ -9,6 +9,7 @@ export interface Property {
   categories: Array<{ category: Category }>;
   amenities: Array<{ amenity: Amenity }>;
   attributes: Array<Attribute>;
+  status: string;
 }
 
 export interface Address {

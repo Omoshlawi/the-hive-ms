@@ -33,7 +33,7 @@ export const CategorySchema = z.object({
 // Property Media
 export const PropertyMediaSchema = z.object({
   // propertyId: z.string().uuid(),
-  type: z.enum(["Image", "Video", "Document", "Tour_3D"]),
+  type: z.enum(["IMAGE", "VIDEO", "DOCUMENT", "TOUR_3D"]),
   url: z.string().min(1, "Required"),
   title: z.string().min(1, "Required").optional(),
   description: z.string().min(1, "Required").optional(),
@@ -91,13 +91,13 @@ export const PropertyfiltersSchema = z.object({
   search: z.string().optional(),
   status: z
     .enum([
-      "Blocked",
-      "Draft",
-      "Archived",
-      "Approved",
-      "Rejected",
-      "Paused",
-      "Pending",
+      "DRAFT",
+      "BLOCKED",
+      "ARCHIVED",
+      "APPROVED",
+      "REJECTED",
+      "PAUSED",
+      "PENDING",
     ])
     .optional(),
 });

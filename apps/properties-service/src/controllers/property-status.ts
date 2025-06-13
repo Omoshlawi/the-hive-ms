@@ -41,7 +41,7 @@ export const getPropertyStatus = async (
   }
 };
 
-export const submitForReview = async (
+export const submitDraftPropertyForReview = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -52,20 +52,20 @@ export const submitForReview = async (
     const property = await PropertiesModel.findUniqueOrThrow({
       where: { id: propertyId },
     });
-    if (property.status !== "Draft")
+    if (property.status !== "DRAFT")
       throw new APIException(403, {
         detail: "Operation only allowed for draft properties",
       });
     //TODO validate property info to ensure all required info and propertly entered
     await PropertiesModel.update({
       where: { id: propertyId },
-      data: { status: "Pending" },
+      data: { status: "PENDING" },
     });
     const item = await PropertyStatusHistoryModel.create({
       data: {
         propertyId,
         previousStatus: property.status,
-        newStatus: "Pending",
+        newStatus: "PENDING",
         changedBy: user,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
@@ -78,7 +78,7 @@ export const submitForReview = async (
   }
 };
 
-export const approveProperty = async (
+export const approvePendingProperty = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -89,20 +89,20 @@ export const approveProperty = async (
     const property = await PropertiesModel.findUniqueOrThrow({
       where: { id: propertyId },
     });
-    if (property.status !== "Pending")
+    if (property.status !== "PENDING")
       throw new APIException(403, {
         detail: "operation alloewed ony for properties pending approval",
       });
     //TODO validate property info to ensure all required info and propertly entered
     await PropertiesModel.update({
       where: { id: propertyId },
-      data: { status: "Approved" },
+      data: { status: "APPROVED" },
     });
     const item = await PropertyStatusHistoryModel.create({
       data: {
         propertyId,
         previousStatus: property.status,
-        newStatus: "Approved",
+        newStatus: "APPROVED",
         changedBy: user,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),

@@ -1,9 +1,9 @@
 import { Router } from "express";
 import {
-  approveProperty,
+  approvePendingProperty,
   getPropertyStatus,
   getPropertyStatusHostory,
-  submitForReview,
+  submitDraftPropertyForReview,
 } from "../controllers/property-status";
 import {
   requireAuthentication,
@@ -24,12 +24,12 @@ router.get("/", getPropertyStatusHostory);
 router.post(
   "/submit",
   [requireContext, requireOrganizationContext(serviceClient)],
-  submitForReview
+  submitDraftPropertyForReview
 );
 router.post(
   "/approve",
   [requireContext, requireOrganizationContext(serviceClient)],
-  approveProperty
+  approvePendingProperty
 );
 
 export default router;
