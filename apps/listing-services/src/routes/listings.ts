@@ -18,6 +18,7 @@ import {
 import listingAdditionalChargesRouter from "./listing-additional-charges";
 import listingFinancingRouter from "./listing-financial-options";
 import listingStatusRouter from "./listing-status";
+import listingMediaRouter from "./listing-media";
 const router = Router({ mergeParams: true });
 
 router.get("/", getListings);
@@ -80,6 +81,11 @@ router.use(
   "/:listingId/additional-charges",
   [validateUUIDPathParam("listingId")],
   listingAdditionalChargesRouter
+);
+router.use(
+  "/:listingId/media",
+  [validateUUIDPathParam("listingId")],
+  listingMediaRouter
 );
 router.use(
   "/:listingId/status",

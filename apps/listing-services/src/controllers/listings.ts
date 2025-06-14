@@ -301,7 +301,7 @@ export const updateListing = async (
     validateTypes(type, validation.data);
 
     const item = await ListingModel.update({
-      where: { id: req.params.listingId, voided: false },
+      where: { id: req.params.listingId, voided: false, type },
       data: {
         ...validation.data,
         saleDetails:
@@ -373,7 +373,7 @@ export const patchListing = async (
     validateTypes(type, validation.data);
 
     const item = await ListingModel.update({
-      where: { id: req.params.listingId, voided: false },
+      where: { id: req.params.listingId, voided: false, type },
       data: {
         ...validation.data,
         saleDetails:

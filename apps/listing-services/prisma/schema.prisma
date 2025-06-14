@@ -49,11 +49,11 @@ model ListingMedia {
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   tags            String[]  @default([])
-  title           String
+  title           String?
   description     String?   @db.Text
   url             String
   metadata        Json?
-  mediaType       MediaType @default(IMAGE) // New!
+  mediaType       MediaType @default(IMAGE)
   documentPurpose String? // e.g., “terms”, “renewalPolicy”, “maintenanceAgreement”
 
   order     Int      @default(0)

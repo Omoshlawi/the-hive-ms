@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  addListingAdditionalCharge,
-  deleteListingAdditionalCharge,
-  getListingAdditionalCharge,
-  getListingAdditionalCharges,
-  patchListingAdditionalCharge,
-  purgeListingAdditionalCharge,
-  updateListingAdditionalCharge,
-} from "../controllers/listing-additional-charges";
+  addListingMedia,
+  deleteListingMedia,
+  getListingMedia,
+  getListingMedias,
+  patchListingMedia,
+  purgeListingMedia,
+  updateListingMedia,
+} from "../controllers/listing-media";
 import {
   requireAuthentication,
   requireContext,
@@ -18,7 +18,7 @@ import serviceClient from "@/services/service-client";
 
 const router = Router({ mergeParams: true });
 
-router.get("/", getListingAdditionalCharges);
+router.get("/", getListingMedias);
 router.post(
   "/",
   [
@@ -26,52 +26,48 @@ router.post(
     requireContext,
     requireOrganizationContext(serviceClient),
   ],
-  addListingAdditionalCharge
+  addListingMedia
 );
-router.get(
-  "/:chargeId",
-  [validateUUIDPathParam("chargeId")],
-  getListingAdditionalCharge
-);
+router.get("/:mediaId", [validateUUIDPathParam("mediaId")], getListingMedia);
 router.patch(
-  "/:chargeId",
+  "/:mediaId",
   [
-    validateUUIDPathParam("chargeId"),
+    validateUUIDPathParam("mediaId"),
     requireAuthentication(serviceClient),
     requireContext,
     requireOrganizationContext(serviceClient),
   ],
-  patchListingAdditionalCharge
+  patchListingMedia
 );
 router.put(
-  "/:chargeId",
+  "/:mediaId",
   [
-    validateUUIDPathParam("chargeId"),
+    validateUUIDPathParam("mediaId"),
     requireAuthentication(serviceClient),
     requireContext,
     requireOrganizationContext(serviceClient),
   ],
-  updateListingAdditionalCharge
+  updateListingMedia
 );
 router.delete(
-  "/:chargeId",
+  "/:mediaId",
   [
-    validateUUIDPathParam("chargeId"),
+    validateUUIDPathParam("mediaId"),
     requireAuthentication(serviceClient),
     requireContext,
     requireOrganizationContext(serviceClient),
   ],
-  deleteListingAdditionalCharge
+  deleteListingMedia
 );
 router.purge(
-  "/:chargeId",
+  "/:mediaId",
   [
-    validateUUIDPathParam("chargeId"),
+    validateUUIDPathParam("mediaId"),
     requireAuthentication(serviceClient),
     requireContext,
     requireOrganizationContext(serviceClient),
   ],
-  purgeListingAdditionalCharge
+  purgeListingMedia
 );
 
 export default router;

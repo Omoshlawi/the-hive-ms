@@ -8,12 +8,26 @@ import {
   purgeSalesListingFinancialOption,
   updateSalesListingFinancialOption,
 } from "../controllers/listing-financial-options";
-import { validateUUIDPathParam } from "@hive/shared-middlewares";
+import {
+  requireAuthentication,
+  requireContext,
+  requireOrganizationContext,
+  validateUUIDPathParam,
+} from "@hive/shared-middlewares";
+import serviceClient from "@/services/service-client";
 
 const router = Router({ mergeParams: true });
 
 router.get("/", getSalesListingFinancialOptions);
-router.post("/", addSalesListingFinancialOption);
+router.post(
+  "/",
+  [
+    requireAuthentication(serviceClient),
+    requireContext,
+    requireOrganizationContext(serviceClient),
+  ],
+  addSalesListingFinancialOption
+);
 router.get(
   "/:optionId",
   [validateUUIDPathParam("optionId")],
@@ -21,22 +35,42 @@ router.get(
 );
 router.patch(
   "/:optionId",
-  [validateUUIDPathParam("optionId")],
+  [
+    validateUUIDPathParam("optionId"),
+    requireAuthentication(serviceClient),
+    requireContext,
+    requireOrganizationContext(serviceClient),
+  ],
   patchSalesListingFinancialOption
 );
 router.put(
   "/:optionId",
-  [validateUUIDPathParam("optionId")],
+  [
+    validateUUIDPathParam("optionId"),
+    requireAuthentication(serviceClient),
+    requireContext,
+    requireOrganizationContext(serviceClient),
+  ],
   updateSalesListingFinancialOption
 );
 router.delete(
   "/:optionId",
-  [validateUUIDPathParam("optionId")],
+  [
+    validateUUIDPathParam("optionId"),
+    requireAuthentication(serviceClient),
+    requireContext,
+    requireOrganizationContext(serviceClient),
+  ],
   deleteSalesListingFinancialOption
 );
 router.purge(
   "/:optionId",
-  [validateUUIDPathParam("optionId")],
+  [
+    validateUUIDPathParam("optionId"),
+    requireAuthentication(serviceClient),
+    requireContext,
+    requireOrganizationContext(serviceClient),
+  ],
   purgeSalesListingFinancialOption
 );
 
