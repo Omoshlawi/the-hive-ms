@@ -181,7 +181,7 @@ export const addListing = async (
           url: `/properties/${validation.data.propertyId}`,
           headers: sanitizeHeaders(req),
           params: {
-            v: "custom:select(id,name,thumbnail,address,addressId,categories:select(category:select(id,name)),amenities:select(amenity:select(id,name)),attributes:select(value,attribute:select(id,name)))",
+            v: "custom:select(id,name,status,thumbnail,address,addressId,categories:select(category:select(id,name)),amenities:select(amenity:select(id,name)),attributes:select(value,attribute:select(id,name)))",
           },
         }),
       (err) =>
@@ -215,7 +215,9 @@ export const addListing = async (
                   financingOptions: {
                     createMany: {
                       skipDuplicates: true,
-                      data: validation.data.saleDetails!.financingOptions ?? [],
+                      data: (
+                        validation.data.saleDetails!.financingOptions ?? []
+                      ).map((optionId) => ({ optionId })),
                     },
                   },
                 },

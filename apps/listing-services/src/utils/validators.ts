@@ -28,7 +28,9 @@ export const SaleListingSchema = z.object({
   priceNegotiable: z.boolean().optional(),
   ownershipTypeId: z.string().uuid("Invalid"),
   titleDeedReady: z.boolean().optional(),
-  financingOptions: SaleListingFinancingOptionSchema//.omit({ listingId: true })
+  financingOptions: z
+    .string()
+    .uuid("Invalid")
     .array()
     .nonempty("Atleast one payment option required"),
 });
@@ -107,9 +109,7 @@ export const FinancingOptionSchema = z.object({
 
 export const ListingFilterSchema = z.object({
   search: z.string().optional(),
-  tags: z
-    .string().array()
-    .optional(),
+  tags: z.string().array().optional(),
   status: z
     .enum([
       "DRAFT",
@@ -117,7 +117,7 @@ export const ListingFilterSchema = z.object({
       "BLOCKED",
       "APPROVED",
       "REJECTED",
-      "UNDER_CONTRACTED",
+      "UNDER_CONTRACT",
       "SOLD",
       "LEASED",
       "RENTED",
