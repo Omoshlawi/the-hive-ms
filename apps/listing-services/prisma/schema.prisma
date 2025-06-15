@@ -53,7 +53,7 @@ model ListingMedia {
   description     String?   @db.Text
   url             String
   metadata        Json?
-  mediaType       MediaType @default(IMAGE)
+  mediaType       MediaType
   documentPurpose String? // e.g., “terms”, “renewalPolicy”, “maintenanceAgreement”
 
   order     Int      @default(0)

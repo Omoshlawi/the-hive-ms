@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { ListingMediaModel } from "../models";
-import { ListingMediaSchema } from "@/utils/validators";
+import {
+  ListingMediaFilterSchema,
+  ListingMediaSchema,
+} from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
@@ -13,9 +16,17 @@ export const getListingMedias = async (
 ) => {
   try {
     const listingId = req.params.listingId;
-
+    const validation = await ListingMediaFilterSchema.safeParseAsync(req.body);
+    if (!validation.success)
+      throw new APIException(400, validation.error.format());
+    const { size, tags, ...filters } = validation.data;
     const results = await ListingMediaModel.findMany({
-      where: { voided: false, listingId },
+      where: {
+        voided: false,
+        listingId,
+        tags: tags?.length ? { hasSome: tags ?? [] } : undefined,
+        ...filters,
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json({ results });
