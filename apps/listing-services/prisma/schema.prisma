@@ -242,8 +242,9 @@ model RentToOwnListing {
 
   // Purchase terms
   requiredDownPayment Decimal @db.Decimal(12, 2)
-  maintenanceTerms    String? @db.Text // TODO Remove and replace with terms document
-  purchaseTerms       String? @db.Text // TODO Remove and replace with terms document
+  // Replaced by listing media document explaining all that
+  // maintenanceTerms    String? @db.Text 
+  // purchaseTerms       String? @db.Text 
 
   // Financial requirements
   minimumIncome       Decimal? @db.Decimal(12, 2)

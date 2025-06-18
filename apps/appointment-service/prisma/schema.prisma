@@ -1,0 +1,300 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../dist/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core appointment model
+model Appointment {
+  id          String  @id @default(uuid()) @db.Uuid
+  title       String
+  description String?
+
+  // Scheduling details
+  startTime DateTime
+  endTime   DateTime
+  timezone  String   @default("UTC")
+  duration  Int // Duration in minutes
+
+  // Status and workflow
+  status   AppointmentStatus @default(SCHEDULED)
+  priority Priority          @default(MEDIUM)
+
+  // Relationships
+  appointmentTypeId String          @db.Uuid
+  appointmentType   AppointmentType @relation(fields: [appointmentTypeId], references: [id])
+
+  organizerId    String @db.Uuid // User id of the organizaer
+  organizer      Json? // Minimal essential user  details cache from user-service
+  organizationId String
+  organization   Json? // Minimal organization details
+
+  // Participants (many-to-many)
+  participants AppointmentParticipant[]
+
+  // Flexible metadata for type-specific data
+  metadata Json?
+
+  // Resources (properties, rooms, equipment)
+  resources AppointmentResource[] // MVP Resources
+
+  // TODO future enhancements
+  // Location details
+  // location AppointmentLocation?
+
+  // TODO Move to notifications service
+  // Notifications and reminders
+  // notifications AppointmentNotification[]
+
+  // Audit fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String
+
+  // Recurring appointments
+  recurrenceRule String? // RRULE format
+  parentId       String?       @db.Uuid // For recurring series
+  parent         Appointment?  @relation("RecurringAppointments", fields: [parentId], references: [id])
+  children       Appointment[] @relation("RecurringAppointments")
+
+  // Cancellation/Rescheduling
+  cancelledAt        DateTime?
+  cancellationReason String?
+  rescheduledFrom    String? // Previous appointment ID
+
+  @@index([startTime, endTime])
+  @@index([organizerId])
+  @@index([status])
+  @@index([appointmentTypeId])
+  @@map("appointments")
+}
+
+// Appointment types for different real estate activities
+model AppointmentType {
+  id          String              @id @default(uuid()) @db.Uuid
+  name        String              @unique
+  description String?
+  category    AppointmentCategory
+
+  // Default settings
+  defaultDuration    Int // Minutes
+  bufferTimeBefore   Int? // Minutes
+  bufferTimeAfter    Int? // Minutes
+  allowOnlineBooking Boolean @default(true)
+  requiresApproval   Boolean @default(false)
+  maxParticipants    Int?
+
+  // Availability settings
+  availabilityRules Json? // Flexible rules for when this type can be booked
+
+  // Required fields configuration
+  requiredFields Json? // Define what fields are required for this type
+
+  // Pricing (if applicable)
+  baseCost Decimal? @db.Decimal(10, 2)
+
+  appointments Appointment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("appointment_types")
+}
+
+// Participants in appointments (many-to-many with metadata)
+model AppointmentParticipant {
+  id            String      @id @default(uuid()) @db.Uuid
+  appointmentId String      @db.Uuid
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  userId String @db.Uuid
+  user   Json?
+
+  role       ParticipantRole   @default(ATTENDEE)
+  status     ParticipantStatus @default(PENDING)
+  isRequired Boolean           @default(true)
+
+  // Response tracking
+  respondedAt DateTime?
+  notes       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([appointmentId, userId])
+  @@map("appointment_participants")
+}
+
+model AppointmentResource {
+  id            String      @id @default(uuid()) @db.Uuid
+  appointmentId String      @db.Uuid
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  resourceId    String      @db.Uuid
+  resource      Json?
+  resourceModel String
+  //   // Resource-specific notes or requirements
+  notes         String?
+
+  //   @@unique([appointmentId, resourceId])
+  @@map("appointment_resources")
+}
+
+// Location details for appointments
+// model AppointmentLocation {
+//   id            String      @id @default(uuid()) @db.Uuid
+//   appointmentId String      @unique @db.Uuid
+//   appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+//   type LocationType @default(PHYSICAL)
+
+//   // Physical location
+//   address   String?
+//   city      String?
+//   state     String?
+//   zipCode   String?
+//   country   String?
+//   latitude  Float?
+//   longitude Float?
+
+//   // Virtual location
+//   meetingUrl   String?
+//   meetingId    String?
+//   dialInNumber String?
+//   accessCode   String?
+
+//   // Additional details
+//   instructions String?
+
+//   @@map("appointment_locations")
+// }
+
+// Availability slots for users
+model AvailabilitySlot {
+  id     String @id @default(uuid()) @db.Uuid
+  label  String // For describing the slot (e.g., "Morning tours")
+  userId String @db.Uuid
+  user   Json?
+
+  // Time range
+  startTime DateTime
+  endTime   DateTime
+
+  // Recurrence pattern
+  recurrenceRule String? // RRULE format
+
+  voided    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, startTime, endTime])
+  @@map("availability_slots")
+}
+// TODO Move to notification service
+// Notifications and reminders
+// model AppointmentNotification {
+//   id            String      @id @default(uuid()) @db.Uuid
+//   appointmentId String      @db.Uuid
+//   appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+//   type      NotificationType
+//   channel   NotificationChannel
+//   recipient String // Email, phone, user ID, etc.
+
+//   // Timing
+//   scheduledFor DateTime
+//   sentAt       DateTime?
+
+//   // Content
+//   subject String?
+//   message String
+
+//   // Status
+//   status NotificationStatus @default(PENDING)
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@index([scheduledFor, status])
+//   @@map("appointment_notifications")
+// }
+
+// Enums
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  RESCHEDULED
+}
+
+enum AppointmentCategory {
+  PROPERTY_VIEWING // Tours, showings
+  INSPECTION // Property inspections, appraisals
+  CONSULTATION // Client meetings, investment consultations
+  TRANSACTION // Closings, signings
+  MAINTENANCE // Repairs, cleaning, landscaping
+  TENANT_MANAGEMENT // Lease signings, move-ins/outs
+  PHOTOGRAPHY // Property photography, virtual tours
+  LEGAL // Legal consultations, document reviews
+  OTHER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ParticipantRole {
+  ORGANIZER
+  ATTENDEE
+  OPTIONAL
+  RESOURCE_PERSON
+}
+
+enum ParticipantStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  TENTATIVE
+}
+
+// enum LocationType {
+//   PHYSICAL
+//   VIRTUAL
+//   HYBRID
+// }
+
+// enum NotificationType {
+//   REMINDER
+//   CONFIRMATION
+//   CANCELLATION
+//   RESCHEDULING
+//   INVITATION
+//   UPDATE
+// }
+
+// enum NotificationChannel {
+//   EMAIL
+//   SMS
+//   PUSH
+//   IN_APP
+// }
+
+// enum NotificationStatus {
+//   PENDING
+//   SENT
+//   DELIVERED
+//   FAILED
+//   CANCELLED
+// }

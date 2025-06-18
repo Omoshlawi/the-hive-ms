@@ -37,6 +37,8 @@ model User {
   username        String     @unique
   profileUpdated  Boolean    @default(false)
   accountVerified DateTime?
+  //   timezone String? @default("UTC")
+
   voided          Boolean    @default(false)
   isAdmin         Boolean    @default(false)
   password        String

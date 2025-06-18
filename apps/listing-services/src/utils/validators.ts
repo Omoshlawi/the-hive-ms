@@ -33,6 +33,7 @@ export const ListingMediaFilterSchema = z.object({
   title: z.string().min(1, "Required").optional(),
   description: z.string().min(1, "Required").optional(),
   documentPurpose: z.string().optional(),
+  propertyId: z.string().uuid().optional(),
   mediaType: z
     .enum([
       "IMAGE",
