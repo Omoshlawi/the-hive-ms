@@ -1,0 +1,465 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../dist/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Main notification model
+model Notification {
+  id String @id @default(cuid())
+
+  // Content
+  title   String
+  message String
+  data    Json? // Additional structured data
+
+  // Recipient information
+  recipientId   String
+  recipientType RecipientType @default(USER)
+
+  // Delivery channels
+  channels NotificationChannel[]
+
+  // Classification
+  type     NotificationType
+  category NotificationCategory @default(GENERAL)
+  priority Priority             @default(MEDIUM)
+
+  // Source tracking
+  sourceService String? // e.g., "appointment-service", "payment-service"
+  sourceId      String? // e.g., appointment ID, payment ID
+  sourceType    String? // e.g., "appointment", "payment"
+
+  // Scheduling
+  scheduledFor DateTime?
+  expiresAt    DateTime?
+
+  // Status tracking
+  status    NotificationStatus @default(PENDING)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  sentAt    DateTime?
+
+  // Retry mechanism
+  retryCount  Int       @default(0)
+  maxRetries  Int       @default(3)
+  nextRetryAt DateTime?
+  lastError   String?
+
+  // Grouping and batching
+  groupId String? // For grouping related notifications
+  batchId String? // For batch processing
+
+  // User interaction tracking
+  readAt      DateTime?
+  clickedAt   DateTime?
+  dismissedAt DateTime?
+
+  // Templates and personalization
+  templateId String?
+  template   NotificationTemplate? @relation(fields: [templateId], references: [id])
+  variables  Json? // Template variables
+
+  @@index([recipientId, status])
+  @@index([scheduledFor, status])
+  @@index([sourceService, sourceId])
+  @@index([type, category])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// Delivery channels for each notification
+model NotificationChannel {
+  id             String       @id @default(cuid())
+  notificationId String
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  channel ChannelType
+
+  // Channel-specific recipient info
+  recipient String // email address, phone number, device token, etc.
+
+  // Channel-specific configuration
+  config Json? // Channel-specific settings
+
+  // Delivery tracking
+  status       ChannelStatus @default(PENDING)
+  attempts     Int           @default(0)
+  lastAttempt  DateTime?
+  deliveredAt  DateTime?
+  failedAt     DateTime?
+  errorMessage String?
+
+  // External tracking
+  externalId       String? // Provider's message ID
+  externalStatus   String? // Provider's status
+  externalResponse Json? // Full provider response
+
+  // Delivery metrics
+  openedAt  DateTime?
+  clickedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([channel, status])
+  @@index([recipient])
+  @@map("notification_channels")
+}
+
+// Notification templates for reusable content
+model NotificationTemplate {
+  id   String @id @default(cuid())
+  name String @unique
+
+  // Template content
+  title   String
+  message String
+
+  // Channel-specific templates
+  emailTemplate NotificationEmailTemplate?
+  smsTemplate   NotificationSmsTemplate?
+  pushTemplate  NotificationPushTemplate?
+
+  // Metadata
+  description String?
+  category    NotificationCategory @default(GENERAL)
+  isActive    Boolean              @default(true)
+
+  // Variables definition
+  variables Json? // Schema for template variables
+
+  // Usage tracking
+  usageCount Int @default(0)
+
+  notifications Notification[]
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  createdBy       String?
+  NotificationJob NotificationJob[]
+
+  @@map("notification_templates")
+}
+
+// Email-specific template content
+model NotificationEmailTemplate {
+  id         String               @id @default(cuid())
+  templateId String               @unique
+  template   NotificationTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  subject   String
+  htmlBody  String
+  textBody  String?
+  fromName  String?
+  fromEmail String?
+  replyTo   String?
+
+  // Email styling
+  styles Json? // CSS styles or theme configuration
+
+  @@map("notification_email_templates")
+}
+
+// SMS-specific template content
+model NotificationSmsTemplate {
+  id         String               @id @default(cuid())
+  templateId String               @unique
+  template   NotificationTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  body   String
+  sender String? // Sender ID or phone number
+
+  @@map("notification_sms_templates")
+}
+
+// Push notification-specific template content
+model NotificationPushTemplate {
+  id         String               @id @default(cuid())
+  templateId String               @unique
+  template   NotificationTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  title    String
+  body     String
+  icon     String?
+  imageUrl String?
+
+  // Action buttons
+  actions Json? // Array of action objects
+
+  // Platform-specific config
+  androidConfig Json?
+  iosConfig     Json?
+  webConfig     Json?
+
+  @@map("notification_push_templates")
+}
+
+// User notification preferences
+model NotificationPreference {
+  id     String @id @default(cuid())
+  userId String
+
+  // Global preferences
+  enabled Boolean @default(true)
+
+  // Channel preferences
+  emailEnabled Boolean @default(true)
+  smsEnabled   Boolean @default(true)
+  pushEnabled  Boolean @default(true)
+  inAppEnabled Boolean @default(true)
+
+  // Category preferences
+  categoryPreferences Json? // Preferences per category
+
+  // Quiet hours
+  quietHoursEnabled Boolean @default(false)
+  quietHoursStart   String? // "22:00"
+  quietHoursEnd     String? // "08:00"
+  timezone          String? @default("UTC")
+
+  // Frequency limits
+  maxNotificationsPerHour Int? @default(10)
+  maxNotificationsPerDay  Int? @default(50)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId])
+  @@map("notification_preferences")
+}
+
+// User devices for push notifications
+model UserDevice {
+  id     String @id @default(cuid())
+  userId String
+
+  // Device identification
+  deviceToken String         @unique
+  deviceId    String?
+  platform    DevicePlatform
+
+  // Device info
+  deviceName String?
+  appVersion String?
+  osVersion  String?
+
+  // Status
+  isActive     Boolean  @default(true)
+  lastSeenAt   DateTime @default(now())
+  registeredAt DateTime @default(now())
+
+  @@index([userId, isActive])
+  @@map("user_devices")
+}
+
+// Notification delivery logs for analytics
+model NotificationLog {
+  id             String @id @default(cuid())
+  notificationId String
+
+  // Event tracking
+  event     LogEvent
+  timestamp DateTime @default(now())
+
+  // Context
+  channel   ChannelType?
+  recipient String?
+
+  // Additional data
+  metadata Json?
+
+  @@index([notificationId])
+  @@index([event, timestamp])
+  @@map("notification_logs")
+}
+
+// Subscription management for different notification topics
+model NotificationSubscription {
+  id     String @id @default(cuid())
+  userId String
+
+  // Subscription details
+  topic    String
+  isActive Boolean @default(true)
+
+  // Subscription metadata
+  config Json? // Topic-specific configuration
+
+  subscribedAt   DateTime  @default(now())
+  unsubscribedAt DateTime?
+
+  @@unique([userId, topic])
+  @@map("notification_subscriptions")
+}
+
+// Webhook configurations for external integrations
+model NotificationWebhook {
+  id String @id @default(cuid())
+
+  // Webhook details
+  name     String
+  url      String
+  method   String  @default("POST")
+  headers  Json?
+  isActive Boolean @default(true)
+
+  // Event filters
+  events     String[] // Which events to send
+  conditions Json? // Advanced filtering conditions
+
+  // Security
+  secret String? // For webhook signature verification
+
+  // Retry configuration
+  maxRetries    Int @default(3)
+  retryInterval Int @default(300) // seconds
+
+  // Status tracking
+  lastTriggered DateTime?
+  failureCount  Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_webhooks")
+}
+
+// Scheduled notification jobs
+model NotificationJob {
+  id String @id @default(cuid())
+
+  // Job configuration
+  name        String
+  description String?
+
+  // Scheduling
+  cronExpression String
+  timezone       String @default("UTC")
+
+  // Notification details
+  templateId String?
+  template   NotificationTemplate? @relation(fields: [templateId], references: [id])
+
+  // Recipients
+  recipientQuery Json // Query to determine recipients
+
+  // Status
+  isActive   Boolean   @default(true)
+  lastRunAt  DateTime?
+  nextRunAt  DateTime?
+  lastStatus String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_jobs")
+}
+
+// Enums
+enum NotificationType {
+  APPOINTMENT_REMINDER
+  APPOINTMENT_CONFIRMATION
+  APPOINTMENT_CANCELLATION
+  APPOINTMENT_RESCHEDULED
+  APPOINTMENT_STARTING_SOON
+
+  PAYMENT_DUE
+  PAYMENT_RECEIVED
+  PAYMENT_FAILED
+
+  DOCUMENT_READY
+  DOCUMENT_EXPIRED
+  DOCUMENT_SIGNED
+
+  SYSTEM_MAINTENANCE
+  SYSTEM_UPDATE
+
+  MARKETING_PROMOTIONAL
+  MARKETING_NEWSLETTER
+
+  SECURITY_LOGIN
+  SECURITY_PASSWORD_RESET
+  SECURITY_ACCOUNT_LOCKED
+
+  GENERAL
+  CUSTOM
+}
+
+enum NotificationCategory {
+  TRANSACTIONAL // Critical business notifications
+  PROMOTIONAL // Marketing and promotional content
+  INFORMATIONAL // General information updates
+  SECURITY // Security-related notifications
+  SYSTEM // System and maintenance notifications
+  GENERAL
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum NotificationStatus {
+  PENDING
+  SCHEDULED
+  PROCESSING
+  SENT
+  DELIVERED
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+enum ChannelType {
+  EMAIL
+  SMS
+  PUSH
+  IN_APP
+  WEBHOOK
+  VOICE
+}
+
+enum ChannelStatus {
+  PENDING
+  PROCESSING
+  SENT
+  DELIVERED
+  FAILED
+  CANCELLED
+}
+
+enum RecipientType {
+  USER
+  GROUP
+  ROLE
+  ALL_USERS
+}
+
+enum DevicePlatform {
+  IOS
+  ANDROID
+  WEB
+  DESKTOP
+}
+
+enum LogEvent {
+  CREATED
+  SCHEDULED
+  SENT
+  DELIVERED
+  FAILED
+  OPENED
+  CLICKED
+  DISMISSED
+  EXPIRED
+}

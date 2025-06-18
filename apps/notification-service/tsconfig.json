@@ -1,0 +1,23 @@
+{
+  "extends": "@hive/typescript-config/tsconfig.express.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+    "outDir": "./dist",
+    "rootDir": "./src",
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "include": [
+    "src/**/*"
+  ]
+}
