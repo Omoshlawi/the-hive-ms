@@ -196,34 +196,6 @@ model AvailabilitySlot {
   @@index([userId, startTime, endTime])
   @@map("availability_slots")
 }
-// TODO Move to notification service
-// Notifications and reminders
-// model AppointmentNotification {
-//   id            String      @id @default(uuid()) @db.Uuid
-//   appointmentId String      @db.Uuid
-//   appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
-
-//   type      NotificationType
-//   channel   NotificationChannel
-//   recipient String // Email, phone, user ID, etc.
-
-//   // Timing
-//   scheduledFor DateTime
-//   sentAt       DateTime?
-
-//   // Content
-//   subject String?
-//   message String
-
-//   // Status
-//   status NotificationStatus @default(PENDING)
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@index([scheduledFor, status])
-//   @@map("appointment_notifications")
-// }
 
 // Enums
 enum AppointmentStatus {
@@ -273,28 +245,4 @@ enum ParticipantStatus {
 //   PHYSICAL
 //   VIRTUAL
 //   HYBRID
-// }
-
-// enum NotificationType {
-//   REMINDER
-//   CONFIRMATION
-//   CANCELLATION
-//   RESCHEDULING
-//   INVITATION
-//   UPDATE
-// }
-
-// enum NotificationChannel {
-//   EMAIL
-//   SMS
-//   PUSH
-//   IN_APP
-// }
-
-// enum NotificationStatus {
-//   PENDING
-//   SENT
-//   DELIVERED
-//   FAILED
-//   CANCELLED
 // }

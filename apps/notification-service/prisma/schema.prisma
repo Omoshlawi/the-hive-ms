@@ -13,7 +13,7 @@ datasource db {
 
 // Main notification model
 model Notification {
-  id String @id @default(cuid())
+  id String @id @default(uuid()) @db.Uuid
 
   // Content
   title   String
@@ -21,7 +21,7 @@ model Notification {
   data    Json? // Additional structured data
 
   // Recipient information
-  recipientId   String
+  recipientId   String        @db.Uuid
   recipientType RecipientType @default(USER)
 
   // Delivery channels
@@ -34,7 +34,7 @@ model Notification {
 
   // Source tracking
   sourceService String? // e.g., "appointment-service", "payment-service"
-  sourceId      String? // e.g., appointment ID, payment ID
+  sourceId      String? @db.Uuid // e.g., appointment ID, payment ID
   sourceType    String? // e.g., "appointment", "payment"
 
   // Scheduling
@@ -54,8 +54,8 @@ model Notification {
   lastError   String?
 
   // Grouping and batching
-  groupId String? // For grouping related notifications
-  batchId String? // For batch processing
+  groupId String? @db.Uuid // For grouping related notifications
+  batchId String? @db.Uuid // For batch processing
 
   // User interaction tracking
   readAt      DateTime?
@@ -63,7 +63,7 @@ model Notification {
   dismissedAt DateTime?
 
   // Templates and personalization
-  templateId String?
+  templateId String?               @db.Uuid
   template   NotificationTemplate? @relation(fields: [templateId], references: [id])
   variables  Json? // Template variables
 
@@ -77,8 +77,8 @@ model Notification {
 
 // Delivery channels for each notification
 model NotificationChannel {
-  id             String       @id @default(cuid())
-  notificationId String
+  id             String       @id @default(uuid()) @db.Uuid
+  notificationId String       @db.Uuid
   notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
 
   channel ChannelType
@@ -98,7 +98,7 @@ model NotificationChannel {
   errorMessage String?
 
   // External tracking
-  externalId       String? // Provider's message ID
+  externalId       String? @db.Uuid // Provider's message ID
   externalStatus   String? // Provider's status
   externalResponse Json? // Full provider response
 
@@ -116,7 +116,7 @@ model NotificationChannel {
 
 // Notification templates for reusable content
 model NotificationTemplate {
-  id   String @id @default(cuid())
+  id   String @id @default(uuid()) @db.Uuid
   name String @unique
 
   // Template content
@@ -151,8 +151,8 @@ model NotificationTemplate {
 
 // Email-specific template content
 model NotificationEmailTemplate {
-  id         String               @id @default(cuid())
-  templateId String               @unique
+  id         String               @id @default(uuid()) @db.Uuid
+  templateId String               @unique @db.Uuid
   template   NotificationTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   subject   String
@@ -170,8 +170,8 @@ model NotificationEmailTemplate {
 
 // SMS-specific template content
 model NotificationSmsTemplate {
-  id         String               @id @default(cuid())
-  templateId String               @unique
+  id         String               @id @default(uuid()) @db.Uuid
+  templateId String               @unique @db.Uuid
   template   NotificationTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   body   String
@@ -182,8 +182,8 @@ model NotificationSmsTemplate {
 
 // Push notification-specific template content
 model NotificationPushTemplate {
-  id         String               @id @default(cuid())
-  templateId String               @unique
+  id         String               @id @default(uuid()) @db.Uuid
+  templateId String               @unique @db.Uuid
   template   NotificationTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   title    String
@@ -204,8 +204,8 @@ model NotificationPushTemplate {
 
 // User notification preferences
 model NotificationPreference {
-  id     String @id @default(cuid())
-  userId String
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
 
   // Global preferences
   enabled Boolean @default(true)
@@ -238,8 +238,8 @@ model NotificationPreference {
 
 // User devices for push notifications
 model UserDevice {
-  id     String @id @default(cuid())
-  userId String
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
 
   // Device identification
   deviceToken String         @unique
@@ -262,7 +262,7 @@ model UserDevice {
 
 // Notification delivery logs for analytics
 model NotificationLog {
-  id             String @id @default(cuid())
+  id             String @id @default(uuid()) @db.Uuid
   notificationId String
 
   // Event tracking
@@ -283,8 +283,8 @@ model NotificationLog {
 
 // Subscription management for different notification topics
 model NotificationSubscription {
-  id     String @id @default(cuid())
-  userId String
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
 
   // Subscription details
   topic    String
@@ -302,7 +302,7 @@ model NotificationSubscription {
 
 // Webhook configurations for external integrations
 model NotificationWebhook {
-  id String @id @default(cuid())
+  id String @id @default(uuid()) @db.Uuid
 
   // Webhook details
   name     String
@@ -334,7 +334,7 @@ model NotificationWebhook {
 
 // Scheduled notification jobs
 model NotificationJob {
-  id String @id @default(cuid())
+  id String @id @default(uuid()) @db.Uuid
 
   // Job configuration
   name        String
