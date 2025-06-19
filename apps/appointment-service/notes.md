@@ -133,4 +133,13 @@ Represents messages sent to users.
 | `NotificationChannel` | How you're notified                      |
 | `NotificationStatus`  | Was the message delivered?               |
 
+## Participant roles
+
+| Role              | Purpose                                                            | Real-world Example                             |
+| ----------------- | ------------------------------------------------------------------ | ---------------------------------------------- |
+| `ORGANIZER`       | Main person responsible for the appointment (often staff or agent) | Real estate agent managing the showing         |
+| `ATTENDEE`        | Expected participant (required)                                    | Buyer or tenant who booked the tour            |
+| `OPTIONAL`        | Can join, but not critical                                         | Landlord may optionally attend a lease signing |
+| `RESOURCE_PERSON` | Role-based support, often from staff or vendor                     | Inspector during inspection, or photographer   |
+
 ---
