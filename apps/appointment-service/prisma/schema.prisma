@@ -21,7 +21,7 @@ model Appointment {
   startTime DateTime
   endTime   DateTime
   timezone  String   @default("UTC")
-  duration  Int // Duration in minutes
+  // duration  Int // Duration in minutes(calculated)
 
   // Status and workflow
   status   AppointmentStatus @default(SCHEDULED)
@@ -49,9 +49,7 @@ model Appointment {
   // Location details
   // location AppointmentLocation?
 
-  // TODO Move to notifications service
-  // Notifications and reminders
-  // notifications AppointmentNotification[]
+  voided Boolean @default(false)
 
   // Audit fields
   createdAt DateTime @default(now())
@@ -68,12 +66,12 @@ model Appointment {
   cancelledAt        DateTime?
   cancellationReason String?
   rescheduledFrom    String? // Previous appointment ID
+  // @@map("appointments")
 
   @@index([startTime, endTime])
   @@index([organizerId])
   @@index([status])
   @@index([appointmentTypeId])
-  @@map("appointments")
 }
 
 // Appointment types for different real estate activities
@@ -105,7 +103,7 @@ model AppointmentType {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("appointment_types")
+  // @@map("appointment_types")
 }
 
 // Participants in appointments (many-to-many with metadata)
@@ -127,9 +125,9 @@ model AppointmentParticipant {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  // @@map("appointment_participants")
 
   @@unique([appointmentId, userId])
-  @@map("appointment_participants")
 }
 
 model AppointmentResource {
@@ -143,7 +141,7 @@ model AppointmentResource {
   notes         String?
 
   //   @@unique([appointmentId, resourceId])
-  @@map("appointment_resources")
+  // @@map("appointment_resources")
 }
 
 // Location details for appointments
@@ -192,9 +190,9 @@ model AvailabilitySlot {
   voided    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  // @@map("availability_slots")
 
   @@index([userId, startTime, endTime])
-  @@map("availability_slots")
 }
 
 // Enums

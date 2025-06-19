@@ -25,12 +25,6 @@ export const AppointmentsValidator = z.object({
   organizerId: z.string().nonempty().uuid("Invalid"),
   recurrenceRule: z.string(), // TODO USE CUSTOM RRULE VALIDATOR
   parentId: z.string().nonempty().uuid("Invalid appointment").optional(),
-  children: z
-    .string()
-    .nonempty()
-    .uuid("Invalid appointment")
-    .array()
-    .optional(),
   participants: AppointmentParticipantValidator.omit({
     appointmentId: true,
   })
