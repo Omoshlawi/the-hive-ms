@@ -14,29 +14,25 @@ const router = Router({ mergeParams: true });
 
 router.get("/", getAppointmentTypes);
 router.post("/", addAppointmentType);
-router.get(
-  "/:appointmentTypeid",
-  [validateUUIDPathParam("appointmentTypeid")],
-  getAppointmentType
-);
+router.get("/:typeId", [validateUUIDPathParam("typeId")], getAppointmentType);
 router.patch(
-  "/:appointmentTypeid",
-  [validateUUIDPathParam("appointmentTypeid")],
+  "/:typeId",
+  [validateUUIDPathParam("typeId")],
   patchAppointmentType
 );
 router.put(
-  "/:appointmentTypeid",
-  [validateUUIDPathParam("appointmentTypeid")],
+  "/:typeId",
+  [validateUUIDPathParam("typeId")],
   updateAppointmentType
 );
 router.delete(
-  "/:appointmentTypeid",
-  [validateUUIDPathParam("appointmentTypeid")],
+  "/:typeId",
+  [validateUUIDPathParam("typeId")],
   deleteAppointmentType
 );
 router.purge(
-  "/:appointmentTypeid",
-  [validateUUIDPathParam("appointmentTypeid")],
+  "/:typeId",
+  [validateUUIDPathParam("typeId")],
   purgeAppointmentType
 );
 

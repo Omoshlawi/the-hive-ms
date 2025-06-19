@@ -29,7 +29,7 @@ export const getAppointmentType = async (
 ) => {
   try {
     const item = await AppointmentTypesModel.findUniqueOrThrow({
-      where: { id: req.params.appointmentTypeId, voided: false },
+      where: { id: req.params.typeId, voided: false },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
@@ -67,7 +67,7 @@ export const updateAppointmentType = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await AppointmentTypesModel.update({
-      where: { id: req.params.appointmentTypeId, voided: false },
+      where: { id: req.params.typeId, voided: false },
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -83,11 +83,13 @@ export const patchAppointmentType = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await AppointmentTypeValidator.partial().safeParseAsync(req.body);
+    const validation = await AppointmentTypeValidator.partial().safeParseAsync(
+      req.body
+    );
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await AppointmentTypesModel.update({
-      where: { id: req.params.appointmentTypeId, voided: false },
+      where: { id: req.params.typeId, voided: false },
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -104,7 +106,7 @@ export const deleteAppointmentType = async (
 ) => {
   try {
     const item = await AppointmentTypesModel.update({
-      where: { id: req.params.appointmentTypeId, voided: false },
+      where: { id: req.params.typeId, voided: false },
       data: {
         voided: true,
       },
@@ -123,7 +125,7 @@ export const purgeAppointmentType = async (
 ) => {
   try {
     const item = await AppointmentTypesModel.delete({
-      where: { id: req.params.appointmentTypeId, voided: false },
+      where: { id: req.params.typeId, voided: false },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
@@ -131,5 +133,3 @@ export const purgeAppointmentType = async (
     next(error);
   }
 };
-
-

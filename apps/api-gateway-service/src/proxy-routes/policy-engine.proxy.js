@@ -55,6 +55,5 @@ module.exports =  [
     serviceVersion,
     serviceName,
     authenticate:true
-
   },
 ]
