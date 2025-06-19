@@ -99,9 +99,9 @@ model AppointmentType {
   baseCost Decimal? @db.Decimal(10, 2)
 
   appointments Appointment[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  voided       Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   // @@map("appointment_types")
 }
