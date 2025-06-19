@@ -1,19 +1,19 @@
 import { NextFunction, Request, Response } from "express";
-import { AppointmentParticipantsModel } from "../models";
-import { AppointmentParticipantValidator } from "@/utils/validators";
+import { AppointmentResourcesModel } from "../models";
+import { AppointmentResourceValidator } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
 } from "@hive/core-utils";
 
-export const getAppointmentParticipants = async (
+export const getAppointmentResources = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
     const appointmentId = req.params.appointmentId;
-    const results = await AppointmentParticipantsModel.findMany({
+    const results = await AppointmentResourcesModel.findMany({
       where: { appointmentId },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -23,15 +23,15 @@ export const getAppointmentParticipants = async (
   }
 };
 
-export const getAppointmentParticipant = async (
+export const getAppointmentResource = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
     const appointmentId = req.params.appointmentId;
-    const item = await AppointmentParticipantsModel.findUniqueOrThrow({
-      where: { id: req.params.participantId, appointmentId },
+    const item = await AppointmentResourcesModel.findUniqueOrThrow({
+      where: { id: req.params.resourceId, appointmentId },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
@@ -40,19 +40,20 @@ export const getAppointmentParticipant = async (
   }
 };
 
-export const addAppointmentParticipant = async (
+export const addAppointmentResource = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
     const appointmentId = req.params.appointmentId!;
-    const validation = await AppointmentParticipantValidator.omit({
+
+    const validation = await AppointmentResourceValidator.omit({
       appointmentId: true,
     }).safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const item = await AppointmentParticipantsModel.create({
+    const item = await AppointmentResourcesModel.create({
       data: { ...validation.data, appointmentId },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -62,20 +63,19 @@ export const addAppointmentParticipant = async (
   }
 };
 
-export const updateAppointmentParticipant = async (
+export const updateAppointmentResource = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const appointmentId = req.params.appointmentId;
-    const validation = await AppointmentParticipantValidator.omit({
+    const validation = await AppointmentResourceValidator.omit({
       appointmentId: true,
     }).safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const item = await AppointmentParticipantsModel.update({
-      where: { id: req.params.participantId, appointmentId },
+    const item = await AppointmentResourcesModel.update({
+      where: { id: req.params.resourceId },
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -85,22 +85,21 @@ export const updateAppointmentParticipant = async (
   }
 };
 
-export const patchAppointmentParticipant = async (
+export const patchAppointmentResource = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const appointmentId = req.params.appointmentId;
-    const validation = await AppointmentParticipantValidator.omit({
+    const validation = await AppointmentResourceValidator.omit({
       appointmentId: true,
     })
       .partial()
       .safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const item = await AppointmentParticipantsModel.update({
-      where: { id: req.params.participantId, appointmentId },
+    const item = await AppointmentResourcesModel.update({
+      where: { id: req.params.resourceId },
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -110,16 +109,15 @@ export const patchAppointmentParticipant = async (
   }
 };
 
-export const deleteAppointmentParticipant = async (
+export const deleteAppointmentResource = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
     const appointmentId = req.params.appointmentId;
-
-    const item = await AppointmentParticipantsModel.delete({
-      where: { id: req.params.participantId, appointmentId },
+    const item = await AppointmentResourcesModel.delete({
+      where: { id: req.params.resourceId, appointmentId },
       //   data: {
       //     voided: true,
       //   },
@@ -131,7 +129,7 @@ export const deleteAppointmentParticipant = async (
   }
 };
 
-export const purgeAppointmentParticipant = async (
+export const purgeAppointmentResource = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -139,8 +137,8 @@ export const purgeAppointmentParticipant = async (
   try {
     const appointmentId = req.params.appointmentId;
 
-    const item = await AppointmentParticipantsModel.delete({
-      where: { id: req.params.participantId, appointmentId },
+    const item = await AppointmentResourcesModel.delete({
+      where: { id: req.params.resourceId, appointmentId },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);
