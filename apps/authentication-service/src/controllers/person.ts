@@ -19,10 +19,11 @@ export const getPersons = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await PersonFilterSchema.safeParseAsync(req.body);
+    const validation = await PersonFilterSchema.safeParseAsync(req.query);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { search, userId } = validation.data;
+
     const results = await PersonModel.findMany({
       where: {
         AND: [

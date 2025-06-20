@@ -4,7 +4,10 @@ import { AppointmentsValidator } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
+  nullifyExceptionAsync,
 } from "@hive/core-utils";
+import serviceClient from "@/services/service-client";
+import { Person } from "@/types";
 
 export const getAppointments = async (
   req: Request,
@@ -48,9 +51,25 @@ export const addAppointment = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { resources, participants, ...data } = validation.data;
+    const getPerson = nullifyExceptionAsync(async () => {
+      const person = await serviceClient.callService<Person>(
+        "@hive/authentication-service",
+        {
+          method: "GET",
+          url: `/person/${data.organizerId}`,
+        }
+      );
+      return person;
+    });
+    const person = await getPerson();
+    if (!person)
+      throw new APIException(400, {
+        organizerId: { _errors: ["Organizer person not found"] },
+      });
     const item = await AppointmentsModel.create({
       data: {
         ...data,
+        organizer: person as any,
         createdBy: req.context!.userId!,
         organizationId: req.context!.organizationId!,
         resources: resources
