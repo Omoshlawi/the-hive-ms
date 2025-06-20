@@ -7,6 +7,7 @@ import {
 import { Router } from "express";
 import signInRouter from "./signin";
 import usersRouter from "./users";
+import personRouter from "./persons";
 import authenticate from "@/middlewares/authentication";
 import { getDatabaseSchemas } from "@/controllers/db-schema";
 import { requireContext } from "@hive/shared-middlewares";
@@ -23,5 +24,6 @@ router.get("/refresh-token", refreshToken);
 router.post("/signup", registerUser);
 router.use("/signin", signInRouter);
 router.use("/users", usersRouter);
+router.use("/person", personRouter);
 
 export default router;

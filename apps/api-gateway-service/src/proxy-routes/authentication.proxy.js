@@ -1,5 +1,5 @@
 const serviceName = "@hive/authentication-service";
-let serviceVersion
+let serviceVersion;
 
 module.exports = [
   {
@@ -7,15 +7,15 @@ module.exports = [
     prefix: "",
     serviceName,
     serviceVersion,
-    includeHeaders: true
+    includeHeaders: true,
   },
-  { 
+  {
     path: "/change-context",
     prefix: "/change-context",
     serviceName,
     serviceVersion,
     includeHeaders: true,
-    authenticate:false // authentication handled in authen service
+    authenticate: false, // authentication handled in authen service
   },
   {
     path: "/exit-context",
@@ -23,13 +23,20 @@ module.exports = [
     serviceName,
     serviceVersion,
     includeHeaders: true,
-    authenticate:true
+    authenticate: true,
   },
   {
     path: "/users",
     prefix: "/users",
     serviceName,
     serviceVersion,
-    authenticate:true
+    authenticate: true,
   },
-]
+  {
+    path: "/person",
+    prefix: "/person",
+    serviceName,
+    serviceVersion,
+    authenticate: true,
+  },
+];

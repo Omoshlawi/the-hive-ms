@@ -1,9 +1,9 @@
 import z from "zod";
 export const AppointmentParticipantValidator = z.object({
   appointmentId: z.string().nonempty().uuid("Invalid"),
-  userId: z.string().nonempty().uuid("Invalid"),
+  personId: z.string().nonempty().uuid("Invalid"),
   role: z.enum(["ORGANIZER", "ATTENDEE", "OPTIONAL", "RESOURCE_PERSON"]),
-  status: z.enum(["PENDING", "ACCEPTED", "DECLINED", "TENTATIVE"]),
+  // status: z.enum(["PENDING", "ACCEPTED", "DECLINED", "TENTATIVE"]),
   isRequired: z.boolean().optional(),
   notes: z.string().optional(),
 });
