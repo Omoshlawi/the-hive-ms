@@ -1,7 +1,7 @@
 import { UUID_REGEX } from "@/constants";
 import { Request } from "express";
 import qs from "querystring";
-
+export * from "./pagination";
 export function parseMessage(object: any, template: string) {
   // regular expression to match placeholders like {{field}}
   const placeholderRegex = /{{(.*?)}}/g;
@@ -80,14 +80,13 @@ export const nullifyExceptionAsync = <T, P extends any[], TErr = Error>(
   };
 };
 
-export const toQueryParams = (q: Record<string, any>) => {
-  const params = qs.stringify(q);
+export const toQueryParams = (...args: Parameters<typeof qs.stringify>) => {
+  const params = qs.stringify(...args);
   if (params) {
     return "?" + params;
   }
   return "";
 };
-
 export const normalizeQuery = (query: Record<string, any>) => {
   const sortedQuery = Object.keys(query)
     .sort()

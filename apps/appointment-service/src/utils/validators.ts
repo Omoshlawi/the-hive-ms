@@ -23,7 +23,7 @@ export const AppointmentsValidator = z.object({
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
   appointmentTypeId: z.string().nonempty().uuid("Invalid"),
   organizerId: z.string().nonempty().uuid("Invalid"),
-  recurrenceRule: z.string(), // TODO USE CUSTOM RRULE VALIDATOR
+  recurrenceRule: z.string().optional(), // TODO USE CUSTOM RRULE VALIDATOR
   parentId: z.string().nonempty().uuid("Invalid appointment").optional(),
   participants: AppointmentParticipantValidator.omit({
     appointmentId: true,

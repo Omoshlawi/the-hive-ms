@@ -1,7 +1,5 @@
 import { APIException } from "@/exceptions";
 import set from "lodash/set";
-import { PrismaClientKnownRequestError } from "@/types";
-
 export const ERROR_CODES = Object.freeze({
   NOT_FOUND: "P2025",
   UNIQUE_CONTRAINT_FAILED: "P2002",
@@ -119,9 +117,6 @@ export function parseSingleOperationCustomRepresentation(
 
   return processObject(parsedFields)[mode][mode];
 }
-
-export const paginate = (pageSize: number, page: number) =>
-  (page - 1) * pageSize;
 
 export const getSingleOperationCustomRepresentationQuery = (
   v?: string

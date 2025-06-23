@@ -8,7 +8,9 @@ import {
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
+  getPaginationControls,
   nullifyExceptionAsync,
+  paginate,
 } from "@hive/core-utils";
 import serviceClient from "@/services/service-client";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
@@ -66,7 +68,8 @@ export const getListings = async (
       categories,
       // attributes,
     } = validation.data;
-    const results = await ListingModel.findMany({
+    type Args = Parameters<typeof ListingModel.findMany>[0];
+    const filters: Args = {
       where: {
         AND: [
           {
@@ -134,9 +137,17 @@ export const getListings = async (
           },
         ],
       },
+    };
+    const results = await ListingModel.findMany({
+      ...filters,
+      ...paginate(req.query),
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    return res.json({ results });
+    const totalCount = await ListingModel.count(pick(filters, "where"));
+    return res.json({
+      results,
+      ...getPaginationControls(req, totalCount),
+    });
   } catch (error) {
     next(error);
   }
