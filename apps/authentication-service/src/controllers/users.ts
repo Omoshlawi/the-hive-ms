@@ -3,8 +3,11 @@ import { UserFilterSchema } from "@/schema";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
+  paginate,
+  getPaginationControls,
 } from "@hive/core-utils";
 import { Request, Response, NextFunction } from "express";
+import pick from "lodash/pick";
 
 export const getUserByToken = async (
   req: Request,
@@ -32,7 +35,8 @@ export const getUsers = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { search } = validation.data;
-    const results = await UsersModel.findMany({
+    type Args = Parameters<typeof UsersModel.findMany>[0];
+    const filters: Args = {
       where: {
         AND: [
           { voided: false },
@@ -70,9 +74,17 @@ export const getUsers = async (
           },
         ],
       },
+    };
+    const results = await UsersModel.findMany({
+      ...filters,
+      ...paginate(req.query),
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    return res.json({ results });
+    const totalCount = await UsersModel.count(pick(filters, "where"));
+    return res.json({
+      results,
+      ...getPaginationControls(req, totalCount),
+    });
   } catch (error) {
     next(error);
   }

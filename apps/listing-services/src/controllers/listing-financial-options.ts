@@ -4,21 +4,32 @@ import { SaleListingFinancingOptionSchema } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
+  getPaginationControls,
+  paginate,
 } from "@hive/core-utils";
+import pick from "lodash/pick";
 
 export const getSalesListingFinancialOptions = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const listingId = req.params.listingId;
-
   try {
+    const listingId = req.params.listingId;
+    type Args = Parameters<typeof SaleListingFinancingOptionsModel.findMany>[0];
+    const filters: Args = { where: { voided: false, listingId } };
     const results = await SaleListingFinancingOptionsModel.findMany({
-      where: { voided: false, listingId },
+      ...filters,
+      ...paginate(req.query),
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    return res.json({ results });
+    const totalCount = await SaleListingFinancingOptionsModel.count(
+      pick(filters, "where")
+    );
+    return res.json({
+      results,
+      ...getPaginationControls(req, totalCount),
+    });
   } catch (error) {
     next(error);
   }

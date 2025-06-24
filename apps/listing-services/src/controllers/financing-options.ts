@@ -4,7 +4,10 @@ import { FinancingOptionSchema } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
+  getPaginationControls,
+  paginate,
 } from "@hive/core-utils";
+import pick from "lodash/pick";
 
 export const getFinancingOptions = async (
   req: Request,
@@ -12,11 +15,20 @@ export const getFinancingOptions = async (
   next: NextFunction
 ) => {
   try {
+    type Args = Parameters<typeof FinancingOptionsModel.findMany>[0];
+    const filters: Args = { where: { voided: false } };
     const results = await FinancingOptionsModel.findMany({
-      where: { voided: false },
+      ...filters,
+      ...paginate(req.query),
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    return res.json({ results });
+    const totalCount = await FinancingOptionsModel.count(
+      pick(filters, "where")
+    );
+    return res.json({
+      results,
+      ...getPaginationControls(req, totalCount),
+    });
   } catch (error) {
     next(error);
   }

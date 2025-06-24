@@ -3,10 +3,10 @@ import { FilesCleanSchema, FilesSchema } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
+  getPaginationControls,
+  paginate,
 } from "@hive/core-utils";
 import {
-  addRollBackTaskToQueue,
-  deleteFile,
   deleteFiles,
   FileOperationError,
   MemoryMulterFile,
@@ -14,6 +14,7 @@ import {
 } from "@hive/shared-middlewares";
 import { HiveFile } from "dist/prisma";
 import { NextFunction, Request, Response } from "express";
+import pick from "lodash/pick";
 import path from "path";
 import { HiveFilesModel } from "../models";
 
@@ -23,11 +24,18 @@ export const getHiveFiles = async (
   next: NextFunction
 ) => {
   try {
+    type Args = Parameters<typeof HiveFilesModel.findMany>[0];
+    const filters: Args = { where: { voided: false } };
     const results = await HiveFilesModel.findMany({
-      where: { voided: false },
+      ...filters,
+      ...paginate(req.query),
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    return res.json({ results });
+    const totalCount = await HiveFilesModel.count(pick(filters, "where"));
+    return res.json({
+      results,
+      ...getPaginationControls(req, totalCount),
+    });
   } catch (error) {
     next(error);
   }

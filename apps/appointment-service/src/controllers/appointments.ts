@@ -4,10 +4,13 @@ import { AppointmentsValidator } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
+  getPaginationControls,
   nullifyExceptionAsync,
+  paginate,
 } from "@hive/core-utils";
 import serviceClient from "@/services/service-client";
 import { Person } from "@/types";
+import pick from "lodash/pick";
 
 export const getAppointments = async (
   req: Request,
@@ -15,11 +18,15 @@ export const getAppointments = async (
   next: NextFunction
 ) => {
   try {
+    type Args = Parameters<typeof AppointmentsModel.findMany>[0];
+    const filters: Args = { where: { voided: false } };
     const results = await AppointmentsModel.findMany({
-      where: { voided: false },
+      ...filters,
+      ...paginate(req.query),
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    return res.json({ results });
+    const totalCount = await AppointmentsModel.count(pick(filters, "where"));
+    return res.json({ results, ...getPaginationControls(req, totalCount) });
   } catch (error) {
     next(error);
   }

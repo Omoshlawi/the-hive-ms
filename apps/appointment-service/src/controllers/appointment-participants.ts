@@ -4,7 +4,10 @@ import { AppointmentParticipantValidator } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
+  getPaginationControls,
+  paginate,
 } from "@hive/core-utils";
+import pick from "lodash/pick";
 
 export const getAppointmentParticipants = async (
   req: Request,
@@ -13,11 +16,20 @@ export const getAppointmentParticipants = async (
 ) => {
   try {
     const appointmentId = req.params.appointmentId;
+    type Args = Parameters<typeof AppointmentParticipantsModel.findMany>[0];
+    const filters: Args = { where: { appointmentId } };
     const results = await AppointmentParticipantsModel.findMany({
-      where: { appointmentId },
+      ...filters,
+      ...paginate(req.query),
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    return res.json({ results });
+    const totalCount = await AppointmentParticipantsModel.count(
+      pick(filters, "where")
+    );
+    return res.json({
+      results,
+      ...getPaginationControls(req, totalCount),
+    });
   } catch (error) {
     next(error);
   }

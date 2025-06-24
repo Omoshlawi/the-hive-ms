@@ -9,9 +9,12 @@ import {
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
+  getPaginationControls,
+  paginate,
 } from "@hive/core-utils";
 import isEmpty from "lodash/isEmpty";
 import { hashPassword } from "@/utils";
+import pick from "lodash/pick";
 
 export const getPersons = async (
   req: Request,
@@ -23,8 +26,8 @@ export const getPersons = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { search, userId } = validation.data;
-
-    const results = await PersonModel.findMany({
+    type Args = Parameters<typeof PersonModel.findMany>[0];
+    const filters: Args = {
       where: {
         AND: [
           { voided: false, userId },
@@ -45,9 +48,17 @@ export const getPersons = async (
           },
         ],
       },
+    };
+    const results = await PersonModel.findMany({
+      ...filters,
+      ...paginate(req.query),
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    return res.json({ results });
+    const totalCount = await PersonModel.count(pick(filters, "where"));
+    return res.json({
+      results,
+      ...getPaginationControls(req, totalCount),
+    });
   } catch (error) {
     next(error);
   }

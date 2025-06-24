@@ -7,7 +7,10 @@ import {
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
+  getPaginationControls,
+  paginate,
 } from "@hive/core-utils";
+import pick from "lodash/pick";
 
 export const getListingMedias = async (
   req: Request,
@@ -20,16 +23,25 @@ export const getListingMedias = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { size, tags, ...filters } = validation.data;
-    const results = await ListingMediaModel.findMany({
+    type Args = Parameters<typeof ListingMediaModel.findMany>[0];
+    const _filters: Args = {
       where: {
         voided: false,
         listingId,
         tags: tags?.length ? { hasSome: tags ?? [] } : undefined,
         ...filters,
       },
+    };
+    const results = await ListingMediaModel.findMany({
+      ..._filters,
+      ...paginate(req.query),
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    return res.json({ results });
+    const totalCount = await ListingMediaModel.count(pick(_filters, "where"));
+    return res.json({
+      results,
+      ...getPaginationControls(req, totalCount),
+    });
   } catch (error) {
     next(error);
   }
