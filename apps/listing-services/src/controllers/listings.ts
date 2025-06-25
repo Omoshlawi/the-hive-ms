@@ -226,9 +226,7 @@ export const addListing = async (
                   financingOptions: {
                     createMany: {
                       skipDuplicates: true,
-                      data: (
-                        validation.data.saleDetails!.financingOptions ?? []
-                      ).map((optionId) => ({ optionId })),
+                      data: validation.data.saleDetails!.financingOptions ?? [],
                     },
                   },
                 },

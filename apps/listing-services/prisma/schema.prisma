@@ -164,6 +164,7 @@ model SaleListingFinancingOption {
   listing   SaleListing     @relation(fields: [listingId], onDelete: Cascade, references: [id])
   optionId  String          @db.Uuid
   option    FinancingOption @relation(fields: [optionId], onDelete: Cascade, references: [id])
+  notes     String?         @db.Text
   voided    Boolean         @default(false)
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
