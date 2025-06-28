@@ -34,7 +34,6 @@ model Tenant {
   specialRequirements    String? // Accessibility, pet accommodations, etc.
 
   // Rental history and references
-  previousAddresses  TenantAddress[]
   references         TenantReference[]
   rentalApplications RentalApplication[]
   leases             TenantLease[]
@@ -82,45 +81,6 @@ model TenantStatusHistory {
   reason         String?      @db.Text
   createdAt      DateTime     @default(now())
   tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-}
-
-// Previous addresses for rental history
-model TenantAddress {
-  id             String @id @default(uuid()) @db.Uuid
-  organizationId String @db.Uuid
-  tenantId       String @db.Uuid
-
-  addressLine1 String
-  addressLine2 String?
-  city         String
-  state        String
-  postalCode   String
-  country      String  @default("US")
-
-  // Rental period
-  moveInDate  DateTime
-  moveOutDate DateTime?
-
-  // Landlord information
-  landlordName     String?
-  landlordPhone    String?
-  landlordEmail    String?
-  monthlyRent      Decimal? @db.Decimal(10, 2)
-  reasonForLeaving String?
-
-  // Verification
-  verified          Boolean   @default(false)
-  verifiedDate      DateTime?
-  verificationNotes String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  // @@map("tenant_addresses")
-
-  @@index([organizationId])
-  @@index([tenantId])
 }
 
 // References (personal/professional)
@@ -384,12 +344,12 @@ model ScreeningQuestion {
   updatedAt DateTime @updatedAt
   createdBy String?  @db.Uuid
   updatedBy String?  @db.Uuid
+  // @@map("screening_questions")
 
   @@index([organizationId])
   @@index([category])
   @@index([isActive])
   @@index([sortOrder])
-  // @@map("screening_questions")
 }
 
 // Screening responses from applicants
@@ -422,13 +382,13 @@ model ScreeningResponse {
 
   application RentalApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   question    ScreeningQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  // @@map("screening_responses")
 
   @@unique([applicationId, questionId])
   @@index([organizationId])
   @@index([applicationId])
   @@index([questionId])
   @@index([flagged])
-  // @@map("screening_responses")
 }
 
 // Pre-defined screening question templates for quick setup
@@ -452,11 +412,11 @@ model ScreeningQuestionTemplate {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   createdBy String?  @db.Uuid
+  // @@map("screening_question_templates")
 
   @@index([organizationId])
   @@index([category])
   @@index([isSystemTemplate])
-  // @@map("screening_question_templates")
 }
 
 // Listing-specific screening configuration
@@ -490,11 +450,11 @@ model ListingScreeningConfig {
   updatedAt DateTime @updatedAt
   createdBy String?  @db.Uuid
   updatedBy String?  @db.Uuid
+  // @@map("listing_screening_configs")
 
   @@unique([listingId])
   @@index([organizationId])
   @@index([listingId])
-  // @@map("listing_screening_configs")
 }
 
 enum TenantType {
