@@ -7,3 +7,4 @@ export const PrivilegesModel = db.privilege;
 export const RolePrivilege = db.rolePrivilege;
 export const OrganizationMembershipsModel = db.organizationMemberShip;
 export const OrganizationMembershipRolesModel = db.organizationMemberShipRoles;
+export const IdentifierSequenceModel = db.identifierSequence;

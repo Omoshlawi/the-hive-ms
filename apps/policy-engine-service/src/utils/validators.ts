@@ -49,3 +49,12 @@ export const ServiceSchema = z.object({
   name: z.string().min(1, "required"),
   version: z.string().min(1, "Required").optional(),
 });
+
+export const IdGenSchema = z.object({
+  dataModel: z.string().nonempty(),
+  prefix: z
+    .string()
+    .nonempty()
+    .regex(/^[A-Z]{2,6}$/),
+  width: z.number({ coerce: true }).min(4).max(12).optional().default(6),
+});

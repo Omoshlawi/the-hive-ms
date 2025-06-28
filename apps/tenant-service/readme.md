@@ -61,22 +61,6 @@ Represents a tenant’s intent to rent a unit with associated screening, co-appl
 
 ---
 
-### `TenantAddress`
-
-Captures rental history for a tenant.
-
-| Field        | Type      | Description                  | Example           |
-| ------------ | --------- | ---------------------------- | ----------------- |
-| addressLine1 | String    | First line of address        | `"123 Maple St"`  |
-| city         | String    | City                         | `"Nairobi"`       |
-| moveInDate   | DateTime  | Start of occupancy           | `"2023-01-15"`    |
-| moveOutDate  | DateTime? | End of stay                  | `"2024-01-14"`    |
-| monthlyRent  | Decimal?  | Rent paid                    | `"2200.00"`       |
-| landlordName | String?   | Former landlord              | `"Jane Landlord"` |
-| verified     | Boolean   | Confirmed by system or admin | `true`            |
-
----
-
 ## 🔄 Status Tracking Models
 
 ### `TenantStatusHistory`, `RentalApplicationStatusHistory`, `TenantLeaseStatusHistory`

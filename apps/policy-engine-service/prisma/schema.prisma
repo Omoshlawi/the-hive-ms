@@ -122,6 +122,13 @@ model RolePrivilege {
   @@unique([privilegeId, roleId])
 }
 
+model IdentifierSequence {
+  id         String   @id @default(uuid())
+  dataModel  String   @unique
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}
+
 enum Operation {
   Create
   Read

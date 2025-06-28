@@ -13,6 +13,7 @@ import privilegesRouter from "./privileges";
 import resourcesRouter from "./resources";
 import rolesPrivilegeRouter from "./role-privilege";
 import rolesRouter from "./roles";
+import idGenRouter from "./id-gen"
 const router = Router();
 router.get("/resources-schema", getDatabaseSchemas);
 router.post("/resources-schema", pullServiceDatabaseSchema);
@@ -23,5 +24,6 @@ router.use("/organization-membership", [requireContext], membershipRouter);
 router.use("/organizations", [requireContext], organizationsRouter);
 router.use("/privileges", [requireContext], privilegesRouter);
 router.use("/role-privileges", rolesPrivilegeRouter);
+router.use("/id-gen", idGenRouter);
 
 export default router;

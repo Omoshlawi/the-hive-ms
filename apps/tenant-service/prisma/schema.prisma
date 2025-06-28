@@ -17,7 +17,7 @@ model Tenant {
   personId                 String            @db.Uuid // Reference to Person in Person Service
   person                   Json?
   // Tenant-specific fields
-  tenantNumber             String?           @unique // Internal tenant reference number
+  tenantNumber             String            @unique // Internal tenant reference number
   tenantType               TenantType        @default(INDIVIDUAL)
   status                   TenantStatus      @default(ACTIVE)
   creditScore              Int?
@@ -41,17 +41,8 @@ model Tenant {
   // Tenant status history for audit trail
   statusHistory TenantStatusHistory[]
 
-  // Background check and verification
-  backgroundCheckStatus BackgroundCheckStatus?
-  backgroundCheckDate   DateTime?
-  identityVerified      Boolean                @default(false)
-  incomeVerified        Boolean                @default(false)
-
   // Tenant documents
   documents TenantDocument[]
-
-  // Background check status history for audit trail
-  backgroundCheckStatusHistory BackgroundCheckStatusHistory[]
 
   // Notes and internal tracking
   internalNotes String?
@@ -145,6 +136,15 @@ model RentalApplication {
   // Internal processing
   assignedToUser String? @db.Uuid
   internalNotes  String?
+
+  // Background check and verification
+  backgroundCheckStatus BackgroundCheckStatus?
+  backgroundCheckDate   DateTime?
+  identityVerified      Boolean                @default(false)
+  incomeVerified        Boolean                @default(false)
+
+  // Background check status history for audit trail
+  backgroundCheckStatusHistory BackgroundCheckStatusHistory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -288,17 +288,17 @@ model TenantDocument {
 // Background check status history
 model BackgroundCheckStatusHistory {
   id             String                @id @default(uuid()) @db.Uuid
-  tenantId       String                @db.Uuid
+  applicationId  String                @db.Uuid
   previousStatus BackgroundCheckStatus
   newStatus      BackgroundCheckStatus
   changedBy      String?
   reason         String?               @db.Text
   createdAt      DateTime              @default(now())
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  application RentalApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   // @@map("background_check_status_history")
 
-  @@index([tenantId])
+  @@index([applicationId])
 }
 
 // Flexible screening questions and responses system
@@ -405,7 +405,7 @@ model ScreeningQuestionTemplate {
   questions Json // Array of question configurations
 
   // Usage tracking
-  usageCount Int      @default(0)
+  usageCount Int      @default(0) // How many times this template has been applied to listings
   rating     Decimal? @db.Decimal(3, 2) // User rating 1-5
 
   // Audit fields
