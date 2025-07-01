@@ -34,9 +34,7 @@ model Tenant {
   specialRequirements    String? // Accessibility, pet accommodations, etc.
 
   // Rental history and references
-  references         TenantReference[]
   rentalApplications RentalApplication[]
-  leases             TenantLease[]
 
   // Tenant status history for audit trail
   statusHistory TenantStatusHistory[]
@@ -53,7 +51,9 @@ model Tenant {
   updatedAt DateTime @updatedAt
   createdBy String?  @db.Uuid
   updatedBy String?  @db.Uuid
-  // @@map("tenants")
+
+  coApplicants            CoApplicant[]
+  agreementParticipations AgreementParticipant[]
 
   @@index([personId])
   @@index([tenantNumber])
@@ -68,7 +68,7 @@ model TenantStatusHistory {
 
   previousStatus TenantStatus
   newStatus      TenantStatus
-  changedBy      String?
+  changedBy      String?      @db.Uuid
   reason         String?      @db.Text
   createdAt      DateTime     @default(now())
   tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -76,8 +76,8 @@ model TenantStatusHistory {
 
 // References (personal/professional)
 model TenantReference {
-  id       String @id @default(uuid()) @db.Uuid
-  tenantId String @db.Uuid
+  id            String @id @default(uuid()) @db.Uuid
+  applicationId String @db.Uuid
 
   referenceType ReferenceType
   name          String
@@ -96,10 +96,9 @@ model TenantReference {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  // @@map("tenant_references")
+  application RentalApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
-  @@index([tenantId])
+  @@index([applicationId])
 }
 
 // Rental applications
@@ -130,7 +129,6 @@ model RentalApplication {
 
   // Screening and evaluation
   screeningScore     Decimal? @db.Decimal(5, 2) // Calculated screening score
-  // autoScreenResult   AutoScreenResult?
   manualReviewNeeded Boolean  @default(false)
 
   // Internal processing
@@ -149,8 +147,8 @@ model RentalApplication {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  // @@map("rental_applications")
+  tenant     Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  references TenantReference[]
 
   @@index([organizationId])
   @@index([tenantId])
@@ -167,7 +165,7 @@ model RentalApplicationStatusHistory {
 
   previousStatus ApplicationStatus
   newStatus      ApplicationStatus
-  changedBy      String?
+  changedBy      String?           @db.Uuid
   reason         String?           @db.Text
   createdAt      DateTime          @default(now())
 
@@ -178,20 +176,7 @@ model RentalApplicationStatusHistory {
 model CoApplicant {
   id            String @id @default(uuid()) @db.Uuid
   applicationId String @db.Uuid
-
-  // Personal information
-  firstName   String
-  lastName    String
-  email       String?
-  phoneNumber String?
-  dateOfBirth DateTime?
-  ssn         String? // Encrypted
-
-  // Employment
-  employmentStatus EmploymentStatus?
-  employer         String?
-  jobTitle         String?
-  monthlyIncome    Decimal?          @db.Decimal(10, 2)
+  tenantId      String @db.Uuid // Optional link to an existing tenant
 
   // Relationship to primary applicant
   relationshipType String
@@ -200,53 +185,181 @@ model CoApplicant {
   updatedAt DateTime @updatedAt
 
   application RentalApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  // @@map("co_applicants")
+  tenant      Tenant            @relation(fields: [tenantId], references: [id])
 
   @@index([applicationId])
 }
 
-// Tenant lease relationships (references to Lease Service)
-model TenantLease {
+// Base Agreement model - Flexible for any type of rental agreement
+model RentalAgreement {
   id             String @id @default(uuid()) @db.Uuid
   organizationId String @db.Uuid
-  tenantId       String @db.Uuid
-  leaseId        String @db.Uuid // Reference to Lease Service
+  propertyId     String @db.Uuid
 
-  // Tenant's role in the lease
-  isPrimaryTenant Boolean           @default(true)
-  moveInDate      DateTime?
-  moveOutDate     DateTime?
-  status          TenantLeaseStatus @default(ACTIVE)
+  // Agreement identification
+  agreementNumber String          @unique @db.VarChar(50)
+  agreementType   AgreementType // LEASE, RENTAL, SHORT_TERM, etc.
+  status          AgreementStatus @default(ACTIVE)
 
-  // Tenant lease status history for audit trail
-  statusHistory TenantLeaseStatusHistory[]
+  // Basic periods - flexible for all agreement types
+  startDate DateTime  @db.Date
+  endDate   DateTime? @db.Date
+
+  // Core financial terms - common to all agreements
+  baseRentAmount Decimal @db.Decimal(10, 2) // Could be monthly rent, total amount, etc.
+
+  // Flexible metadata for type-specific fields
+  // This JSON field allows each agreement type to store specific data
+  typeSpecificData Json? // Store agreement-type specific fields here
+
+  // Common terms
+  noticePeriodDays  Int     @default(30)
+  autoRenewal       Boolean @default(false)
+  petsAllowed       Boolean @default(false)
+  smokingAllowed    Boolean @default(false)
+  sublettingAllowed Boolean @default(false)
+
+  // TODO add model to flexibly handle terminations
+  // Termination details
+  // terminationReason     String?   @db.VarChar(200)
+  // terminationNoticeDate DateTime? @db.Date
+  // earlyTerminationFee   Decimal?  @db.Decimal(10, 2)
+
+  // Audit fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?  @db.Uuid
+  updatedBy String?  @db.Uuid
+  metadata  Json? // General metadata
+
+  // Relations
+  participants      AgreementParticipant[]
+  additionalCharges AdditionalCharge[]
+
+  // Type-specific extensions
+  leaseDetails     LeaseAgreementDetails?
+  rentalDetails    RentalAgreementDetails?
+  shortTermDetails ShortTermAgreementDetails?
+  statusHistory    AgreementStatusHistory?
+
+  @@index([organizationId])
+  @@index([propertyId])
+  @@index([status])
+  @@index([agreementType])
+  @@index([startDate, endDate])
+}
+
+model AgreementStatusHistory {
+  id             String          @id @default(uuid()) @db.Uuid
+  agreementId    String          @unique @db.Uuid
+  agreement      RentalAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  previousStatus AgreementStatus
+  newStatus      AgreementStatus
+  changedBy      String?         @db.Uuid
+  reason         String?         @db.Text
+  createdAt      DateTime        @default(now())
+}
+
+// Extension for Traditional Lease agreements (long-term, typically 12+ months)
+model LeaseAgreementDetails {
+  id          String          @id @default(uuid()) @db.Uuid
+  agreementId String          @unique @db.Uuid
+  agreement   RentalAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+
+  // Lease-specific fields
+  leaseTerm        Int     @default(12) // in months
+  renewalOptions   Json? // Renewal terms and options
+  rentEscalation   Json? // Rent increase schedules
+  maintenanceTerms String? @db.Text
+
+  // Lease-specific compliance
+  leaseCompliance Json? // Legal compliance requirements
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  // @@map("tenant_leases")
-
-  @@unique([tenantId, leaseId])
-  @@index([organizationId])
-  @@index([tenantId])
-  @@index([leaseId])
 }
 
-// Tenant lease status history
-model TenantLeaseStatusHistory {
+// Extension for Rental agreements (month-to-month, flexible terms)
+model RentalAgreementDetails {
+  id          String          @id @default(uuid()) @db.Uuid
+  agreementId String          @unique @db.Uuid
+  agreement   RentalAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+
+  // Rental-specific fields
+  billingCycle  BillingCycle @default(MONTHLY)
+  flexibleTerms Boolean      @default(true)
+  minimumStay   Int? // in days/months
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Extension for Short-term agreements (Airbnb-style, vacation rentals)
+model ShortTermAgreementDetails {
+  id          String          @id @default(uuid()) @db.Uuid
+  agreementId String          @unique @db.Uuid
+  agreement   RentalAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+
+  // Short-term specific fields
+  checkInTime     String? // "3:00 PM"
+  checkOutTime    String? // "11:00 AM"
+  cleaningFee     Decimal? @db.Decimal(10, 2)
+  guestCapacity   Int?
+  houseRules      String?  @db.Text
+  amenities       String[] // List of amenities
+  bookingPlatform String? // Airbnb, Booking.com, etc.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Flexible participant model
+model AgreementParticipant {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  agreementId    String @db.Uuid
+  tenantId       String @db.Uuid
+
+  participantType          ParticipantType
+  responsibilityPercentage Decimal?        @db.Decimal(5, 2)
+  isPrimaryTenant          Boolean         @default(false)
+
+  status        ParticipantStatus          @default(ACTIVE)
+  statusHistory ParticipantStatusHistory[]
+
+  // Flexible move dates
+  moveInDate  DateTime?
+  moveOutDate DateTime?
+
+  // Participant-specific terms (stored as JSON for flexibility)
+  participantTerms Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  metadata  Json?
+
+  // Relations
+  agreement RentalAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([agreementId])
+  @@index([tenantId])
+}
+
+// Participant status history
+model ParticipantStatusHistory {
   id            String @id @default(uuid()) @db.Uuid
-  tenantLeaseId String @db.Uuid
+  participantId String @db.Uuid
 
-  previousStatus TenantStatus
-  newStatus      TenantStatus
+  previousStatus ParticipantStatus
+  newStatus      ParticipantStatus
   changedBy      String?
-  reason         String?      @db.Text
-  createdAt      DateTime     @default(now())
-  tenantLease    TenantLease  @relation(fields: [tenantLeaseId], references: [id], onDelete: Cascade)
-  // @@map("tenant_lease_status_history")
+  reason         String?              @db.Text
+  createdAt      DateTime             @default(now())
+  participant    AgreementParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
 
-  @@index([tenantLeaseId])
+  @@index([participantId])
 }
 
 // Document management for tenants
@@ -257,13 +370,7 @@ model TenantDocument {
 
   documentType DocumentType
   documentUrl  String
-
-  //document file metadata covered in meta json fields
-  // filePath     String
-  // fileName     String
-  // fileSize     Int?
-  // mimeType     String?
-  metadata Json?
+  metadata     Json?
 
   // Document metadata
   title       String?
@@ -278,7 +385,6 @@ model TenantDocument {
   uploadedBy String?  @db.Uuid
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  // @@map("tenant_documents")
 
   @@index([organizationId])
   @@index([tenantId])
@@ -296,7 +402,6 @@ model BackgroundCheckStatusHistory {
   createdAt      DateTime              @default(now())
 
   application RentalApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  // @@map("background_check_status_history")
 
   @@index([applicationId])
 }
@@ -344,7 +449,6 @@ model ScreeningQuestion {
   updatedAt DateTime @updatedAt
   createdBy String?  @db.Uuid
   updatedBy String?  @db.Uuid
-  // @@map("screening_questions")
 
   @@index([organizationId])
   @@index([category])
@@ -382,7 +486,6 @@ model ScreeningResponse {
 
   application RentalApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   question    ScreeningQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  // @@map("screening_responses")
 
   @@unique([applicationId, questionId])
   @@index([organizationId])
@@ -412,15 +515,14 @@ model ScreeningQuestionTemplate {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   createdBy String?  @db.Uuid
-  // @@map("screening_question_templates")
 
   @@index([organizationId])
   @@index([category])
   @@index([isSystemTemplate])
 }
 
-// Listing-specific screening configuration
-model ListingScreeningConfig {
+// Property listing screening configuration
+model PropertyScreeningConfig {
   id             String @id @default(uuid()) @db.Uuid
   organizationId String @db.Uuid
   listingId      String @db.Uuid // Reference to Listing Service
@@ -450,11 +552,93 @@ model ListingScreeningConfig {
   updatedAt DateTime @updatedAt
   createdBy String?  @db.Uuid
   updatedBy String?  @db.Uuid
-  // @@map("listing_screening_configs")
 
   @@unique([listingId])
   @@index([organizationId])
   @@index([listingId])
+}
+
+// Flexible additional charges model
+model AdditionalCharge {
+  id          String          @id @default(uuid()) @db.Uuid
+  agreementId String          @db.Uuid
+  agreement   RentalAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+
+  name        String // e.g., "Cleaning Fee", "Pet Fee", "Parking"
+  description String?
+  amount      Decimal         @db.Decimal(12, 2)
+  frequency   ChargeFrequency @default(ONE_TIME)
+  mandatory   Boolean         @default(true)
+
+  // Charge-specific metadata
+  chargeMetadata Json?
+  voided         Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([agreementId])
+}
+
+// ENUMS
+
+enum AgreementType {
+  LEASE // Traditional long-term lease (12+ months)
+  RENTAL // Month-to-month or flexible rental
+  SHORT_TERM // Vacation rental, Airbnb-style
+  CORPORATE // Corporate housing
+  SUBLEASE // Subletting arrangement
+  COMMERCIAL // Commercial property lease
+  RENT_TO_OWN // Rent-to-own agreements
+  STUDENT // Student housing
+  SENIOR // Senior living agreements
+}
+
+enum BillingCycle {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUALLY
+}
+
+enum ChargeFrequency {
+  ONE_TIME
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUALLY
+  PER_NIGHT
+  PER_STAY
+}
+
+enum ParticipantType {
+  PRIMARY_TENANT
+  CO_TENANT
+  GUARANTOR
+  OCCUPANT
+  SUBLESSEE
+  AUTHORIZED_OCCUPANT
+}
+
+enum AgreementStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  EXPIRED
+  TERMINATED
+  RENEWED
+  CANCELLED
+  SUSPENDED
+}
+
+enum ParticipantStatus {
+  ACTIVE
+  TERMINATED
+  EXPIRED
+  PENDING
+  SUSPENDED
 }
 
 enum TenantType {
@@ -463,14 +647,14 @@ enum TenantType {
   FAMILY
   ROOMMATES
   CORPORATE
+  STUDENT
 }
 
 enum TenantStatus {
   ACTIVE
   INACTIVE
-  PROSPECTIVE
-  FORMER
   BLACKLISTED
+  PROSPECTIVE
 }
 
 enum EmploymentStatus {
@@ -488,6 +672,7 @@ enum ContactMethod {
   PHONE
   SMS
   MAIL
+  IN_PERSON
 }
 
 enum BackgroundCheckStatus {
@@ -496,6 +681,7 @@ enum BackgroundCheckStatus {
   REJECTED
   EXPIRED
   NOT_REQUIRED
+  IN_PROGRESS
 }
 
 enum ReferenceType {
@@ -504,6 +690,7 @@ enum ReferenceType {
   PREVIOUS_LANDLORD
   EMPLOYER
   CHARACTER
+  EMERGENCY_CONTACT
 }
 
 enum ReferenceRecommendation {
@@ -522,13 +709,7 @@ enum ApplicationStatus {
   REJECTED
   WITHDRAWN
   EXPIRED
-}
-
-enum TenantLeaseStatus {
-  ACTIVE
-  TERMINATED
-  EXPIRED
-  PENDING
+  CONDITIONAL_APPROVAL
 }
 
 enum DocumentType {
@@ -541,25 +722,29 @@ enum DocumentType {
   CREDIT_REPORT
   INSURANCE_CERTIFICATE
   PET_DOCUMENTATION
+  LEASE_AGREEMENT
+  RENTAL_HISTORY
+  TAX_RETURN
+  PROOF_OF_FUNDS
   OTHER
 }
 
 enum QuestionCategory {
-  GENERAL // - General application questions
-  PERSONAL_INFO //- Contact info, demographics
-  EMPLOYMENT //- Job history, employer details
-  INCOME //- Salary, income verification
-  RENTAL_HISTORY //- Previous rentals, references
-  REFERENCES // - Personal/professional references
-  PETS //- Pet ownership and details
-  VEHICLES //- Vehicle info for parking
-  BACKGROUND //- Criminal history, credit checks
-  PREFERENCES // - Tenant preferences
-  EMERGENCY_CONTACT //- Emergency contact info
-  FAMILY // - Family members, dependents
-  FINANCIAL // - Banking, credit, debts
-  LEGAL //- Legal disclosures, agreements
-  CUSTOM //- Custom categories
+  GENERAL
+  PERSONAL_INFO
+  EMPLOYMENT
+  INCOME
+  RENTAL_HISTORY
+  REFERENCES
+  PETS
+  VEHICLES
+  BACKGROUND
+  PREFERENCES
+  EMERGENCY_CONTACT
+  FAMILY
+  FINANCIAL
+  LEGAL
+  CUSTOM
 }
 
 enum QuestionType {

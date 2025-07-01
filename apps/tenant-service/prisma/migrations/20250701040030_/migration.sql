@@ -1,38 +1,47 @@
-/*
-  Warnings:
-
-  - You are about to drop the `TemplateApp` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
-CREATE TYPE "TenantType" AS ENUM ('INDIVIDUAL', 'COUPLE', 'FAMILY', 'ROOMMATES', 'CORPORATE');
+CREATE TYPE "AgreementType" AS ENUM ('LEASE', 'RENTAL', 'SHORT_TERM', 'CORPORATE', 'SUBLEASE', 'COMMERCIAL', 'RENT_TO_OWN', 'STUDENT', 'SENIOR');
 
 -- CreateEnum
-CREATE TYPE "TenantStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'PROSPECTIVE', 'FORMER', 'BLACKLISTED');
+CREATE TYPE "BillingCycle" AS ENUM ('DAILY', 'WEEKLY', 'MONTHLY', 'QUARTERLY', 'ANNUALLY');
+
+-- CreateEnum
+CREATE TYPE "ChargeFrequency" AS ENUM ('ONE_TIME', 'DAILY', 'WEEKLY', 'MONTHLY', 'QUARTERLY', 'ANNUALLY', 'PER_NIGHT', 'PER_STAY');
+
+-- CreateEnum
+CREATE TYPE "ParticipantType" AS ENUM ('PRIMARY_TENANT', 'CO_TENANT', 'GUARANTOR', 'OCCUPANT', 'SUBLESSEE', 'AUTHORIZED_OCCUPANT');
+
+-- CreateEnum
+CREATE TYPE "AgreementStatus" AS ENUM ('DRAFT', 'PENDING', 'ACTIVE', 'EXPIRED', 'TERMINATED', 'RENEWED', 'CANCELLED', 'SUSPENDED');
+
+-- CreateEnum
+CREATE TYPE "ParticipantStatus" AS ENUM ('ACTIVE', 'TERMINATED', 'EXPIRED', 'PENDING', 'SUSPENDED');
+
+-- CreateEnum
+CREATE TYPE "TenantType" AS ENUM ('INDIVIDUAL', 'COUPLE', 'FAMILY', 'ROOMMATES', 'CORPORATE', 'STUDENT');
+
+-- CreateEnum
+CREATE TYPE "TenantStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'BLACKLISTED', 'PROSPECTIVE');
 
 -- CreateEnum
 CREATE TYPE "EmploymentStatus" AS ENUM ('EMPLOYED_FULL_TIME', 'EMPLOYED_PART_TIME', 'SELF_EMPLOYED', 'UNEMPLOYED', 'RETIRED', 'STUDENT', 'CONTRACTOR');
 
 -- CreateEnum
-CREATE TYPE "ContactMethod" AS ENUM ('EMAIL', 'PHONE', 'SMS', 'MAIL');
+CREATE TYPE "ContactMethod" AS ENUM ('EMAIL', 'PHONE', 'SMS', 'MAIL', 'IN_PERSON');
 
 -- CreateEnum
-CREATE TYPE "BackgroundCheckStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'EXPIRED', 'NOT_REQUIRED');
+CREATE TYPE "BackgroundCheckStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'EXPIRED', 'NOT_REQUIRED', 'IN_PROGRESS');
 
 -- CreateEnum
-CREATE TYPE "ReferenceType" AS ENUM ('PERSONAL', 'PROFESSIONAL', 'PREVIOUS_LANDLORD', 'EMPLOYER', 'CHARACTER');
+CREATE TYPE "ReferenceType" AS ENUM ('PERSONAL', 'PROFESSIONAL', 'PREVIOUS_LANDLORD', 'EMPLOYER', 'CHARACTER', 'EMERGENCY_CONTACT');
 
 -- CreateEnum
 CREATE TYPE "ReferenceRecommendation" AS ENUM ('HIGHLY_RECOMMENDED', 'RECOMMENDED', 'NEUTRAL', 'NOT_RECOMMENDED', 'STRONGLY_NOT_RECOMMENDED');
 
 -- CreateEnum
-CREATE TYPE "ApplicationStatus" AS ENUM ('DRAFT', 'PENDING', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'WITHDRAWN', 'EXPIRED');
+CREATE TYPE "ApplicationStatus" AS ENUM ('DRAFT', 'PENDING', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'WITHDRAWN', 'EXPIRED', 'CONDITIONAL_APPROVAL');
 
 -- CreateEnum
-CREATE TYPE "TenantLeaseStatus" AS ENUM ('ACTIVE', 'TERMINATED', 'EXPIRED', 'PENDING');
-
--- CreateEnum
-CREATE TYPE "DocumentType" AS ENUM ('ID_DOCUMENT', 'INCOME_VERIFICATION', 'EMPLOYMENT_LETTER', 'BANK_STATEMENT', 'REFERENCE_LETTER', 'BACKGROUND_CHECK', 'CREDIT_REPORT', 'INSURANCE_CERTIFICATE', 'PET_DOCUMENTATION', 'OTHER');
+CREATE TYPE "DocumentType" AS ENUM ('ID_DOCUMENT', 'INCOME_VERIFICATION', 'EMPLOYMENT_LETTER', 'BANK_STATEMENT', 'REFERENCE_LETTER', 'BACKGROUND_CHECK', 'CREDIT_REPORT', 'INSURANCE_CERTIFICATE', 'PET_DOCUMENTATION', 'LEASE_AGREEMENT', 'RENTAL_HISTORY', 'TAX_RETURN', 'PROOF_OF_FUNDS', 'OTHER');
 
 -- CreateEnum
 CREATE TYPE "QuestionCategory" AS ENUM ('GENERAL', 'PERSONAL_INFO', 'EMPLOYMENT', 'INCOME', 'RENTAL_HISTORY', 'REFERENCES', 'PETS', 'VEHICLES', 'BACKGROUND', 'PREFERENCES', 'EMERGENCY_CONTACT', 'FAMILY', 'FINANCIAL', 'LEGAL', 'CUSTOM');
@@ -40,15 +49,12 @@ CREATE TYPE "QuestionCategory" AS ENUM ('GENERAL', 'PERSONAL_INFO', 'EMPLOYMENT'
 -- CreateEnum
 CREATE TYPE "QuestionType" AS ENUM ('TEXT', 'TEXTAREA', 'NUMBER', 'BOOLEAN', 'DATE', 'EMAIL', 'PHONE', 'SINGLE_SELECT', 'MULTI_SELECT', 'CHECKBOX', 'DROPDOWN', 'FILE_UPLOAD', 'CURRENCY', 'PERCENTAGE', 'URL', 'TIME', 'DATETIME', 'RATING', 'SLIDER', 'SIGNATURE');
 
--- DropTable
-DROP TABLE "TemplateApp";
-
 -- CreateTable
 CREATE TABLE "Tenant" (
     "id" UUID NOT NULL,
     "personId" UUID NOT NULL,
     "person" JSONB,
-    "tenantNumber" TEXT,
+    "tenantNumber" TEXT NOT NULL,
     "tenantType" "TenantType" NOT NULL DEFAULT 'INDIVIDUAL',
     "status" "TenantStatus" NOT NULL DEFAULT 'ACTIVE',
     "creditScore" INTEGER,
@@ -61,10 +67,6 @@ CREATE TABLE "Tenant" (
     "preferredContactMethod" "ContactMethod" NOT NULL DEFAULT 'EMAIL',
     "languagePreference" TEXT DEFAULT 'en',
     "specialRequirements" TEXT,
-    "backgroundCheckStatus" "BackgroundCheckStatus",
-    "backgroundCheckDate" TIMESTAMP(3),
-    "identityVerified" BOOLEAN NOT NULL DEFAULT false,
-    "incomeVerified" BOOLEAN NOT NULL DEFAULT false,
     "internalNotes" TEXT,
     "tags" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -81,7 +83,7 @@ CREATE TABLE "TenantStatusHistory" (
     "tenantId" UUID NOT NULL,
     "previousStatus" "TenantStatus" NOT NULL,
     "newStatus" "TenantStatus" NOT NULL,
-    "changedBy" TEXT,
+    "changedBy" UUID,
     "reason" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -91,7 +93,7 @@ CREATE TABLE "TenantStatusHistory" (
 -- CreateTable
 CREATE TABLE "TenantReference" (
     "id" UUID NOT NULL,
-    "tenantId" UUID NOT NULL,
+    "applicationId" UUID NOT NULL,
     "referenceType" "ReferenceType" NOT NULL,
     "name" TEXT NOT NULL,
     "relationship" TEXT NOT NULL,
@@ -128,6 +130,10 @@ CREATE TABLE "RentalApplication" (
     "manualReviewNeeded" BOOLEAN NOT NULL DEFAULT false,
     "assignedToUser" UUID,
     "internalNotes" TEXT,
+    "backgroundCheckStatus" "BackgroundCheckStatus",
+    "backgroundCheckDate" TIMESTAMP(3),
+    "identityVerified" BOOLEAN NOT NULL DEFAULT false,
+    "incomeVerified" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -140,7 +146,7 @@ CREATE TABLE "RentalApplicationStatusHistory" (
     "applicationId" UUID NOT NULL,
     "previousStatus" "ApplicationStatus" NOT NULL,
     "newStatus" "ApplicationStatus" NOT NULL,
-    "changedBy" TEXT,
+    "changedBy" UUID,
     "reason" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -151,16 +157,7 @@ CREATE TABLE "RentalApplicationStatusHistory" (
 CREATE TABLE "CoApplicant" (
     "id" UUID NOT NULL,
     "applicationId" UUID NOT NULL,
-    "firstName" TEXT NOT NULL,
-    "lastName" TEXT NOT NULL,
-    "email" TEXT,
-    "phoneNumber" TEXT,
-    "dateOfBirth" TIMESTAMP(3),
-    "ssn" TEXT,
-    "employmentStatus" "EmploymentStatus",
-    "employer" TEXT,
-    "jobTitle" TEXT,
-    "monthlyIncome" DECIMAL(10,2),
+    "tenantId" UUID NOT NULL,
     "relationshipType" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -169,32 +166,120 @@ CREATE TABLE "CoApplicant" (
 );
 
 -- CreateTable
-CREATE TABLE "TenantLease" (
+CREATE TABLE "RentalAgreement" (
     "id" UUID NOT NULL,
     "organizationId" UUID NOT NULL,
-    "tenantId" UUID NOT NULL,
-    "leaseId" UUID NOT NULL,
-    "isPrimaryTenant" BOOLEAN NOT NULL DEFAULT true,
-    "moveInDate" TIMESTAMP(3),
-    "moveOutDate" TIMESTAMP(3),
-    "status" "TenantLeaseStatus" NOT NULL DEFAULT 'ACTIVE',
+    "propertyId" UUID NOT NULL,
+    "agreementNumber" VARCHAR(50) NOT NULL,
+    "agreementType" "AgreementType" NOT NULL,
+    "status" "AgreementStatus" NOT NULL DEFAULT 'ACTIVE',
+    "startDate" DATE NOT NULL,
+    "endDate" DATE,
+    "baseRentAmount" DECIMAL(10,2) NOT NULL,
+    "typeSpecificData" JSONB,
+    "noticePeriodDays" INTEGER NOT NULL DEFAULT 30,
+    "autoRenewal" BOOLEAN NOT NULL DEFAULT false,
+    "petsAllowed" BOOLEAN NOT NULL DEFAULT false,
+    "smokingAllowed" BOOLEAN NOT NULL DEFAULT false,
+    "sublettingAllowed" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "createdBy" UUID,
+    "updatedBy" UUID,
+    "metadata" JSONB,
 
-    CONSTRAINT "TenantLease_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "RentalAgreement_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "TenantLeaseStatusHistory" (
+CREATE TABLE "AgreementStatusHistory" (
     "id" UUID NOT NULL,
-    "tenantLeaseId" UUID NOT NULL,
-    "previousStatus" "TenantStatus" NOT NULL,
-    "newStatus" "TenantStatus" NOT NULL,
+    "agreementId" UUID NOT NULL,
+    "previousStatus" "AgreementStatus" NOT NULL,
+    "newStatus" "AgreementStatus" NOT NULL,
+    "changedBy" UUID,
+    "reason" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "AgreementStatusHistory_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "LeaseAgreementDetails" (
+    "id" UUID NOT NULL,
+    "agreementId" UUID NOT NULL,
+    "leaseTerm" INTEGER NOT NULL DEFAULT 12,
+    "renewalOptions" JSONB,
+    "rentEscalation" JSONB,
+    "maintenanceTerms" TEXT,
+    "leaseCompliance" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "LeaseAgreementDetails_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "RentalAgreementDetails" (
+    "id" UUID NOT NULL,
+    "agreementId" UUID NOT NULL,
+    "billingCycle" "BillingCycle" NOT NULL DEFAULT 'MONTHLY',
+    "flexibleTerms" BOOLEAN NOT NULL DEFAULT true,
+    "minimumStay" INTEGER,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "RentalAgreementDetails_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ShortTermAgreementDetails" (
+    "id" UUID NOT NULL,
+    "agreementId" UUID NOT NULL,
+    "checkInTime" TEXT,
+    "checkOutTime" TEXT,
+    "cleaningFee" DECIMAL(10,2),
+    "guestCapacity" INTEGER,
+    "houseRules" TEXT,
+    "amenities" TEXT[],
+    "bookingPlatform" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ShortTermAgreementDetails_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AgreementParticipant" (
+    "id" UUID NOT NULL,
+    "organizationId" UUID NOT NULL,
+    "agreementId" UUID NOT NULL,
+    "tenantId" UUID NOT NULL,
+    "participantType" "ParticipantType" NOT NULL,
+    "responsibilityPercentage" DECIMAL(5,2),
+    "isPrimaryTenant" BOOLEAN NOT NULL DEFAULT false,
+    "status" "ParticipantStatus" NOT NULL DEFAULT 'ACTIVE',
+    "moveInDate" TIMESTAMP(3),
+    "moveOutDate" TIMESTAMP(3),
+    "participantTerms" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "metadata" JSONB,
+
+    CONSTRAINT "AgreementParticipant_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ParticipantStatusHistory" (
+    "id" UUID NOT NULL,
+    "participantId" UUID NOT NULL,
+    "previousStatus" "ParticipantStatus" NOT NULL,
+    "newStatus" "ParticipantStatus" NOT NULL,
     "changedBy" TEXT,
     "reason" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "TenantLeaseStatusHistory_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ParticipantStatusHistory_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -221,7 +306,7 @@ CREATE TABLE "TenantDocument" (
 -- CreateTable
 CREATE TABLE "BackgroundCheckStatusHistory" (
     "id" UUID NOT NULL,
-    "tenantId" UUID NOT NULL,
+    "applicationId" UUID NOT NULL,
     "previousStatus" "BackgroundCheckStatus" NOT NULL,
     "newStatus" "BackgroundCheckStatus" NOT NULL,
     "changedBy" TEXT,
@@ -304,7 +389,7 @@ CREATE TABLE "ScreeningQuestionTemplate" (
 );
 
 -- CreateTable
-CREATE TABLE "ListingScreeningConfig" (
+CREATE TABLE "PropertyScreeningConfig" (
     "id" UUID NOT NULL,
     "organizationId" UUID NOT NULL,
     "listingId" UUID NOT NULL,
@@ -324,7 +409,24 @@ CREATE TABLE "ListingScreeningConfig" (
     "createdBy" UUID,
     "updatedBy" UUID,
 
-    CONSTRAINT "ListingScreeningConfig_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "PropertyScreeningConfig_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AdditionalCharge" (
+    "id" UUID NOT NULL,
+    "agreementId" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "amount" DECIMAL(12,2) NOT NULL,
+    "frequency" "ChargeFrequency" NOT NULL DEFAULT 'ONE_TIME',
+    "mandatory" BOOLEAN NOT NULL DEFAULT true,
+    "chargeMetadata" JSONB,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "AdditionalCharge_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -343,7 +445,7 @@ CREATE INDEX "Tenant_status_idx" ON "Tenant"("status");
 CREATE INDEX "Tenant_createdAt_idx" ON "Tenant"("createdAt");
 
 -- CreateIndex
-CREATE INDEX "TenantReference_tenantId_idx" ON "TenantReference"("tenantId");
+CREATE INDEX "TenantReference_applicationId_idx" ON "TenantReference"("applicationId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "RentalApplication_applicationNumber_key" ON "RentalApplication"("applicationNumber");
@@ -370,19 +472,46 @@ CREATE INDEX "RentalApplicationStatusHistory_applicationId_idx" ON "RentalApplic
 CREATE INDEX "CoApplicant_applicationId_idx" ON "CoApplicant"("applicationId");
 
 -- CreateIndex
-CREATE INDEX "TenantLease_organizationId_idx" ON "TenantLease"("organizationId");
+CREATE UNIQUE INDEX "RentalAgreement_agreementNumber_key" ON "RentalAgreement"("agreementNumber");
 
 -- CreateIndex
-CREATE INDEX "TenantLease_tenantId_idx" ON "TenantLease"("tenantId");
+CREATE INDEX "RentalAgreement_organizationId_idx" ON "RentalAgreement"("organizationId");
 
 -- CreateIndex
-CREATE INDEX "TenantLease_leaseId_idx" ON "TenantLease"("leaseId");
+CREATE INDEX "RentalAgreement_propertyId_idx" ON "RentalAgreement"("propertyId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "TenantLease_tenantId_leaseId_key" ON "TenantLease"("tenantId", "leaseId");
+CREATE INDEX "RentalAgreement_status_idx" ON "RentalAgreement"("status");
 
 -- CreateIndex
-CREATE INDEX "TenantLeaseStatusHistory_tenantLeaseId_idx" ON "TenantLeaseStatusHistory"("tenantLeaseId");
+CREATE INDEX "RentalAgreement_agreementType_idx" ON "RentalAgreement"("agreementType");
+
+-- CreateIndex
+CREATE INDEX "RentalAgreement_startDate_endDate_idx" ON "RentalAgreement"("startDate", "endDate");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AgreementStatusHistory_agreementId_key" ON "AgreementStatusHistory"("agreementId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "LeaseAgreementDetails_agreementId_key" ON "LeaseAgreementDetails"("agreementId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RentalAgreementDetails_agreementId_key" ON "RentalAgreementDetails"("agreementId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ShortTermAgreementDetails_agreementId_key" ON "ShortTermAgreementDetails"("agreementId");
+
+-- CreateIndex
+CREATE INDEX "AgreementParticipant_organizationId_idx" ON "AgreementParticipant"("organizationId");
+
+-- CreateIndex
+CREATE INDEX "AgreementParticipant_agreementId_idx" ON "AgreementParticipant"("agreementId");
+
+-- CreateIndex
+CREATE INDEX "AgreementParticipant_tenantId_idx" ON "AgreementParticipant"("tenantId");
+
+-- CreateIndex
+CREATE INDEX "ParticipantStatusHistory_participantId_idx" ON "ParticipantStatusHistory"("participantId");
 
 -- CreateIndex
 CREATE INDEX "TenantDocument_organizationId_idx" ON "TenantDocument"("organizationId");
@@ -394,7 +523,7 @@ CREATE INDEX "TenantDocument_tenantId_idx" ON "TenantDocument"("tenantId");
 CREATE INDEX "TenantDocument_documentType_idx" ON "TenantDocument"("documentType");
 
 -- CreateIndex
-CREATE INDEX "BackgroundCheckStatusHistory_tenantId_idx" ON "BackgroundCheckStatusHistory"("tenantId");
+CREATE INDEX "BackgroundCheckStatusHistory_applicationId_idx" ON "BackgroundCheckStatusHistory"("applicationId");
 
 -- CreateIndex
 CREATE INDEX "ScreeningQuestion_organizationId_idx" ON "ScreeningQuestion"("organizationId");
@@ -433,19 +562,22 @@ CREATE INDEX "ScreeningQuestionTemplate_category_idx" ON "ScreeningQuestionTempl
 CREATE INDEX "ScreeningQuestionTemplate_isSystemTemplate_idx" ON "ScreeningQuestionTemplate"("isSystemTemplate");
 
 -- CreateIndex
-CREATE INDEX "ListingScreeningConfig_organizationId_idx" ON "ListingScreeningConfig"("organizationId");
+CREATE INDEX "PropertyScreeningConfig_organizationId_idx" ON "PropertyScreeningConfig"("organizationId");
 
 -- CreateIndex
-CREATE INDEX "ListingScreeningConfig_listingId_idx" ON "ListingScreeningConfig"("listingId");
+CREATE INDEX "PropertyScreeningConfig_listingId_idx" ON "PropertyScreeningConfig"("listingId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "ListingScreeningConfig_listingId_key" ON "ListingScreeningConfig"("listingId");
+CREATE UNIQUE INDEX "PropertyScreeningConfig_listingId_key" ON "PropertyScreeningConfig"("listingId");
+
+-- CreateIndex
+CREATE INDEX "AdditionalCharge_agreementId_idx" ON "AdditionalCharge"("agreementId");
 
 -- AddForeignKey
 ALTER TABLE "TenantStatusHistory" ADD CONSTRAINT "TenantStatusHistory_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TenantReference" ADD CONSTRAINT "TenantReference_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "TenantReference" ADD CONSTRAINT "TenantReference_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "RentalApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "RentalApplication" ADD CONSTRAINT "RentalApplication_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -457,19 +589,40 @@ ALTER TABLE "RentalApplicationStatusHistory" ADD CONSTRAINT "RentalApplicationSt
 ALTER TABLE "CoApplicant" ADD CONSTRAINT "CoApplicant_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "RentalApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TenantLease" ADD CONSTRAINT "TenantLease_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "CoApplicant" ADD CONSTRAINT "CoApplicant_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TenantLeaseStatusHistory" ADD CONSTRAINT "TenantLeaseStatusHistory_tenantLeaseId_fkey" FOREIGN KEY ("tenantLeaseId") REFERENCES "TenantLease"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "AgreementStatusHistory" ADD CONSTRAINT "AgreementStatusHistory_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "RentalAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LeaseAgreementDetails" ADD CONSTRAINT "LeaseAgreementDetails_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "RentalAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RentalAgreementDetails" ADD CONSTRAINT "RentalAgreementDetails_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "RentalAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ShortTermAgreementDetails" ADD CONSTRAINT "ShortTermAgreementDetails_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "RentalAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AgreementParticipant" ADD CONSTRAINT "AgreementParticipant_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "RentalAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AgreementParticipant" ADD CONSTRAINT "AgreementParticipant_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ParticipantStatusHistory" ADD CONSTRAINT "ParticipantStatusHistory_participantId_fkey" FOREIGN KEY ("participantId") REFERENCES "AgreementParticipant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "TenantDocument" ADD CONSTRAINT "TenantDocument_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BackgroundCheckStatusHistory" ADD CONSTRAINT "BackgroundCheckStatusHistory_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "BackgroundCheckStatusHistory" ADD CONSTRAINT "BackgroundCheckStatusHistory_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "RentalApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ScreeningResponse" ADD CONSTRAINT "ScreeningResponse_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "RentalApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ScreeningResponse" ADD CONSTRAINT "ScreeningResponse_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "ScreeningQuestion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AdditionalCharge" ADD CONSTRAINT "AdditionalCharge_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "RentalAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;

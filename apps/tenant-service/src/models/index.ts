@@ -6,12 +6,12 @@ export const RentalApplicationsModel = db.rentalApplication;
 export const RentalApplicationStatusHistoryModel =
   db.rentalApplicationStatusHistory;
 export const CoApplicantsModel = db.coApplicant;
-export const TenantLeaseModel = db.tenantLease;
-export const TenantLeaseStatusHistoryModel = db.tenantLeaseStatusHistory;
+export const RentalAgrementModel = db.rentalAgreement;
+export const AgreementStatusHistoryModel = db.agreementStatusHistory;
 export const TenantDocumentsModel = db.tenantDocument;
 export const BackgroundCheckStatusHistoryModel =
   db.backgroundCheckStatusHistory;
 export const ScreeningQuestionsModel = db.screeningQuestion;
 export const ScreeningResponsesModel = db.screeningResponse;
 export const ScreeningQuestionTemplatesModel = db.screeningQuestionTemplate;
-export const ListingScreeningConfigsModel = db.listingScreeningConfig;
+export const ListingScreeningConfigsModel = db.propertyScreeningConfig;

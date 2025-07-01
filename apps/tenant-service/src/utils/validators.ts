@@ -49,6 +49,17 @@ export const TenenantReferenceValidator = z.object({
   position: z.string().optional(),
 });
 
+export const CoApplicantValidator = z.object({
+  tenantNumber: z
+    .string()
+    .regex(
+      /^TNT-\d{6,12}$/,
+      "Tenant number must follow the format 'TNT-######' (6–12 digits)"
+    )
+    .optional(),
+  relationshipType: z.string().nonempty(),
+});
+
 export const RentalApplicationValidator = z.object({
   tenantId: z.string().nonempty().uuid("Invalid"),
   listingId: z.string().nonempty().uuid("Invalid"),
@@ -60,21 +71,11 @@ export const RentalApplicationValidator = z.object({
   vehicleInfo: z.string().optional(),
 });
 
-export const CoApplicantValidator = z.object({
-  firstName: z.string().nonempty(),
-  lastName: z.string().nonempty(),
-  email: z.string().email().optional(),
-  phoneNumber: z.string().regex(PHONE_NUMBER_REGEX).optional(),
-  dateOfBirth: z.date({ coerce: true }).max(new Date()).optional(),
-  employmentStatus: z
-    .enum([
-      "EMPLOYED_FULL_TIME",
-      "EMPLOYED_PART_TIME",
-      "SELF_EMPLOYED",
-      "UNEMPLOYED",
-      "RETIRED",
-      "STUDENT",
-      "CONTRACTOR",
-    ])
-    .optional(),
+export const LeaseValidator = z.object({
+  propertyId: z.string().nonempty().uuid("Invalid"),
+  leaseType: z.enum(["RESIDENTIAL", "COMMERCIAL", "SHORT_TERM", "CORPORATE"]),
+  leaseStartDate: z.date({ coerce: true }),
+  leaseEndDate: z.date({ coerce: true }).optional(),
+  noticePeriodDays:z.number({coerce:true}).int().nonnegative()
+  
 });
