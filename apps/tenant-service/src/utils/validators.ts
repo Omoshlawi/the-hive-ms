@@ -60,6 +60,35 @@ export const CoApplicantValidator = z.object({
   relationshipType: z.string().nonempty(),
 });
 
+export const ScreeningQuestionValidator = z.object({
+  question: z.string().nonempty(),
+  questionType: z.enum([
+    "TEXT",
+    "TEXTAREA",
+    "NUMBER",
+    "BOOLEAN",
+    "DATE",
+    "EMAIL",
+    "PHONE",
+    "SINGLE_SELECT",
+    "MULTI_SELECT",
+    "CHECKBOX",
+    "DROPDOWN",
+    "FILE_UPLOAD",
+    "CURRENCY",
+    "PERCENTAGE",
+    "URL",
+    "TIME",
+    "DATETIME",
+    "RATING",
+    "SLIDER",
+    "SIGNATURE",
+  ]),
+  isRequired: z.boolean(),
+  isActive: z.boolean(),
+  sortOrder: z.number({ coerce: true }).optional(),
+});
+
 export const RentalApplicationValidator = z.object({
   tenantId: z.string().nonempty().uuid("Invalid"),
   listingId: z.string().nonempty().uuid("Invalid"),
@@ -69,13 +98,71 @@ export const RentalApplicationValidator = z.object({
   securityDeposit: z.number({ coerce: true }).nonnegative().optional(),
   petDetails: z.string().optional(),
   vehicleInfo: z.string().optional(),
+  coApplicants: CoApplicantValidator.array().optional(),
 });
 
-export const LeaseValidator = z.object({
+export const LeaseAgreementDetailsValidator = z.object({
+  leaseTerm: z.number({ coerce: true }).int().nonnegative(),
+});
+
+export const RentalAgreementDetailsValidator = z.object({
+  minimumStay: z.number({ coerce: true }).int().nonnegative(),
+});
+
+export const AgreementParticipantValudator = z.object({
+  tenantId: z.string().nonempty().uuid("Invalid"),
+  participantType: z.enum([
+    "PRIMARY_TENANT",
+    "CO_TENANT",
+    "GUARANTOR",
+    "OCCUPANT",
+    "SUBLESSEE",
+    "AUTHORIZED_OCCUPANT",
+  ]),
+  moveInDate: z.date({ coerce: true }),
+  moveOutDate: z.date({ coerce: true }),
+});
+
+export const AdditionalChargeValidator = z.object({
+  name: z.string().nonempty(),
+  description: z.string().optional(),
+  amount: z.number({ coerce: true }).nonnegative(),
+  frequesncy: z.enum([
+    "ONE_TIME",
+    "DAILY",
+    "WEEKLY",
+    "MONTHLY",
+    "QUARTERLY",
+    "ANNUALLY",
+    "PER_NIGHT",
+    "PER_STAY",
+  ]),
+  mandatory: z.boolean().optional(),
+  dueDate: z.date({ coerce: true }).optional(),
+});
+
+export const RentalAgreementValidator = z.object({
   propertyId: z.string().nonempty().uuid("Invalid"),
-  leaseType: z.enum(["RESIDENTIAL", "COMMERCIAL", "SHORT_TERM", "CORPORATE"]),
-  leaseStartDate: z.date({ coerce: true }),
-  leaseEndDate: z.date({ coerce: true }).optional(),
-  noticePeriodDays:z.number({coerce:true}).int().nonnegative()
-  
+  agremeementType: z.enum([
+    "LEASE",
+    "RENTAL",
+    "SHORT_TERM",
+    "CORPORATE",
+    "SHORT_TERM",
+    "SUBLEASE",
+    "COMMERCIAL",
+    "RENT_TO_OWN",
+    "STUDENT",
+    "SENIOR",
+  ]),
+  startDate: z.date({ coerce: true }),
+  endDate: z.date({ coerce: true }).optional(),
+  noticePeriodDays: z.number({ coerce: true }).int().nonnegative(),
+  baseRentAmount: z.number({ coerce: true }).int().nonnegative(),
+  autoRenewal: z.boolean().optional(),
+  petsAllowed: z.boolean().optional(),
+  smokingAllowed: z.boolean().optional(),
+  sublettingAllowed: z.boolean().optional(),
+  participants: AgreementParticipantValudator.array().nonempty(),
+  additionalCharges: AdditionalChargeValidator.array().optional(),
 });

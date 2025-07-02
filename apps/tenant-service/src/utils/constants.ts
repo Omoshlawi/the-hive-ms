@@ -3,6 +3,16 @@ export const BASE_DIR = process.cwd();
 import { RegistryAddress, ServiceIdentity } from "@hive/core-utils";
 import config from "config";
 
+export const ID_GEN_CONFIG = {
+  tenant: {
+    prefix: "TNT",
+    dataModel: "Tenant",
+  },
+  application: {
+    prefix: "APLN",
+    dataModel: "RentalApplication",
+  },
+};
 export const configuration = {
   version: require("./../../package.json").version,
   name: require("./../../package.json").name,

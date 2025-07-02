@@ -48,7 +48,7 @@ export const PropertyMediaSchema = z.object({
 });
 // Property Filter
 export const PropertyMediaFilterSchema = z.object({
-  type: z.enum(["Image", "Video", "Document", "Tour_3D"]).optional(),
+  type: z.enum(["IMAGE", "VIDEO", "DOCUMENT", "TOUR_3D"]).optional(),
   size: z.number({ coerce: true }).optional(),
   memeType: z.string().optional(),
 });

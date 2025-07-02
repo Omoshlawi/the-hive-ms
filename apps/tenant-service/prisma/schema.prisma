@@ -47,11 +47,11 @@ model Tenant {
   tags          String[] // For categorization and filtering
 
   // Audit fields
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  createdBy String?  @db.Uuid
-  updatedBy String?  @db.Uuid
-
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  createdBy               String?                @db.Uuid
+  updatedBy               String?                @db.Uuid
+  voided                  Boolean                @default(false)
   coApplicants            CoApplicant[]
   agreementParticipations AgreementParticipant[]
 
@@ -149,6 +149,7 @@ model RentalApplication {
 
   tenant     Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   references TenantReference[]
+  voided     Boolean           @default(false)
 
   @@index([organizationId])
   @@index([tenantId])
@@ -303,10 +304,8 @@ model ShortTermAgreementDetails {
   // Short-term specific fields
   checkInTime     String? // "3:00 PM"
   checkOutTime    String? // "11:00 AM"
-  cleaningFee     Decimal? @db.Decimal(10, 2)
   guestCapacity   Int?
-  houseRules      String?  @db.Text
-  amenities       String[] // List of amenities
+  houseRules      String? @db.Text
   bookingPlatform String? // Airbnb, Booking.com, etc.
 
   createdAt DateTime @default(now())
@@ -322,7 +321,6 @@ model AgreementParticipant {
 
   participantType          ParticipantType
   responsibilityPercentage Decimal?        @db.Decimal(5, 2)
-  isPrimaryTenant          Boolean         @default(false)
 
   status        ParticipantStatus          @default(ACTIVE)
   statusHistory ParticipantStatusHistory[]
@@ -569,6 +567,7 @@ model AdditionalCharge {
   amount      Decimal         @db.Decimal(12, 2)
   frequency   ChargeFrequency @default(ONE_TIME)
   mandatory   Boolean         @default(true)
+  dueDate     DateTime?
 
   // Charge-specific metadata
   chargeMetadata Json?
@@ -590,8 +589,8 @@ enum AgreementType {
   SUBLEASE // Subletting arrangement
   COMMERCIAL // Commercial property lease
   RENT_TO_OWN // Rent-to-own agreements
-  STUDENT // Student housing
-  SENIOR // Senior living agreements
+  STUDENT // Student housing (University towns, dorms)
+  SENIOR // Senior living agreements (Retirement communities, care homes.)
 }
 
 enum BillingCycle {
@@ -619,7 +618,7 @@ enum ParticipantType {
   GUARANTOR
   OCCUPANT
   SUBLESSEE
-  AUTHORIZED_OCCUPANT
+  AUTHORIZED_OCCUPANT // (Permitted by the landlord to live in the unit without being legally responsible.	Nannies, long-term guests, partners.)
 }
 
 enum AgreementStatus {
