@@ -69,7 +69,7 @@ export const addRentalApplication = async (
     );
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const { listingId, coApplicants = [] } = validation.data;
+    const { listingId, coApplicants = [], references = [] } = validation.data;
     const { identifier } = await serviceClient.callService<{
       identifier: string;
     }>("@hive/policy-engine-service", {
@@ -136,6 +136,9 @@ export const addRentalApplication = async (
               },
             }
           : undefined,
+        references: references.length
+          ? { createMany: { skipDuplicates: true, data: references } }
+          : undefined,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -153,6 +156,7 @@ export const updateRentalApplication = async (
   try {
     const validation = await RentalApplicationValidator.omit({
       coApplicants: true,
+      references: true,
     }).safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
@@ -175,6 +179,7 @@ export const patchRentalApplication = async (
   try {
     const validation = await RentalApplicationValidator.omit({
       coApplicants: true,
+      references: true,
     })
       .partial()
       .safeParseAsync(req.body);

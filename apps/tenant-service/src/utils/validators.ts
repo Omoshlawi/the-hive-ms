@@ -99,6 +99,7 @@ export const RentalApplicationValidator = z.object({
   petDetails: z.string().optional(),
   vehicleInfo: z.string().optional(),
   coApplicants: CoApplicantValidator.array().optional(),
+  references:TenenantReferenceValidator.array().optional()
 });
 
 export const LeaseAgreementDetailsValidator = z.object({
