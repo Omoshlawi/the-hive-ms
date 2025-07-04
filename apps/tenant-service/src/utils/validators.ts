@@ -50,13 +50,7 @@ export const TenenantReferenceValidator = z.object({
 });
 
 export const CoApplicantValidator = z.object({
-  tenantNumber: z
-    .string()
-    .regex(
-      /^TNT-\d{6,12}$/,
-      "Tenant number must follow the format 'TNT-######' (6–12 digits)"
-    )
-    .optional(),
+  personId: z.string().nonempty().uuid("Invalid"),
   relationshipType: z.string().nonempty(),
 });
 
@@ -90,7 +84,7 @@ export const ScreeningQuestionValidator = z.object({
 });
 
 export const RentalApplicationValidator = z.object({
-  tenantId: z.string().nonempty().uuid("Invalid"),
+  personId: z.string().nonempty().uuid("Invalid"),
   listingId: z.string().nonempty().uuid("Invalid"),
   desiredMoveInDate: z.date({ coerce: true }),
   leaseTerm: z.number({ coerce: true }).nonnegative().optional(),
@@ -99,7 +93,7 @@ export const RentalApplicationValidator = z.object({
   petDetails: z.string().optional(),
   vehicleInfo: z.string().optional(),
   coApplicants: CoApplicantValidator.array().optional(),
-  references:TenenantReferenceValidator.array().optional()
+  references: TenenantReferenceValidator.array().optional(),
 });
 
 export const LeaseAgreementDetailsValidator = z.object({
@@ -109,7 +103,12 @@ export const LeaseAgreementDetailsValidator = z.object({
 export const RentalAgreementDetailsValidator = z.object({
   minimumStay: z.number({ coerce: true }).int().nonnegative(),
 });
-
+export const tenantNumber = z
+  .string()
+  .regex(
+    /^TNT-\d{6,12}$/,
+    "Tenant number must follow the format 'TNT-######' (6–12 digits)"
+  );
 export const AgreementParticipantValudator = z.object({
   tenantId: z.string().nonempty().uuid("Invalid"),
   participantType: z.enum([

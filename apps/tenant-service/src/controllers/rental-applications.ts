@@ -12,7 +12,7 @@ import {
 import serviceClient from "@/services/service-client";
 import { ID_GEN_CONFIG } from "@/utils";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
-import { Listing } from "@/types";
+import { Listing, Person } from "@/types";
 import { Tenant } from "dist/prisma";
 
 export const getRentalApplications = async (
@@ -69,7 +69,13 @@ export const addRentalApplication = async (
     );
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const { listingId, coApplicants = [], references = [] } = validation.data;
+    const {
+      listingId,
+      coApplicants = [],
+      references = [],
+      personId,
+    } = validation.data;
+    // generate id
     const { identifier } = await serviceClient.callService<{
       identifier: string;
     }>("@hive/policy-engine-service", {
@@ -78,6 +84,7 @@ export const addRentalApplication = async (
       data: { ...ID_GEN_CONFIG.application },
       headers: sanitizeHeaders(req),
     });
+    // validate listing
     const getListing = nullifyExceptionAsync(() =>
       serviceClient.callService<Listing>("@hive/listing-service", {
         url: `listings/${listingId}`,
@@ -95,28 +102,37 @@ export const addRentalApplication = async (
           _errors: ["Inavlid listing (Either dont exist or not applicable)"],
         },
       });
-    // Validate tenants
-    const validTenants: Array<Tenant> = [];
+    // Validate applicant person
+    const getPerson = nullifyExceptionAsync((id: string) =>
+      serviceClient.callService<Person>("@hive/authentication-service", {
+        url: `person/${id}`,
+        method: "GET",
+        headers: sanitizeHeaders(req),
+      })
+    );
+    const person = await getPerson(personId);
+    if (!person)
+      throw new APIException(400, {
+        personId: { _errors: ["Invalid person"] },
+      });
+    // Validate co applicants
+    const validPersons: Array<Person> = [];
     for (let index = 0; index < coApplicants.length; index++) {
       const ca = coApplicants[index];
-      const tenant = await TenantsModel.findUnique({
-        where: { tenantNumber: ca!.tenantNumber, status: "ACTIVE" },
-      });
+      const tenant = await getPerson(ca!.personId!);
       if (!tenant)
         throw new APIException(400, {
           coApplicants: {
             _errors: ["one or more invalid coapplicant"],
             index: {
-              _errors: ["Tenant with provided number dont exist or not active"],
-              tenantNumber: {
-                _errors: [
-                  "Tenant with provided number dont exist or not active",
-                ],
+              _errors: ["Invalid co-applicant"],
+              personId: {
+                _errors: ["Invalid co-applicant"],
               },
             },
           },
         });
-      validTenants.push(tenant);
+      validPersons.push(tenant);
     }
     const item = await RentalApplicationsModel.create({
       data: {
@@ -125,13 +141,13 @@ export const addRentalApplication = async (
         listingId,
         organizationId: listing.organizationId,
         propertyId: listing.propertyId,
-        coApplicants: validTenants.length
+        coApplicants: validPersons.length
           ? {
               createMany: {
                 skipDuplicates: true,
                 data: coApplicants.map((ca, index) => ({
                   relationshipType: ca.relationshipType,
-                  tenantId: validTenants[index]!.id,
+                  personId: validPersons[index]!.id,
                 })),
               },
             }

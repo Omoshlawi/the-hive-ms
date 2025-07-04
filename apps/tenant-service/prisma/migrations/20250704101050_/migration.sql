@@ -54,6 +54,8 @@ CREATE TABLE "Tenant" (
     "id" UUID NOT NULL,
     "personId" UUID NOT NULL,
     "person" JSONB,
+    "organizationId" UUID,
+    "organization" JSONB,
     "tenantNumber" TEXT NOT NULL,
     "tenantType" "TenantType" NOT NULL DEFAULT 'INDIVIDUAL',
     "status" "TenantStatus" NOT NULL DEFAULT 'ACTIVE',
@@ -73,6 +75,7 @@ CREATE TABLE "Tenant" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "createdBy" UUID,
     "updatedBy" UUID,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Tenant_pkey" PRIMARY KEY ("id")
 );
@@ -115,7 +118,7 @@ CREATE TABLE "TenantReference" (
 CREATE TABLE "RentalApplication" (
     "id" UUID NOT NULL,
     "organizationId" UUID NOT NULL,
-    "tenantId" UUID NOT NULL,
+    "personId" UUID NOT NULL,
     "propertyId" UUID NOT NULL,
     "listingId" UUID NOT NULL,
     "applicationNumber" TEXT NOT NULL,
@@ -136,6 +139,8 @@ CREATE TABLE "RentalApplication" (
     "incomeVerified" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "person" JSONB,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "RentalApplication_pkey" PRIMARY KEY ("id")
 );
@@ -157,10 +162,11 @@ CREATE TABLE "RentalApplicationStatusHistory" (
 CREATE TABLE "CoApplicant" (
     "id" UUID NOT NULL,
     "applicationId" UUID NOT NULL,
-    "tenantId" UUID NOT NULL,
+    "personId" UUID NOT NULL,
     "relationshipType" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "person" JSONB,
 
     CONSTRAINT "CoApplicant_pkey" PRIMARY KEY ("id")
 );
@@ -238,10 +244,8 @@ CREATE TABLE "ShortTermAgreementDetails" (
     "agreementId" UUID NOT NULL,
     "checkInTime" TEXT,
     "checkOutTime" TEXT,
-    "cleaningFee" DECIMAL(10,2),
     "guestCapacity" INTEGER,
     "houseRules" TEXT,
-    "amenities" TEXT[],
     "bookingPlatform" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -257,7 +261,6 @@ CREATE TABLE "AgreementParticipant" (
     "tenantId" UUID NOT NULL,
     "participantType" "ParticipantType" NOT NULL,
     "responsibilityPercentage" DECIMAL(5,2),
-    "isPrimaryTenant" BOOLEAN NOT NULL DEFAULT false,
     "status" "ParticipantStatus" NOT NULL DEFAULT 'ACTIVE',
     "moveInDate" TIMESTAMP(3),
     "moveOutDate" TIMESTAMP(3),
@@ -421,6 +424,7 @@ CREATE TABLE "AdditionalCharge" (
     "amount" DECIMAL(12,2) NOT NULL,
     "frequency" "ChargeFrequency" NOT NULL DEFAULT 'ONE_TIME',
     "mandatory" BOOLEAN NOT NULL DEFAULT true,
+    "dueDate" TIMESTAMP(3),
     "chargeMetadata" JSONB,
     "voided" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -454,7 +458,7 @@ CREATE UNIQUE INDEX "RentalApplication_applicationNumber_key" ON "RentalApplicat
 CREATE INDEX "RentalApplication_organizationId_idx" ON "RentalApplication"("organizationId");
 
 -- CreateIndex
-CREATE INDEX "RentalApplication_tenantId_idx" ON "RentalApplication"("tenantId");
+CREATE INDEX "RentalApplication_person_idx" ON "RentalApplication"("person");
 
 -- CreateIndex
 CREATE INDEX "RentalApplication_propertyId_idx" ON "RentalApplication"("propertyId");
@@ -580,16 +584,10 @@ ALTER TABLE "TenantStatusHistory" ADD CONSTRAINT "TenantStatusHistory_tenantId_f
 ALTER TABLE "TenantReference" ADD CONSTRAINT "TenantReference_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "RentalApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "RentalApplication" ADD CONSTRAINT "RentalApplication_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "RentalApplicationStatusHistory" ADD CONSTRAINT "RentalApplicationStatusHistory_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "RentalApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CoApplicant" ADD CONSTRAINT "CoApplicant_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "RentalApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "CoApplicant" ADD CONSTRAINT "CoApplicant_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AgreementStatusHistory" ADD CONSTRAINT "AgreementStatusHistory_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "RentalAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;

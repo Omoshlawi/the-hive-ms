@@ -6,8 +6,12 @@ import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
   getPaginationControls,
+  nullifyExceptionAsync,
   paginate,
 } from "@hive/core-utils";
+import serviceClient from "@/services/service-client";
+import { Person } from "@/types";
+import { sanitizeHeaders } from "@hive/shared-middlewares";
 
 export const getCoApplicants = async (
   req: Request,
@@ -63,12 +67,16 @@ export const addCoApplicant = async (
     const validation = await CoApplicantValidator.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const { tenantNumber, relationshipType } = validation.data;
+    const { personId, relationshipType } = validation.data;
     // Validate tenants
-
-    const tenant = await TenantsModel.findUnique({
-      where: { tenantNumber, status: "ACTIVE" },
-    });
+    const getPerson = nullifyExceptionAsync((id: string) =>
+      serviceClient.callService<Person>("@hive/authentication-service", {
+        url: `person/${id}`,
+        method: "GET",
+        headers: sanitizeHeaders(req),
+      })
+    );
+    const tenant = await getPerson(personId);
     if (!tenant)
       throw new APIException(400, {
         tenantNumber: {
@@ -77,7 +85,7 @@ export const addCoApplicant = async (
       });
 
     const item = await CoApplicantsModel.create({
-      data: { relationshipType, applicationId, tenantId: tenant.id },
+      data: { relationshipType, applicationId, personId: tenant.id },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);

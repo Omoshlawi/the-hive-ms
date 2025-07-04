@@ -35,9 +35,6 @@ model Tenant {
   languagePreference     String?       @default("en")
   specialRequirements    String? // Accessibility, pet accommodations, etc.
 
-  // Rental history and references
-  rentalApplications RentalApplication[]
-
   // Tenant status history for audit trail
   statusHistory TenantStatusHistory[]
 
@@ -54,7 +51,6 @@ model Tenant {
   createdBy               String?                @db.Uuid
   updatedBy               String?                @db.Uuid
   voided                  Boolean                @default(false)
-  coApplicants            CoApplicant[]
   agreementParticipations AgreementParticipant[]
 
   @@index([personId])
@@ -107,7 +103,7 @@ model TenantReference {
 model RentalApplication {
   id             String @id @default(uuid()) @db.Uuid
   organizationId String @db.Uuid
-  tenantId       String @db.Uuid
+  personId       String @db.Uuid
   propertyId     String @db.Uuid // Reference to Property Service (physical real estate unit)
   listingId      String @db.Uuid // Reference to Listing Service (marketing listing)
 
@@ -150,11 +146,11 @@ model RentalApplication {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  person Json?
   voided Boolean @default(false)
 
   @@index([organizationId])
-  @@index([tenantId])
+  @@index([person])
   @@index([propertyId])
   @@index([listingId])
   @@index([status])
@@ -179,7 +175,7 @@ model RentalApplicationStatusHistory {
 model CoApplicant {
   id            String @id @default(uuid()) @db.Uuid
   applicationId String @db.Uuid
-  tenantId      String @db.Uuid // Optional link to an existing tenant
+  personId      String @db.Uuid // Optional link to an existing tenant
 
   // Relationship to primary applicant
   relationshipType String
@@ -188,7 +184,7 @@ model CoApplicant {
   updatedAt DateTime @updatedAt
 
   application RentalApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  tenant      Tenant            @relation(fields: [tenantId], references: [id])
+  person      Json?
 
   @@index([applicationId])
 }
