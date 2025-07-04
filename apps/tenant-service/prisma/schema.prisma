@@ -14,7 +14,7 @@ datasource db {
 // Main Tenant model extending Person from another service
 model Tenant {
   id                       String            @id @default(uuid()) @db.Uuid
-  personId                 String            @db.Uuid // Reference to Person in Person Service
+  personId                 String            @db.Uuid @unique// Reference to Person in Person Service
   person                   Json?
   organizationId           String?           @db.Uuid // For tenenats created by organization and not already users in the system
   organization             Json? // Minima organization info

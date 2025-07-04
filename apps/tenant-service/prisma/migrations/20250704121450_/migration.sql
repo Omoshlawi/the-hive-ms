@@ -434,6 +434,9 @@ CREATE TABLE "AdditionalCharge" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Tenant_personId_key" ON "Tenant"("personId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Tenant_tenantNumber_key" ON "Tenant"("tenantNumber");
 
 -- CreateIndex
