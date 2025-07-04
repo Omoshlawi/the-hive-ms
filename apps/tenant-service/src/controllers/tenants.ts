@@ -86,9 +86,14 @@ export const addTenant = async (
       throw new APIException(400, {
         personId: { _errors: ["Invalid person"] },
       });
-
     const item = await TenantsModel.create({
-      data: { ...validation.data, tenantNumber: identifier, person: person },
+      data: {
+        ...validation.data,
+        tenantNumber: identifier,
+        person: person,
+        organizationId: req.context?.organizationId,
+        createdBy: req.context?.userId,
+      },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
     return res.json(item);

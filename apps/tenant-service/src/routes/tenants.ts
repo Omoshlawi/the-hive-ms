@@ -8,16 +8,66 @@ import {
   purgeTenant,
   updateTenant,
 } from "../controllers/tenants";
-import { validateUUIDPathParam } from "@hive/shared-middlewares";
+import {
+  requireAuthentication,
+  requireContext,
+  requireOrganizationContext,
+  validateUUIDPathParam,
+} from "@hive/shared-middlewares";
+import serviceClient from "@/services/service-client";
 
 const router = Router({ mergeParams: true });
 
 router.get("/", getTenants);
-router.post("/", addTenant);
+router.post(
+  "/",
+  [
+    requireAuthentication(serviceClient),
+    requireContext,
+    requireOrganizationContext(serviceClient, true),
+  ],
+  addTenant
+);
 router.get("/:tenantId", [validateUUIDPathParam("tenantId")], getTenant);
-router.patch("/:tenantId", [validateUUIDPathParam("tenantId")], patchTenant);
-router.put("/:tenantId", [validateUUIDPathParam("tenantId")], updateTenant);
-router.delete("/:tenantId", [validateUUIDPathParam("tenantId")], deleteTenant);
-router.purge("/:tenantId", [validateUUIDPathParam("tenantId")], purgeTenant);
+router.patch(
+  "/:tenantId",
+  [
+    validateUUIDPathParam("tenantId"),
+    requireAuthentication(serviceClient),
+    requireContext,
+    requireOrganizationContext(serviceClient, true),
+  ],
+  patchTenant
+);
+router.put(
+  "/:tenantId",
+  [
+    validateUUIDPathParam("tenantId"),
+    requireAuthentication(serviceClient),
+    requireContext,
+    requireOrganizationContext(serviceClient, true),
+  ],
+  updateTenant
+);
+router.delete(
+  "/:tenantId",
+  [
+    validateUUIDPathParam("tenantId"),
+    requireAuthentication(serviceClient),
+    requireContext,
+    requireOrganizationContext(serviceClient, true),
+  ],
+  deleteTenant
+);
+router.purge(
+  "/:tenantId",
+  [
+    validateUUIDPathParam("tenantId"),
+    requireAuthentication(serviceClient),
+    requireContext,
+    requireOrganizationContext(serviceClient, true),
+  ],
+  purgeTenant
+);
 
 export default router;

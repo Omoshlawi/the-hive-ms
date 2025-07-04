@@ -1,4 +1,4 @@
-const serviceName = "@hive/tenants-service";
+const serviceName = "@hive/tenant-service";
 let serviceVersion;
 
 module.exports = [
