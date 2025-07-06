@@ -86,8 +86,8 @@ export const addRentalApplication = async (
     });
     // validate listing
     const getListing = nullifyExceptionAsync(() =>
-      serviceClient.callService<Listing>("@hive/listing-service", {
-        url: `listings/${listingId}`,
+      serviceClient.callService<Listing>("@hive/listings-service", {
+        url: `/listings/${listingId}`,
         method: "GET",
         params: {
           v: "custom:select(id,propertyId,organizationId,organization,title,status,type,price,listedDate,coverImage,expiryDate)",
@@ -96,6 +96,7 @@ export const addRentalApplication = async (
       })
     );
     const listing = await getListing();
+
     if (!listing || listing.status !== "APPROVED")
       throw new APIException(400, {
         listingId: {
@@ -105,7 +106,7 @@ export const addRentalApplication = async (
     // Validate applicant person
     const getPerson = nullifyExceptionAsync((id: string) =>
       serviceClient.callService<Person>("@hive/authentication-service", {
-        url: `person/${id}`,
+        url: `/person/${id}`,
         method: "GET",
         headers: sanitizeHeaders(req),
       })

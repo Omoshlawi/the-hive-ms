@@ -40,6 +40,7 @@ export const TenenantReferenceValidator = z.object({
     "PREVIOUS_LANDLORD",
     "EMPLOYER",
     "CHARACTER",
+    "EMERGENCY_CONTACT",
   ]),
   name: z.string().nonempty(),
   relationship: z.string().nonempty(),
