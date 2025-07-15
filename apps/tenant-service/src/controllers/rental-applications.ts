@@ -75,15 +75,7 @@ export const addRentalApplication = async (
       references = [],
       personId,
     } = validation.data;
-    // generate id
-    const { identifier } = await serviceClient.callService<{
-      identifier: string;
-    }>("@hive/policy-engine-service", {
-      url: "/id-gen",
-      method: "POST",
-      data: { ...ID_GEN_CONFIG.application },
-      headers: sanitizeHeaders(req),
-    });
+
     // validate listing
     const getListing = nullifyExceptionAsync(() =>
       serviceClient.callService<Listing>("@hive/listings-service", {
@@ -135,6 +127,15 @@ export const addRentalApplication = async (
         });
       validPersons.push(tenant);
     }
+    // generate id
+    const { identifier } = await serviceClient.callService<{
+      identifier: string;
+    }>("@hive/policy-engine-service", {
+      url: "/id-gen",
+      method: "POST",
+      data: { ...ID_GEN_CONFIG.application },
+      headers: sanitizeHeaders(req),
+    });
     const item = await RentalApplicationsModel.create({
       data: {
         ...validation.data,
@@ -149,6 +150,7 @@ export const addRentalApplication = async (
                 data: coApplicants.map((ca, index) => ({
                   relationshipType: ca.relationshipType,
                   personId: validPersons[index]!.id,
+                  person: validPersons[index],
                 })),
               },
             }
@@ -156,6 +158,7 @@ export const addRentalApplication = async (
         references: references.length
           ? { createMany: { skipDuplicates: true, data: references } }
           : undefined,
+        person,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });

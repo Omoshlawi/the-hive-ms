@@ -97,6 +97,19 @@ export const RentalApplicationValidator = z.object({
   references: TenenantReferenceValidator.array().optional(),
 });
 
+export const RentalApplicationStatusValidator = z.object({
+  status: z.enum([
+    "DRAFT",
+    "PENDING",
+    "UNDER_REVIEW",
+    "APPROVED",
+    "REJECTED",
+    "WITHDRAWN",
+    "EXPIRED",
+    "CONDITIONAL_APPROVAL",
+  ]),
+  reason: z.string(),
+});
 export const LeaseAgreementDetailsValidator = z.object({
   leaseTerm: z.number({ coerce: true }).int().nonnegative(),
 });

@@ -11,6 +11,7 @@ import {
 import { validateUUIDPathParam } from "@hive/shared-middlewares";
 import coapplicantRouter from "./application-coapplicants";
 import referencesrouter from "./application-references";
+import statusRouter from "./application-status";
 const router = Router({ mergeParams: true });
 
 router.get("/", getRentalApplications);
@@ -49,5 +50,10 @@ router.use(
   "/:applicationId/references",
   [validateUUIDPathParam("applicationId")],
   referencesrouter
+);
+router.use(
+  "/:applicationId/status",
+  [validateUUIDPathParam("applicationId")],
+  statusRouter
 );
 export default router;

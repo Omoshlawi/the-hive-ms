@@ -14,7 +14,7 @@ datasource db {
 // Main Tenant model extending Person from another service
 model Tenant {
   id                       String            @id @default(uuid()) @db.Uuid
-  personId                 String            @db.Uuid @unique// Reference to Person in Person Service
+  personId                 String            @unique @db.Uuid // Reference to Person in Person Service
   person                   Json?
   organizationId           String?           @db.Uuid // For tenenats created by organization and not already users in the system
   organization             Json? // Minima organization info
@@ -700,12 +700,12 @@ enum ReferenceRecommendation {
 enum ApplicationStatus {
   DRAFT
   PENDING
-  UNDER_REVIEW
+  UNDER_REVIEW // TODO Remove if necessary
   APPROVED
   REJECTED
   WITHDRAWN
-  EXPIRED
-  CONDITIONAL_APPROVAL
+  EXPIRED //TODO Considor removing
+  CONDITIONAL_APPROVAL // TODO Considor removing
 }
 
 enum DocumentType {
