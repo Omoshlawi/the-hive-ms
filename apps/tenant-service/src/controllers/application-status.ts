@@ -59,6 +59,7 @@ export const submitDraftApplicationForReview = async (
     });
     if (application.status !== "DRAFT")
       throw new APIException(400, { status: ["Invalid status"] });
+    const changedBy = req.context!.userId!;
     await RentalApplicationsModel.update({
       where: { id: req.params.applicationId },
       data: {
@@ -71,7 +72,7 @@ export const submitDraftApplicationForReview = async (
         previousStatus: application.status,
         newStatus: "PENDING",
         reason,
-        changedBy: req.context!.userId!,
+        changedBy,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -88,15 +89,21 @@ export const approvePendingApplication = async (
   try {
     const validation = await RentalApplicationStatusValidator.omit({
       status: true,
-    }).safeParseAsync(req.body);
+    })
+      .partial()
+      .safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { reason } = validation.data;
     const application = await RentalApplicationsModel.findFirstOrThrow({
       where: { id: req.params.applicationId },
     });
+
     if (application.status !== "PENDING")
       throw new APIException(400, { status: ["Invalid status"] });
+
+    const changedBy = req.context!.userId!;
+
     await RentalApplicationsModel.update({
       where: { id: req.params.applicationId },
       data: {
@@ -109,7 +116,7 @@ export const approvePendingApplication = async (
         previousStatus: application.status,
         newStatus: "APPROVED",
         reason,
-        changedBy: req.context!.userId!,
+        changedBy,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -135,6 +142,8 @@ export const rejectPendingApplication = async (
     });
     if (application.status !== "PENDING")
       throw new APIException(400, { status: ["Invalid status"] });
+    const changedBy = req.context!.userId!;
+
     await RentalApplicationsModel.update({
       where: { id: req.params.applicationId },
       data: {
@@ -147,7 +156,7 @@ export const rejectPendingApplication = async (
         previousStatus: application.status,
         newStatus: "REJECTED",
         reason,
-        changedBy: req.context!.userId!,
+        changedBy,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -171,6 +180,8 @@ export const withdrawApplication = async (
     const application = await RentalApplicationsModel.findFirstOrThrow({
       where: { id: req.params.applicationId },
     });
+    const changedBy = req.context!.userId!;
+
     await RentalApplicationsModel.update({
       where: { id: req.params.applicationId },
       data: {
@@ -183,7 +194,7 @@ export const withdrawApplication = async (
         previousStatus: application.status,
         newStatus: "WITHDRAWN",
         reason,
-        changedBy: req.context!.userId!,
+        changedBy,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -210,6 +221,8 @@ export const updateApplicationStatus = async (
     });
     if (application.status === status)
       throw new APIException(400, { status: ["Invalid status"] });
+    const changedBy = req.context!.userId!;
+
     await RentalApplicationsModel.update({
       where: { id: req.params.applicationId },
       data: {
@@ -222,7 +235,7 @@ export const updateApplicationStatus = async (
         previousStatus: application.status,
         newStatus: status,
         reason,
-        changedBy: req.context!.userId!,
+        changedBy,
       },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
