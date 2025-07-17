@@ -14,4 +14,10 @@ module.exports = [
     serviceName,
     serviceVersion,
   },
+  {
+    path: "/rental-agreement",
+    prefix: "/rental-agreement",
+    serviceName,
+    serviceVersion,
+  },
 ];

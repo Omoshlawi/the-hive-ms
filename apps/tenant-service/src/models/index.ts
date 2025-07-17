@@ -15,3 +15,5 @@ export const ScreeningQuestionsModel = db.screeningQuestion;
 export const ScreeningResponsesModel = db.screeningResponse;
 export const ScreeningQuestionTemplatesModel = db.screeningQuestionTemplate;
 export const ListingScreeningConfigsModel = db.propertyScreeningConfig;
+export const AdditionalChargesModel = db.additionalCharge;
+export const AgreementParticipantsModel = db.agreementParticipant;
