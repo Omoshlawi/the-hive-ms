@@ -10,7 +10,7 @@ export const TenantValidator = z.object({
     "ROOMMATES",
     "CORPORATE",
   ]),
-  monthlyIncome: z.number({ coerce: true }).nonnegative().optional(),
+  monthlyIncome: z.coerce.number().nonnegative().optional(),
   employmentStatus: z
     .enum([
       "EMPLOYED_FULL_TIME",
@@ -81,16 +81,16 @@ export const ScreeningQuestionValidator = z.object({
   ]),
   isRequired: z.boolean(),
   isActive: z.boolean(),
-  sortOrder: z.number({ coerce: true }).optional(),
+  sortOrder: z.coerce.number().optional(),
 });
 
 export const RentalApplicationValidator = z.object({
   personId: z.string().nonempty().uuid("Invalid"),
   listingId: z.string().nonempty().uuid("Invalid"),
-  desiredMoveInDate: z.date({ coerce: true }),
-  leaseTerm: z.number({ coerce: true }).nonnegative().optional(),
-  proposedRent: z.number({ coerce: true }).nonnegative().optional(),
-  securityDeposit: z.number({ coerce: true }).nonnegative().optional(),
+  desiredMoveInDate: z.coerce.date(),
+  leaseTerm: z.coerce.number().nonnegative().optional(),
+  proposedRent: z.coerce.number().nonnegative().optional(),
+  securityDeposit: z.coerce.number().nonnegative().optional(),
   petDetails: z.string().optional(),
   vehicleInfo: z.string().optional(),
   coApplicants: CoApplicantValidator.array().optional(),
@@ -111,11 +111,16 @@ export const RentalApplicationStatusValidator = z.object({
   reason: z.string(),
 });
 export const LeaseAgreementDetailsValidator = z.object({
-  leaseTerm: z.number({ coerce: true }).int().nonnegative(),
+  leaseTerm: z.coerce.number().int().nonnegative(),
 });
 
 export const RentalAgreementDetailsValidator = z.object({
-  minimumStay: z.number({ coerce: true }).int().nonnegative(),
+  minimumStay: z.coerce.number().int().nonnegative(),
+});
+export const ShortTermAgreementDetailsValidator = z.object({
+  checkInTime: z.coerce.date(),
+  checkOutTime: z.coerce.date(),
+  guestCapacity: z.coerce.number(),
 });
 export const tenantNumber = z
   .string()
@@ -133,14 +138,14 @@ export const AgreementParticipantValudator = z.object({
     "SUBLESSEE",
     "AUTHORIZED_OCCUPANT",
   ]),
-  moveInDate: z.date({ coerce: true }),
-  moveOutDate: z.date({ coerce: true }),
+  moveInDate: z.coerce.date(),
+  moveOutDate: z.coerce.date(),
 });
 
 export const AdditionalChargeValidator = z.object({
   name: z.string().nonempty(),
   description: z.string().optional(),
-  amount: z.number({ coerce: true }).nonnegative(),
+  amount: z.coerce.number().nonnegative(),
   frequesncy: z.enum([
     "ONE_TIME",
     "DAILY",
@@ -152,12 +157,12 @@ export const AdditionalChargeValidator = z.object({
     "PER_STAY",
   ]),
   mandatory: z.boolean().optional(),
-  dueDate: z.date({ coerce: true }).optional(),
+  dueDate: z.coerce.date().optional(),
 });
 
 export const RentalAgreementValidator = z.object({
-  propertyId: z.string().nonempty().uuid("Invalid"),
-  agremeementType: z.enum([
+  applicationId: z.string().nonempty().uuid({ message: "Invalid" }),
+  agreementType: z.enum([
     "LEASE",
     "RENTAL",
     "SHORT_TERM",
@@ -169,14 +174,17 @@ export const RentalAgreementValidator = z.object({
     "STUDENT",
     "SENIOR",
   ]),
-  startDate: z.date({ coerce: true }),
-  endDate: z.date({ coerce: true }).optional(),
-  noticePeriodDays: z.number({ coerce: true }).int().nonnegative(),
-  baseRentAmount: z.number({ coerce: true }).int().nonnegative(),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date().optional(),
+  noticePeriodDays: z.coerce.number().int().nonnegative(),
+  baseRentAmount: z.coerce.number().int().nonnegative(),
   autoRenewal: z.boolean().optional(),
   petsAllowed: z.boolean().optional(),
   smokingAllowed: z.boolean().optional(),
   sublettingAllowed: z.boolean().optional(),
   participants: AgreementParticipantValudator.array().nonempty(),
   additionalCharges: AdditionalChargeValidator.array().optional(),
+  leaseDetails: LeaseAgreementDetailsValidator.optional(),
+  rentalDetails: RentalAgreementDetailsValidator.optional(),
+  shortTermDetails: ShortTermAgreementDetailsValidator.optional(),
 });

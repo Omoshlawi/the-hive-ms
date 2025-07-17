@@ -12,6 +12,10 @@ export const ID_GEN_CONFIG = {
     prefix: "APLN",
     dataModel: "RentalApplication",
   },
+  agreement: {
+    prefix: "AGT",
+    dataModel: "RentalAgreement",
+  },
 };
 export const configuration = {
   version: require("./../../package.json").version,

@@ -146,8 +146,9 @@ model RentalApplication {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  person Json?
-  voided Boolean @default(false)
+  person    Json?
+  voided    Boolean          @default(false)
+  agreement RentalAgreement?
 
   @@index([organizationId])
   @@index([person])
@@ -191,9 +192,11 @@ model CoApplicant {
 
 // Base Agreement model - Flexible for any type of rental agreement
 model RentalAgreement {
-  id             String @id @default(uuid()) @db.Uuid
-  organizationId String @db.Uuid
-  propertyId     String @db.Uuid
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @db.Uuid
+  propertyId     String            @db.Uuid
+  applicationId  String            @unique @db.Uuid
+  application    RentalApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   // Agreement identification
   agreementNumber String          @unique @db.VarChar(50)
@@ -225,12 +228,12 @@ model RentalAgreement {
   // earlyTerminationFee   Decimal?  @db.Decimal(10, 2)
 
   // Audit fields
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  createdBy String?  @db.Uuid
-  updatedBy String?  @db.Uuid
-  metadata  Json? // General metadata
-
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  createdBy         String?                @db.Uuid
+  updatedBy         String?                @db.Uuid
+  metadata          Json? // General metadata
+  voided            Boolean                @default(false)
   // Relations
   participants      AgreementParticipant[]
   additionalCharges AdditionalCharge[]
@@ -300,8 +303,8 @@ model ShortTermAgreementDetails {
   agreement   RentalAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
 
   // Short-term specific fields
-  checkInTime     String? // "3:00 PM"
-  checkOutTime    String? // "11:00 AM"
+  checkInTime     DateTime?
+  checkOutTime    DateTime? 
   guestCapacity   Int?
   houseRules      String? @db.Text
   bookingPlatform String? // Airbnb, Booking.com, etc.
