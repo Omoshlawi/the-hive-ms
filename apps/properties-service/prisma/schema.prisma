@@ -74,11 +74,12 @@ model PropertyStatusHistory {
 }
 
 model Property {
-  id          String  @id @default(uuid()) @db.Uuid
-  name        String
-  description String? @db.Text
-  thumbnail   String?
-  isVirtual   Boolean @default(false) // used to group or organize real properties for logical, operational, or hierarchical purposes.Also perfome batch operations on related real properties
+  id             String  @id @default(uuid()) @db.Uuid
+  propertyNumber String  @unique
+  name           String
+  description    String? @db.Text
+  thumbnail      String?
+  isVirtual      Boolean @default(false) // used to group or organize real properties for logical, operational, or hierarchical purposes.Also perfome batch operations on related real properties
 
   status PropertyStatus @default(DRAFT)
 

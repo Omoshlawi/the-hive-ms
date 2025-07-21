@@ -1,8 +1,8 @@
 -- CreateEnum
-CREATE TYPE "PropertyStatus" AS ENUM ('Draft', 'Blocked', 'Archived', 'Approved', 'Rejected', 'Paused', 'Pending');
+CREATE TYPE "PropertyStatus" AS ENUM ('DRAFT', 'BLOCKED', 'ARCHIVED', 'APPROVED', 'REJECTED', 'PAUSED', 'PENDING');
 
 -- CreateEnum
-CREATE TYPE "PropertyMediaType" AS ENUM ('Image', 'Video', 'Document', 'Tour_3D');
+CREATE TYPE "PropertyMediaType" AS ENUM ('IMAGE', 'VIDEO', 'DOCUMENT', 'TOUR_3D');
 
 -- CreateTable
 CREATE TABLE "AttributeType" (
@@ -59,10 +59,12 @@ CREATE TABLE "PropertyStatusHistory" (
 -- CreateTable
 CREATE TABLE "Property" (
     "id" UUID NOT NULL,
+    "propertyNumber" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
     "thumbnail" TEXT,
-    "status" "PropertyStatus" NOT NULL DEFAULT 'Draft',
+    "isVirtual" BOOLEAN NOT NULL DEFAULT false,
+    "status" "PropertyStatus" NOT NULL DEFAULT 'DRAFT',
     "organizationId" TEXT NOT NULL,
     "organization" JSONB,
     "addressId" TEXT NOT NULL,
@@ -168,6 +170,9 @@ CREATE UNIQUE INDEX "Amenity_name_organizationId_key" ON "Amenity"("name", "orga
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Category_name_organizationId_key" ON "Category"("name", "organizationId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Property_propertyNumber_key" ON "Property"("propertyNumber");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "RelationshipType_aIsToB_key" ON "RelationshipType"("aIsToB");

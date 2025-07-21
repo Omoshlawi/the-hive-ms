@@ -1,6 +1,10 @@
 import serviceClient from "@/services/service-client";
 import { Address } from "@/types";
-import { getCachedResource, invalidateCachedResource } from "@/utils";
+import {
+  getCachedResource,
+  ID_GEN_CONFIG,
+  invalidateCachedResource,
+} from "@/utils";
 import { PropertyfiltersSchema, PropertySchema } from "@/utils/validators";
 import {
   APIException,
@@ -113,10 +117,19 @@ export const addProperty = async (
         }
       }
     )();
-
+    // generate id
+    const { identifier } = await serviceClient.callService<{
+      identifier: string;
+    }>("@hive/policy-engine-service", {
+      url: "/id-gen",
+      method: "POST",
+      data: { ...ID_GEN_CONFIG.properties },
+      headers: sanitizeHeaders(req),
+    });
     const item = await PropertiesModel.create({
       data: {
         ...propertyAttributes,
+        propertyNumber: identifier,
         media: {
           createMany: {
             skipDuplicates: true,

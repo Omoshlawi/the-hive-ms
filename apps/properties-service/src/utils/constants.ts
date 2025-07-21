@@ -26,3 +26,11 @@ export const serviceIdentity: ServiceIdentity = {
   name: configuration.name,
   version: configuration.version,
 };
+
+
+export const ID_GEN_CONFIG = {
+  properties: {
+    prefix: "PRT",
+    dataModel: "Property",
+  },
+};

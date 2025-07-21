@@ -71,6 +71,7 @@ export const PropertyLocation = z.object({
 export const PropertySchema = z.object({
   name: z.string(),
   thumbnail: z.string().optional(),
+  isVirtual: z.boolean().optional(),
   attributes: z
     .array(
       z.object({
