@@ -2,11 +2,11 @@ import db from "@/services/db";
 export const TenantsModel = db.tenant;
 export const TenantStatusHistoryModel = db.tenantStatusHistory;
 export const TenantReferencesModel = db.tenantReference;
-export const TenancyApplicationsModel = db.rentalApplication;
+export const TenancyApplicationsModel = db.tenancyApplication;
 export const TenancyApplicationStatusHistoryModel =
-  db.rentalApplicationStatusHistory;
+  db.tenancyApplicationStatusHistory;
 export const CoApplicantsModel = db.coApplicant;
-export const TenancyAgrementModel = db.rentalAgreement;
+export const TenancyAgrementModel = db.tenancyAgreement;
 export const AgreementStatusHistoryModel = db.agreementStatusHistory;
 export const TenantDocumentsModel = db.tenantDocument;
 export const BackgroundCheckStatusHistoryModel =

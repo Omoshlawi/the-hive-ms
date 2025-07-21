@@ -94,13 +94,13 @@ model TenantReference {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  application RentalApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  application TenancyApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   @@index([applicationId])
 }
 
 // Rental applications
-model RentalApplication {
+model TenancyApplication {
   id             String @id @default(uuid()) @db.Uuid
   organizationId String @db.Uuid
   personId       String @db.Uuid
@@ -123,7 +123,7 @@ model RentalApplication {
   screeningResponses ScreeningResponse[]
 
   // Application status history for audit trail
-  statusHistory RentalApplicationStatusHistory[]
+  statusHistory TenancyApplicationStatusHistory[]
 
   // Screening and evaluation
   screeningScore     Decimal? @db.Decimal(5, 2) // Calculated screening score
@@ -148,7 +148,7 @@ model RentalApplication {
 
   person    Json?
   voided    Boolean          @default(false)
-  agreement RentalAgreement?
+  agreement TenancyAgreement?
 
   @@index([organizationId])
   @@index([person])
@@ -158,10 +158,10 @@ model RentalApplication {
 }
 
 // Rental application status history
-model RentalApplicationStatusHistory {
+model TenancyApplicationStatusHistory {
   id            String            @id @default(uuid()) @db.Uuid
   applicationId String            @db.Uuid
-  application   RentalApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  application   TenancyApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   previousStatus ApplicationStatus
   newStatus      ApplicationStatus
@@ -184,19 +184,19 @@ model CoApplicant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  application RentalApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  application TenancyApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   person      Json?
 
   @@index([applicationId])
 }
 
 // Base Agreement model - Flexible for any type of rental agreement
-model RentalAgreement {
+model TenancyAgreement {
   id             String            @id @default(uuid()) @db.Uuid
   organizationId String            @db.Uuid
   propertyId     String            @db.Uuid
   applicationId  String            @unique @db.Uuid
-  application    RentalApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  application    TenancyApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   // Agreement identification
   agreementNumber String          @unique @db.VarChar(50)
@@ -254,7 +254,7 @@ model RentalAgreement {
 model AgreementStatusHistory {
   id             String          @id @default(uuid()) @db.Uuid
   agreementId    String          @unique @db.Uuid
-  agreement      RentalAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  agreement      TenancyAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
   previousStatus AgreementStatus
   newStatus      AgreementStatus
   changedBy      String?         @db.Uuid
@@ -266,7 +266,7 @@ model AgreementStatusHistory {
 model LeaseAgreementDetails {
   id          String          @id @default(uuid()) @db.Uuid
   agreementId String          @unique @db.Uuid
-  agreement   RentalAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  agreement   TenancyAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
 
   // Lease-specific fields
   leaseTerm        Int     @default(12) // in months
@@ -285,7 +285,7 @@ model LeaseAgreementDetails {
 model RentalAgreementDetails {
   id          String          @id @default(uuid()) @db.Uuid
   agreementId String          @unique @db.Uuid
-  agreement   RentalAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  agreement   TenancyAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
 
   // Rental-specific fields
   billingCycle  BillingCycle @default(MONTHLY)
@@ -300,7 +300,7 @@ model RentalAgreementDetails {
 model ShortTermAgreementDetails {
   id          String          @id @default(uuid()) @db.Uuid
   agreementId String          @unique @db.Uuid
-  agreement   RentalAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  agreement   TenancyAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
 
   // Short-term specific fields
   checkInTime     DateTime?
@@ -338,7 +338,7 @@ model AgreementParticipant {
   metadata  Json?
 
   // Relations
-  agreement RentalAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  agreement TenancyAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
   tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([organizationId])
@@ -400,7 +400,7 @@ model BackgroundCheckStatusHistory {
   reason         String?               @db.Text
   createdAt      DateTime              @default(now())
 
-  application RentalApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  application TenancyApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   @@index([applicationId])
 }
@@ -483,7 +483,7 @@ model ScreeningResponse {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  application RentalApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  application TenancyApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   question    ScreeningQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([applicationId, questionId])
@@ -561,7 +561,7 @@ model PropertyScreeningConfig {
 model AdditionalCharge {
   id          String          @id @default(uuid()) @db.Uuid
   agreementId String          @db.Uuid
-  agreement   RentalAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  agreement   TenancyAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
 
   name        String // e.g., "Cleaning Fee", "Pet Fee", "Parking"
   description String?

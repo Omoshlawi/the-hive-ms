@@ -115,7 +115,7 @@ CREATE TABLE "TenantReference" (
 );
 
 -- CreateTable
-CREATE TABLE "RentalApplication" (
+CREATE TABLE "TenancyApplication" (
     "id" UUID NOT NULL,
     "organizationId" UUID NOT NULL,
     "personId" UUID NOT NULL,
@@ -142,11 +142,11 @@ CREATE TABLE "RentalApplication" (
     "person" JSONB,
     "voided" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "RentalApplication_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "TenancyApplication_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "RentalApplicationStatusHistory" (
+CREATE TABLE "TenancyApplicationStatusHistory" (
     "id" UUID NOT NULL,
     "applicationId" UUID NOT NULL,
     "previousStatus" "ApplicationStatus" NOT NULL,
@@ -155,7 +155,7 @@ CREATE TABLE "RentalApplicationStatusHistory" (
     "reason" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "RentalApplicationStatusHistory_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "TenancyApplicationStatusHistory_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -172,10 +172,11 @@ CREATE TABLE "CoApplicant" (
 );
 
 -- CreateTable
-CREATE TABLE "RentalAgreement" (
+CREATE TABLE "TenancyAgreement" (
     "id" UUID NOT NULL,
     "organizationId" UUID NOT NULL,
     "propertyId" UUID NOT NULL,
+    "applicationId" UUID NOT NULL,
     "agreementNumber" VARCHAR(50) NOT NULL,
     "agreementType" "AgreementType" NOT NULL,
     "status" "AgreementStatus" NOT NULL DEFAULT 'ACTIVE',
@@ -193,8 +194,9 @@ CREATE TABLE "RentalAgreement" (
     "createdBy" UUID,
     "updatedBy" UUID,
     "metadata" JSONB,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "RentalAgreement_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "TenancyAgreement_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -242,8 +244,8 @@ CREATE TABLE "RentalAgreementDetails" (
 CREATE TABLE "ShortTermAgreementDetails" (
     "id" UUID NOT NULL,
     "agreementId" UUID NOT NULL,
-    "checkInTime" TEXT,
-    "checkOutTime" TEXT,
+    "checkInTime" TIMESTAMP(3),
+    "checkOutTime" TIMESTAMP(3),
     "guestCapacity" INTEGER,
     "houseRules" TEXT,
     "bookingPlatform" TEXT,
@@ -455,46 +457,49 @@ CREATE INDEX "Tenant_createdAt_idx" ON "Tenant"("createdAt");
 CREATE INDEX "TenantReference_applicationId_idx" ON "TenantReference"("applicationId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "RentalApplication_applicationNumber_key" ON "RentalApplication"("applicationNumber");
+CREATE UNIQUE INDEX "TenancyApplication_applicationNumber_key" ON "TenancyApplication"("applicationNumber");
 
 -- CreateIndex
-CREATE INDEX "RentalApplication_organizationId_idx" ON "RentalApplication"("organizationId");
+CREATE INDEX "TenancyApplication_organizationId_idx" ON "TenancyApplication"("organizationId");
 
 -- CreateIndex
-CREATE INDEX "RentalApplication_person_idx" ON "RentalApplication"("person");
+CREATE INDEX "TenancyApplication_person_idx" ON "TenancyApplication"("person");
 
 -- CreateIndex
-CREATE INDEX "RentalApplication_propertyId_idx" ON "RentalApplication"("propertyId");
+CREATE INDEX "TenancyApplication_propertyId_idx" ON "TenancyApplication"("propertyId");
 
 -- CreateIndex
-CREATE INDEX "RentalApplication_listingId_idx" ON "RentalApplication"("listingId");
+CREATE INDEX "TenancyApplication_listingId_idx" ON "TenancyApplication"("listingId");
 
 -- CreateIndex
-CREATE INDEX "RentalApplication_status_idx" ON "RentalApplication"("status");
+CREATE INDEX "TenancyApplication_status_idx" ON "TenancyApplication"("status");
 
 -- CreateIndex
-CREATE INDEX "RentalApplicationStatusHistory_applicationId_idx" ON "RentalApplicationStatusHistory"("applicationId");
+CREATE INDEX "TenancyApplicationStatusHistory_applicationId_idx" ON "TenancyApplicationStatusHistory"("applicationId");
 
 -- CreateIndex
 CREATE INDEX "CoApplicant_applicationId_idx" ON "CoApplicant"("applicationId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "RentalAgreement_agreementNumber_key" ON "RentalAgreement"("agreementNumber");
+CREATE UNIQUE INDEX "TenancyAgreement_applicationId_key" ON "TenancyAgreement"("applicationId");
 
 -- CreateIndex
-CREATE INDEX "RentalAgreement_organizationId_idx" ON "RentalAgreement"("organizationId");
+CREATE UNIQUE INDEX "TenancyAgreement_agreementNumber_key" ON "TenancyAgreement"("agreementNumber");
 
 -- CreateIndex
-CREATE INDEX "RentalAgreement_propertyId_idx" ON "RentalAgreement"("propertyId");
+CREATE INDEX "TenancyAgreement_organizationId_idx" ON "TenancyAgreement"("organizationId");
 
 -- CreateIndex
-CREATE INDEX "RentalAgreement_status_idx" ON "RentalAgreement"("status");
+CREATE INDEX "TenancyAgreement_propertyId_idx" ON "TenancyAgreement"("propertyId");
 
 -- CreateIndex
-CREATE INDEX "RentalAgreement_agreementType_idx" ON "RentalAgreement"("agreementType");
+CREATE INDEX "TenancyAgreement_status_idx" ON "TenancyAgreement"("status");
 
 -- CreateIndex
-CREATE INDEX "RentalAgreement_startDate_endDate_idx" ON "RentalAgreement"("startDate", "endDate");
+CREATE INDEX "TenancyAgreement_agreementType_idx" ON "TenancyAgreement"("agreementType");
+
+-- CreateIndex
+CREATE INDEX "TenancyAgreement_startDate_endDate_idx" ON "TenancyAgreement"("startDate", "endDate");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AgreementStatusHistory_agreementId_key" ON "AgreementStatusHistory"("agreementId");
@@ -584,28 +589,31 @@ CREATE INDEX "AdditionalCharge_agreementId_idx" ON "AdditionalCharge"("agreement
 ALTER TABLE "TenantStatusHistory" ADD CONSTRAINT "TenantStatusHistory_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TenantReference" ADD CONSTRAINT "TenantReference_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "RentalApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "TenantReference" ADD CONSTRAINT "TenantReference_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "TenancyApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "RentalApplicationStatusHistory" ADD CONSTRAINT "RentalApplicationStatusHistory_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "RentalApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "TenancyApplicationStatusHistory" ADD CONSTRAINT "TenancyApplicationStatusHistory_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "TenancyApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CoApplicant" ADD CONSTRAINT "CoApplicant_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "RentalApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "CoApplicant" ADD CONSTRAINT "CoApplicant_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "TenancyApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AgreementStatusHistory" ADD CONSTRAINT "AgreementStatusHistory_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "RentalAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "TenancyAgreement" ADD CONSTRAINT "TenancyAgreement_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "TenancyApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "LeaseAgreementDetails" ADD CONSTRAINT "LeaseAgreementDetails_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "RentalAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "AgreementStatusHistory" ADD CONSTRAINT "AgreementStatusHistory_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "TenancyAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "RentalAgreementDetails" ADD CONSTRAINT "RentalAgreementDetails_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "RentalAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "LeaseAgreementDetails" ADD CONSTRAINT "LeaseAgreementDetails_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "TenancyAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ShortTermAgreementDetails" ADD CONSTRAINT "ShortTermAgreementDetails_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "RentalAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "RentalAgreementDetails" ADD CONSTRAINT "RentalAgreementDetails_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "TenancyAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AgreementParticipant" ADD CONSTRAINT "AgreementParticipant_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "RentalAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ShortTermAgreementDetails" ADD CONSTRAINT "ShortTermAgreementDetails_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "TenancyAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AgreementParticipant" ADD CONSTRAINT "AgreementParticipant_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "TenancyAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AgreementParticipant" ADD CONSTRAINT "AgreementParticipant_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -617,13 +625,13 @@ ALTER TABLE "ParticipantStatusHistory" ADD CONSTRAINT "ParticipantStatusHistory_
 ALTER TABLE "TenantDocument" ADD CONSTRAINT "TenantDocument_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BackgroundCheckStatusHistory" ADD CONSTRAINT "BackgroundCheckStatusHistory_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "RentalApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "BackgroundCheckStatusHistory" ADD CONSTRAINT "BackgroundCheckStatusHistory_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "TenancyApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ScreeningResponse" ADD CONSTRAINT "ScreeningResponse_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "RentalApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ScreeningResponse" ADD CONSTRAINT "ScreeningResponse_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "TenancyApplication"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ScreeningResponse" ADD CONSTRAINT "ScreeningResponse_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "ScreeningQuestion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AdditionalCharge" ADD CONSTRAINT "AdditionalCharge_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "RentalAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "AdditionalCharge" ADD CONSTRAINT "AdditionalCharge_agreementId_fkey" FOREIGN KEY ("agreementId") REFERENCES "TenancyAgreement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
