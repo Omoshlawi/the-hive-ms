@@ -8,13 +8,23 @@ import {
   purgeTenancyApplication,
   updateTenancyApplication,
 } from "../controllers/tenancy-applications";
-import { validateUUIDPathParam } from "@hive/shared-middlewares";
+import {
+  requireAuthentication,
+  requireContext,
+  requireOrganizationContext,
+  validateUUIDPathParam,
+} from "@hive/shared-middlewares";
 import coapplicantRouter from "./application-coapplicants";
 import referencesrouter from "./application-references";
 import statusRouter from "./application-status";
+import serviceClient from "@/services/service-client";
 const router = Router({ mergeParams: true });
 
-router.get("/", getTenancyApplications);
+router.get(
+  "/",
+  [requireAuthentication(serviceClient), requireContext],
+  getTenancyApplications
+);
 router.post("/", addTenancyApplication);
 router.get(
   "/:applicationId",

@@ -18,7 +18,15 @@ import serviceClient from "@/services/service-client";
 
 const router = Router({ mergeParams: true });
 
-router.get("/", getTenants);
+router.get(
+  "/",
+  [
+    requireAuthentication(serviceClient),
+    requireContext,
+    requireOrganizationContext(serviceClient),
+  ],
+  getTenants
+);
 router.post(
   "/",
   [

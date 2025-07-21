@@ -22,7 +22,7 @@ export const getTenants = async (
   try {
     type Args = Parameters<typeof TenantsModel.findMany>[0];
     const filters: Args = {
-      where: { status: "ACTIVE" },
+      where: { status: "ACTIVE", organizationId: req.context?.organizationId },
     };
     const results = await TenantsModel.findMany({
       ...filters,

@@ -20,6 +20,35 @@ export type Organization = {
   description: string;
 };
 
+export interface User {
+  id: string;
+  username: string;
+  profileUpdated: boolean;
+  accountVerified: any;
+  voided: boolean;
+  isAdmin: boolean;
+  password: string;
+  lastLogin: string;
+  createdAt: string;
+  updatedAt: string;
+  person?: Person;
+}
+export interface Person {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  surname?: string;
+  userId?: string;
+  avatarUrl?: string;
+  phoneNumber: string;
+  email: string;
+  gender: string;
+  createdAt: string;
+  updatedAt: string;
+  voided: boolean;
+  name?: string;
+}
+
 export type Context = {
   userId: string;
   organizationId?: string;
@@ -31,6 +60,7 @@ declare global {
   namespace Express {
     interface Request {
       context?: Context;
+      user?: User;
     }
   }
 }

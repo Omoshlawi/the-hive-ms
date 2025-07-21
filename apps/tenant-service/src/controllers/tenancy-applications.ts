@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from "express";
-import pick from "lodash/pick";
-import { TenancyApplicationsModel, TenantsModel } from "../models";
+import serviceClient from "@/services/service-client";
+import { Listing, Person } from "@/types";
+import { ID_GEN_CONFIG } from "@/utils";
 import { TenancyApplicationValidator } from "@/utils/validators";
 import {
   APIException,
@@ -9,11 +9,10 @@ import {
   nullifyExceptionAsync,
   paginate,
 } from "@hive/core-utils";
-import serviceClient from "@/services/service-client";
-import { ID_GEN_CONFIG } from "@/utils";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
-import { Listing, Person } from "@/types";
-import { Tenant } from "dist/prisma";
+import { NextFunction, Request, Response } from "express";
+import pick from "lodash/pick";
+import { TenancyApplicationsModel } from "../models";
 
 export const getTenancyApplications = async (
   req: Request,
@@ -23,7 +22,13 @@ export const getTenancyApplications = async (
   try {
     type Args = Parameters<typeof TenancyApplicationsModel.findMany>[0];
     const filters: Args = {
-      where: { voided: false },
+      where: {
+        voided: false,
+        organizationId: req?.context?.organizationId,
+        personId: !req?.context?.organizationId
+          ? req.user?.person?.id
+          : undefined,
+      },
     };
     const results = await TenancyApplicationsModel.findMany({
       ...filters,

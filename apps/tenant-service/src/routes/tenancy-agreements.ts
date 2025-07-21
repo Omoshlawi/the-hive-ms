@@ -19,7 +19,11 @@ import participantsRouter from "./agreement-participants";
 import serviceClient from "@/services/service-client";
 const router = Router({ mergeParams: true });
 
-router.get("/", getTenancyAgreements);
+router.get(
+  "/",
+  [requireAuthentication(serviceClient), requireContext],
+  getTenancyAgreements
+);
 router.post(
   "/",
   [

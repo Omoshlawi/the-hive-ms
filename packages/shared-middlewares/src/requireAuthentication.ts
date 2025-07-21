@@ -1,7 +1,7 @@
 import { APIException, ServiceClient } from "@hive/core-utils";
 import { NextFunction, Response, Request } from "express";
 import { sanitizeHeaders } from "./helpers";
-
+import { User } from "./types";
 export const requireAuthentication =
   (serviceClient: ServiceClient) =>
   async (req: Request, res: Response, next: NextFunction) => {
@@ -9,16 +9,18 @@ export const requireAuthentication =
       const token = req.header("x-access-token");
       if (!token)
         throw new APIException(401, { detail: "Unauthorized - Token missing" });
-      const user = await serviceClient.callService(
+      const user = await serviceClient.callService<User>(
         "@hive/authentication-service",
         {
           method: "GET",
           url: "/users/profile",
           headers: sanitizeHeaders(req),
-          params: {},
+          params: {
+            v: "custom:include(person)",
+          },
         }
       );
-      (req as any).user = user;
+      req.user = user;
       return next();
     } catch (error) {
       next(error);

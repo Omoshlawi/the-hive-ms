@@ -20,7 +20,16 @@ export const getTenancyAgreements = async (
   try {
     type Args = Parameters<typeof TenancyAgrementModel.findMany>[0];
     const filters: Args = {
-      where: { voided: false },
+      where: {
+        voided: false,
+        // if within org context, fetch only organization's else fetch whome client is particpating on
+        organizationId: req?.context?.organizationId,
+        participants: !req?.context?.organizationId
+          ? {
+              some: { tenant: { personId: req.user?.person?.id } },
+            }
+          : undefined,
+      },
     };
     const results = await TenancyAgrementModel.findMany({
       ...filters,
