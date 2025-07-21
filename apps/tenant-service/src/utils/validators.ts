@@ -25,7 +25,7 @@ export const TenantValidator = z.object({
   emergencyContactName: z.string().optional(),
   emergencyContactPhone: z.string().optional(),
   emergencyContactEmail: z.string().email().optional(),
-  emergencyContactRelation: z.string().email().optional(),
+  emergencyContactRelation: z.string().optional(),
   preferredContactMethod: z.enum(["EMAIL", "PHONE", "SMS", "MAIL"]).optional(),
   languagePreference: z.string().optional(),
   specialRequirements: z.string().optional(),
@@ -84,7 +84,7 @@ export const ScreeningQuestionValidator = z.object({
   sortOrder: z.coerce.number().optional(),
 });
 
-export const RentalApplicationValidator = z.object({
+export const TenancyApplicationValidator = z.object({
   personId: z.string().nonempty().uuid("Invalid"),
   listingId: z.string().nonempty().uuid("Invalid"),
   desiredMoveInDate: z.coerce.date(),
@@ -97,7 +97,7 @@ export const RentalApplicationValidator = z.object({
   references: TenenantReferenceValidator.array().optional(),
 });
 
-export const RentalApplicationStatusValidator = z.object({
+export const TenancyApplicationStatusValidator = z.object({
   status: z.enum([
     "DRAFT",
     "PENDING",
@@ -146,7 +146,7 @@ export const AdditionalChargeValidator = z.object({
   name: z.string().nonempty(),
   description: z.string().optional(),
   amount: z.coerce.number().nonnegative(),
-  frequesncy: z.enum([
+  frequency: z.enum([
     "ONE_TIME",
     "DAILY",
     "WEEKLY",
@@ -160,7 +160,7 @@ export const AdditionalChargeValidator = z.object({
   dueDate: z.coerce.date().optional(),
 });
 
-export const RentalAgreementValidator = z.object({
+export const TenancyAgreementValidator = z.object({
   applicationId: z.string().nonempty().uuid({ message: "Invalid" }),
   agreementType: z.enum([
     "LEASE",

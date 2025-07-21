@@ -1,45 +1,45 @@
 import { Router } from "express";
 import {
-  addRentalApplication,
-  deleteRentalApplication,
-  getRentalApplication,
-  getRentalApplications,
-  patchRentalApplication,
-  purgeRentalApplication,
-  updateRentalApplication,
-} from "../controllers/rental-applications";
+  addTenancyApplication,
+  deleteTenancyApplication,
+  getTenancyApplication,
+  getTenancyApplications,
+  patchTenancyApplication,
+  purgeTenancyApplication,
+  updateTenancyApplication,
+} from "../controllers/tenancy-applications";
 import { validateUUIDPathParam } from "@hive/shared-middlewares";
 import coapplicantRouter from "./application-coapplicants";
 import referencesrouter from "./application-references";
 import statusRouter from "./application-status";
 const router = Router({ mergeParams: true });
 
-router.get("/", getRentalApplications);
-router.post("/", addRentalApplication);
+router.get("/", getTenancyApplications);
+router.post("/", addTenancyApplication);
 router.get(
   "/:applicationId",
   [validateUUIDPathParam("applicationId")],
-  getRentalApplication
+  getTenancyApplication
 );
 router.patch(
   "/:applicationId",
   [validateUUIDPathParam("applicationId")],
-  patchRentalApplication
+  patchTenancyApplication
 );
 router.put(
   "/:applicationId",
   [validateUUIDPathParam("applicationId")],
-  updateRentalApplication
+  updateTenancyApplication
 );
 router.delete(
   "/:applicationId",
   [validateUUIDPathParam("applicationId")],
-  deleteRentalApplication
+  deleteTenancyApplication
 );
 router.purge(
   "/:applicationId",
   [validateUUIDPathParam("applicationId")],
-  purgeRentalApplication
+  purgeTenancyApplication
 );
 router.use(
   "/:applicationId/co-applicants",

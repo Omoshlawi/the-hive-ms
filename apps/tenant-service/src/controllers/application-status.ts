@@ -1,8 +1,8 @@
 import {
-  RentalApplicationsModel,
-  RentalApplicationStatusHistoryModel,
+  TenancyApplicationsModel,
+  TenancyApplicationStatusHistoryModel,
 } from "@/models";
-import { RentalApplicationStatusValidator } from "@/utils/validators";
+import { TenancyApplicationStatusValidator } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
@@ -18,19 +18,19 @@ export const getApplicationStatusHistorys = async (
 ) => {
   try {
     type Args = Parameters<
-      typeof RentalApplicationStatusHistoryModel.findMany
+      typeof TenancyApplicationStatusHistoryModel.findMany
     >[0];
     const filters: Args = {
       where: {
         applicationId: req.params.applicationId,
       },
     };
-    const results = await RentalApplicationStatusHistoryModel.findMany({
+    const results = await TenancyApplicationStatusHistoryModel.findMany({
       ...filters,
       ...paginate(req.query),
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    const totalCount = await RentalApplicationStatusHistoryModel.count(
+    const totalCount = await TenancyApplicationStatusHistoryModel.count(
       pick(filters, "where")
     );
     return res.json({
@@ -48,25 +48,25 @@ export const submitDraftApplicationForReview = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await RentalApplicationStatusValidator.omit({
+    const validation = await TenancyApplicationStatusValidator.omit({
       status: true,
     }).safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { reason } = validation.data;
-    const application = await RentalApplicationsModel.findFirstOrThrow({
+    const application = await TenancyApplicationsModel.findFirstOrThrow({
       where: { id: req.params.applicationId },
     });
     if (application.status !== "DRAFT")
       throw new APIException(400, { status: ["Invalid status"] });
     const changedBy = req.context!.userId!;
-    await RentalApplicationsModel.update({
+    await TenancyApplicationsModel.update({
       where: { id: req.params.applicationId },
       data: {
         status: "PENDING",
       },
     });
-    const item = await RentalApplicationStatusHistoryModel.create({
+    const item = await TenancyApplicationStatusHistoryModel.create({
       data: {
         applicationId: req.params.applicationId!,
         previousStatus: application.status,
@@ -87,7 +87,7 @@ export const approvePendingApplication = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await RentalApplicationStatusValidator.omit({
+    const validation = await TenancyApplicationStatusValidator.omit({
       status: true,
     })
       .partial()
@@ -95,7 +95,7 @@ export const approvePendingApplication = async (
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { reason } = validation.data;
-    const application = await RentalApplicationsModel.findFirstOrThrow({
+    const application = await TenancyApplicationsModel.findFirstOrThrow({
       where: { id: req.params.applicationId },
     });
 
@@ -104,13 +104,13 @@ export const approvePendingApplication = async (
 
     const changedBy = req.context!.userId!;
 
-    await RentalApplicationsModel.update({
+    await TenancyApplicationsModel.update({
       where: { id: req.params.applicationId },
       data: {
         status: "APPROVED",
       },
     });
-    const item = await RentalApplicationStatusHistoryModel.create({
+    const item = await TenancyApplicationStatusHistoryModel.create({
       data: {
         applicationId: req.params.applicationId!,
         previousStatus: application.status,
@@ -131,26 +131,26 @@ export const rejectPendingApplication = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await RentalApplicationStatusValidator.omit({
+    const validation = await TenancyApplicationStatusValidator.omit({
       status: true,
     }).safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { reason } = validation.data;
-    const application = await RentalApplicationsModel.findFirstOrThrow({
+    const application = await TenancyApplicationsModel.findFirstOrThrow({
       where: { id: req.params.applicationId },
     });
     if (application.status !== "PENDING")
       throw new APIException(400, { status: ["Invalid status"] });
     const changedBy = req.context!.userId!;
 
-    await RentalApplicationsModel.update({
+    await TenancyApplicationsModel.update({
       where: { id: req.params.applicationId },
       data: {
         status: "REJECTED",
       },
     });
-    const item = await RentalApplicationStatusHistoryModel.create({
+    const item = await TenancyApplicationStatusHistoryModel.create({
       data: {
         applicationId: req.params.applicationId!,
         previousStatus: application.status,
@@ -171,24 +171,24 @@ export const withdrawApplication = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await RentalApplicationStatusValidator.omit({
+    const validation = await TenancyApplicationStatusValidator.omit({
       status: true,
     }).safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { reason } = validation.data;
-    const application = await RentalApplicationsModel.findFirstOrThrow({
+    const application = await TenancyApplicationsModel.findFirstOrThrow({
       where: { id: req.params.applicationId },
     });
     const changedBy = req.context!.userId!;
 
-    await RentalApplicationsModel.update({
+    await TenancyApplicationsModel.update({
       where: { id: req.params.applicationId },
       data: {
         status: "WITHDRAWN",
       },
     });
-    const item = await RentalApplicationStatusHistoryModel.create({
+    const item = await TenancyApplicationStatusHistoryModel.create({
       data: {
         applicationId: req.params.applicationId!,
         previousStatus: application.status,
@@ -210,26 +210,26 @@ export const updateApplicationStatus = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await RentalApplicationStatusValidator.safeParseAsync(
+    const validation = await TenancyApplicationStatusValidator.safeParseAsync(
       req.body
     );
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const { reason, status } = validation.data;
-    const application = await RentalApplicationsModel.findFirstOrThrow({
+    const application = await TenancyApplicationsModel.findFirstOrThrow({
       where: { id: req.params.applicationId },
     });
     if (application.status === status)
       throw new APIException(400, { status: ["Invalid status"] });
     const changedBy = req.context!.userId!;
 
-    await RentalApplicationsModel.update({
+    await TenancyApplicationsModel.update({
       where: { id: req.params.applicationId },
       data: {
         status,
       },
     });
-    const item = await RentalApplicationStatusHistoryModel.create({
+    const item = await TenancyApplicationStatusHistoryModel.create({
       data: {
         applicationId: req.params.applicationId!,
         previousStatus: application.status,

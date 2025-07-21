@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import pick from "lodash/pick";
-import { RentalApplicationsModel, TenantsModel } from "../models";
-import { RentalApplicationValidator } from "@/utils/validators";
+import { TenancyApplicationsModel, TenantsModel } from "../models";
+import { TenancyApplicationValidator } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
@@ -15,22 +15,22 @@ import { sanitizeHeaders } from "@hive/shared-middlewares";
 import { Listing, Person } from "@/types";
 import { Tenant } from "dist/prisma";
 
-export const getRentalApplications = async (
+export const getTenancyApplications = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    type Args = Parameters<typeof RentalApplicationsModel.findMany>[0];
+    type Args = Parameters<typeof TenancyApplicationsModel.findMany>[0];
     const filters: Args = {
       where: { voided: false },
     };
-    const results = await RentalApplicationsModel.findMany({
+    const results = await TenancyApplicationsModel.findMany({
       ...filters,
       ...paginate(req.query),
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    const totalCount = await RentalApplicationsModel.count(
+    const totalCount = await TenancyApplicationsModel.count(
       pick(filters, "where")
     );
     return res.json({
@@ -42,13 +42,13 @@ export const getRentalApplications = async (
   }
 };
 
-export const getRentalApplication = async (
+export const getTenancyApplication = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const item = await RentalApplicationsModel.findUniqueOrThrow({
+    const item = await TenancyApplicationsModel.findUniqueOrThrow({
       where: { id: req.params.applicationId, voided: false },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -58,13 +58,13 @@ export const getRentalApplication = async (
   }
 };
 
-export const addRentalApplication = async (
+export const addTenancyApplication = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const validation = await RentalApplicationValidator.safeParseAsync(
+    const validation = await TenancyApplicationValidator.safeParseAsync(
       req.body
     );
     if (!validation.success)
@@ -136,7 +136,7 @@ export const addRentalApplication = async (
       data: { ...ID_GEN_CONFIG.application },
       headers: sanitizeHeaders(req),
     });
-    const item = await RentalApplicationsModel.create({
+    const item = await TenancyApplicationsModel.create({
       data: {
         ...validation.data,
         applicationNumber: identifier,
@@ -168,19 +168,19 @@ export const addRentalApplication = async (
   }
 };
 
-export const updateRentalApplication = async (
+export const updateTenancyApplication = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const validation = await RentalApplicationValidator.omit({
+    const validation = await TenancyApplicationValidator.omit({
       coApplicants: true,
       references: true,
     }).safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const item = await RentalApplicationsModel.update({
+    const item = await TenancyApplicationsModel.update({
       where: { id: req.params.applicationId, voided: false },
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
@@ -191,13 +191,13 @@ export const updateRentalApplication = async (
   }
 };
 
-export const patchRentalApplication = async (
+export const patchTenancyApplication = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const validation = await RentalApplicationValidator.omit({
+    const validation = await TenancyApplicationValidator.omit({
       coApplicants: true,
       references: true,
     })
@@ -205,7 +205,7 @@ export const patchRentalApplication = async (
       .safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
-    const item = await RentalApplicationsModel.update({
+    const item = await TenancyApplicationsModel.update({
       where: { id: req.params.applicationId, voided: false },
       data: validation.data,
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
@@ -216,13 +216,13 @@ export const patchRentalApplication = async (
   }
 };
 
-export const deleteRentalApplication = async (
+export const deleteTenancyApplication = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const item = await RentalApplicationsModel.update({
+    const item = await TenancyApplicationsModel.update({
       where: { id: req.params.applicationId, voided: false },
       data: {
         voided: true,
@@ -235,13 +235,13 @@ export const deleteRentalApplication = async (
   }
 };
 
-export const purgeRentalApplication = async (
+export const purgeTenancyApplication = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const item = await RentalApplicationsModel.delete({
+    const item = await TenancyApplicationsModel.delete({
       where: { id: req.params.applicationId, voided: false },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });

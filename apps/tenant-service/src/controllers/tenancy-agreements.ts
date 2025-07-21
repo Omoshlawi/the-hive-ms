@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import pick from "lodash/pick";
-import { RentalAgrementModel, RentalApplicationsModel } from "../models";
-import { RentalAgreementValidator } from "@/utils/validators";
+import { TenancyAgrementModel, TenancyApplicationsModel } from "../models";
+import { TenancyAgreementValidator } from "@/utils/validators";
 import {
   APIException,
   getMultipleOperationCustomRepresentationQeury,
@@ -12,22 +12,22 @@ import serviceClient from "@/services/service-client";
 import { ID_GEN_CONFIG } from "@/utils";
 import { sanitizeHeaders } from "@hive/shared-middlewares";
 
-export const getRentalAgreements = async (
+export const getTenancyAgreements = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    type Args = Parameters<typeof RentalAgrementModel.findMany>[0];
+    type Args = Parameters<typeof TenancyAgrementModel.findMany>[0];
     const filters: Args = {
       where: { voided: false },
     };
-    const results = await RentalAgrementModel.findMany({
+    const results = await TenancyAgrementModel.findMany({
       ...filters,
       ...paginate(req.query),
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
-    const totalCount = await RentalAgrementModel.count(pick(filters, "where"));
+    const totalCount = await TenancyAgrementModel.count(pick(filters, "where"));
     return res.json({
       results,
       ...getPaginationControls(req, totalCount),
@@ -37,13 +37,13 @@ export const getRentalAgreements = async (
   }
 };
 
-export const getRentalAgreement = async (
+export const getTenancyAgreement = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const item = await RentalAgrementModel.findUniqueOrThrow({
+    const item = await TenancyAgrementModel.findUniqueOrThrow({
       where: { id: req.params.agreementId, voided: false },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });
@@ -53,13 +53,13 @@ export const getRentalAgreement = async (
   }
 };
 
-export const addRentalAgreement = async (
+export const addTenancyAgreement = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const validation = await RentalAgreementValidator.safeParseAsync(req.body);
+    const validation = await TenancyAgreementValidator.safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const {
@@ -73,7 +73,7 @@ export const addRentalAgreement = async (
     } = validation.data;
     const organizationId = req.context!.organizationId!;
     const userId = req.context!.userId!;
-    const application = await RentalApplicationsModel.findUnique({
+    const application = await TenancyApplicationsModel.findUnique({
       where: { id: applicationId },
     });
     if (!application || application.status !== "APPROVED")
@@ -89,7 +89,7 @@ export const addRentalAgreement = async (
       data: { ...ID_GEN_CONFIG.agreement },
       headers: sanitizeHeaders(req),
     });
-    const item = await RentalAgrementModel.create({
+    const item = await TenancyAgrementModel.create({
       data: {
         ...validation.data,
         agreementNumber: identifier,
@@ -129,13 +129,13 @@ export const addRentalAgreement = async (
   }
 };
 
-export const updateRentalAgreement = async (
+export const updateTenancyAgreement = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const validation = await RentalAgreementValidator.omit({
+    const validation = await TenancyAgreementValidator.omit({
       additionalCharges: true,
       participants: true,
     }).safeParseAsync(req.body);
@@ -143,7 +143,7 @@ export const updateRentalAgreement = async (
       throw new APIException(400, validation.error.format());
     const { leaseDetails, rentalDetails, shortTermDetails, agreementType } =
       validation.data;
-    const item = await RentalAgrementModel.update({
+    const item = await TenancyAgrementModel.update({
       where: { id: req.params.agreementId, voided: false, agreementType },
       data: {
         ...validation.data,
@@ -164,13 +164,13 @@ export const updateRentalAgreement = async (
   }
 };
 
-export const patchRentalAgreement = async (
+export const patchTenancyAgreement = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const validation = await RentalAgreementValidator.omit({
+    const validation = await TenancyAgreementValidator.omit({
       additionalCharges: true,
       participants: true,
     })
@@ -181,7 +181,7 @@ export const patchRentalAgreement = async (
 
     const { leaseDetails, rentalDetails, shortTermDetails, agreementType } =
       validation.data;
-    const item = await RentalAgrementModel.update({
+    const item = await TenancyAgrementModel.update({
       where: { id: req.params.agreementId, voided: false },
       data: {
         ...validation.data,
@@ -202,13 +202,13 @@ export const patchRentalAgreement = async (
   }
 };
 
-export const deleteRentalAgreement = async (
+export const deleteTenancyAgreement = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const item = await RentalAgrementModel.update({
+    const item = await TenancyAgrementModel.update({
       where: { id: req.params.agreementId, voided: false },
       data: {
         voided: true,
@@ -221,13 +221,13 @@ export const deleteRentalAgreement = async (
   }
 };
 
-export const purgeRentalAgreement = async (
+export const purgeTenancyAgreement = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const item = await RentalAgrementModel.delete({
+    const item = await TenancyAgrementModel.delete({
       where: { id: req.params.agreementId, voided: false },
       ...getMultipleOperationCustomRepresentationQeury(req.query?.v as string),
     });

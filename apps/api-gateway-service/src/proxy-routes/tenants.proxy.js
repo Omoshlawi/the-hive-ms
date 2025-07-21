@@ -9,14 +9,14 @@ module.exports = [
     serviceVersion,
   },
   {
-    path: "/rental-applications",
-    prefix: "/rental-applications",
+    path: "/tenancy-applications",
+    prefix: "/tenancy-applications",
     serviceName,
     serviceVersion,
   },
   {
-    path: "/rental-agreement",
-    prefix: "/rental-agreement",
+    path: "/tenancy-agreements",
+    prefix: "/tenancy-agreements",
     serviceName,
     serviceVersion,
   },
