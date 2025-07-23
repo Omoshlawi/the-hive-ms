@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "ListingStatus" AS ENUM ('DRAFT', 'PENDING', 'BLOCKED', 'APPROVED', 'REJECTED', 'UNDER_CONTRACTED', 'SOLD', 'LEASED', 'RENTED', 'WITHDRAWN', 'EXPIRED');
+CREATE TYPE "ListingStatus" AS ENUM ('DRAFT', 'PENDING', 'BLOCKED', 'APPROVED', 'REJECTED', 'UNDER_CONTRACT', 'SOLD', 'LEASED', 'RENTED', 'WITHDRAWN', 'EXPIRED');
 
 -- CreateEnum
 CREATE TYPE "MediaType" AS ENUM ('IMAGE', 'VIDEO', 'DOCUMENT', 'FLOOR_PLAN', 'LEGAL_DOC', 'CONTRACT', 'OTHER');
@@ -28,11 +28,11 @@ CREATE TABLE "ListingMedia" (
     "id" UUID NOT NULL,
     "listingId" UUID NOT NULL,
     "tags" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "title" TEXT NOT NULL,
+    "title" TEXT,
     "description" TEXT,
     "url" TEXT NOT NULL,
     "metadata" JSONB,
-    "mediaType" "MediaType" NOT NULL DEFAULT 'IMAGE',
+    "mediaType" "MediaType" NOT NULL,
     "documentPurpose" TEXT,
     "order" INTEGER NOT NULL DEFAULT 0,
     "voided" BOOLEAN NOT NULL DEFAULT false,
@@ -46,6 +46,7 @@ CREATE TABLE "ListingMedia" (
 -- CreateTable
 CREATE TABLE "Listing" (
     "id" UUID NOT NULL,
+    "listingNumber" TEXT NOT NULL,
     "propertyId" UUID NOT NULL,
     "property" JSONB,
     "organizationId" UUID NOT NULL,
@@ -75,7 +76,10 @@ CREATE TABLE "Listing" (
 CREATE TABLE "OwnershipType" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
+    "description" TEXT,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "OwnershipType_pkey" PRIMARY KEY ("id")
 );
@@ -84,7 +88,10 @@ CREATE TABLE "OwnershipType" (
 CREATE TABLE "FinancingOption" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
+    "description" TEXT,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "FinancingOption_pkey" PRIMARY KEY ("id")
 );
@@ -108,6 +115,10 @@ CREATE TABLE "SaleListingFinancingOption" (
     "id" UUID NOT NULL,
     "listingId" UUID NOT NULL,
     "optionId" UUID NOT NULL,
+    "notes" TEXT,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "SaleListingFinancingOption_pkey" PRIMARY KEY ("id")
 );
@@ -169,8 +180,6 @@ CREATE TABLE "RentToOwnListing" (
     "optionFee" DECIMAL(12,2) NOT NULL,
     "optionPeriod" INTEGER NOT NULL,
     "requiredDownPayment" DECIMAL(12,2) NOT NULL,
-    "maintenanceTerms" TEXT,
-    "purchaseTerms" TEXT,
     "minimumIncome" DECIMAL(12,2),
     "creditScoreRequired" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -244,6 +253,7 @@ CREATE TABLE "ListingCharge" (
     "frequency" "ChargeFrequency" NOT NULL DEFAULT 'ONE_TIME',
     "mandatory" BOOLEAN NOT NULL DEFAULT true,
     "metadata" JSONB,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -254,7 +264,13 @@ CREATE TABLE "ListingCharge" (
 CREATE INDEX "ListingMedia_listingId_idx" ON "ListingMedia"("listingId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Listing_listingNumber_key" ON "Listing"("listingNumber");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "SaleListing_listingId_key" ON "SaleListing"("listingId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "SaleListingFinancingOption_listingId_optionId_key" ON "SaleListingFinancingOption"("listingId", "optionId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "RentalListing_listingId_key" ON "RentalListing"("listingId");

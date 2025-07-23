@@ -26,3 +26,10 @@ export const serviceIdentity: ServiceIdentity = {
   name: configuration.name,
   version: configuration.version,
 };
+
+export const ID_GEN_CONFIG = {
+  listing: {
+    prefix: "LST",
+    dataModel: "Listing",
+  },
+};

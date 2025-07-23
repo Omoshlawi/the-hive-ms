@@ -78,6 +78,7 @@ enum ListingType {
 
 model Listing {
   id             String        @id @default(uuid()) @db.Uuid
+  listingNumber  String        @unique
   propertyId     String        @db.Uuid
   property       Json? // minimal property
   organizationId String        @db.Uuid

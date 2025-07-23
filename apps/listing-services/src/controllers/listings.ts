@@ -17,6 +17,7 @@ import { sanitizeHeaders } from "@hive/shared-middlewares";
 import { ListingData, Property } from "@/types";
 import logger from "@/services/logger";
 import pick from "lodash/pick";
+import { ID_GEN_CONFIG } from "@/utils";
 
 const validateTypes = (type: ListingData["type"] | undefined, data: any) => {
   if (type === "RENTAL" && !data.rentalDetails)
@@ -206,10 +207,19 @@ export const addListing = async (
       throw new APIException(400, {
         propertyId: { _errors: ["Invalid property"] },
       });
-
+    // generate id
+    const { identifier } = await serviceClient.callService<{
+      identifier: string;
+    }>("@hive/policy-engine-service", {
+      url: "/id-gen",
+      method: "POST",
+      data: { ...ID_GEN_CONFIG.listing },
+      headers: sanitizeHeaders(req),
+    });
     const item = await ListingModel.create({
       data: {
         ...validation.data,
+        listingNumber: identifier,
         additionalCharges: validation.data?.additionalCharges?.length
           ? {
               createMany: {
