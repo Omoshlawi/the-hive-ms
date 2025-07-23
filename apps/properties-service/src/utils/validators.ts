@@ -111,13 +111,15 @@ export const RelationshipTypeSchema = z.object({
 });
 
 // Relationship
-export const RelationshipSchema = z.object({
-  propertyAId: z.string().uuid(),
-  propertyBId: z.string().uuid(),
-  startDate: z.date({ coerce: true }),
-  endDate: z.date({ coerce: true }).optional(),
-  typeId: z.string().uuid(),
-});
+export const RelationshipSchema = z
+  .object({
+    propertyAId: z.string().uuid(),
+    propertyBId: z.string().uuid(),
+    startDate: z.date({ coerce: true }),
+    endDate: z.date({ coerce: true }).optional(),
+    typeId: z.string().uuid(),
+  })
+
 
 // Relationship filters
 export const RelationshipFilterSchema = z.object({

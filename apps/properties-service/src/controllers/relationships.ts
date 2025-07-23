@@ -84,7 +84,13 @@ export const addRelationship = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await RelationshipSchema.safeParseAsync(req.body);
+    const validation = await RelationshipSchema.refine(
+      (data) => data.propertyAId !== data.propertyBId,
+      {
+        path: ["propertyBId"],
+        message: "Can't relate property to itself",
+      }
+    ).safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await RelationshipsModel.create({
@@ -104,7 +110,10 @@ export const updateRelationship = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await RelationshipSchema.safeParseAsync(req.body);
+    const validation = await RelationshipSchema.omit({
+      propertyAId: true,
+      propertyBId: true,
+    }).safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await RelationshipsModel.update({
@@ -125,9 +134,12 @@ export const patchRelationship = async (
   next: NextFunction
 ) => {
   try {
-    const validation = await RelationshipSchema.partial().safeParseAsync(
-      req.body
-    );
+    const validation = await RelationshipSchema.omit({
+      propertyAId: true,
+      propertyBId: true,
+    })
+      .partial()
+      .safeParseAsync(req.body);
     if (!validation.success)
       throw new APIException(400, validation.error.format());
     const item = await RelationshipsModel.update({
