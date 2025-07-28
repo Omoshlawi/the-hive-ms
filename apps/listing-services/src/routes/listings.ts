@@ -1,5 +1,6 @@
 import serviceClient from "@/services/service-client";
 import {
+  optionalContext,
   requireAuthentication,
   requireContext,
   requireOrganizationContext,
@@ -21,7 +22,7 @@ import listingStatusRouter from "./listing-status";
 import listingMediaRouter from "./listing-media";
 const router = Router({ mergeParams: true });
 
-router.get("/", getListings);
+router.get("/", [optionalContext], getListings);
 router.post(
   "/",
   [

@@ -7,6 +7,6 @@ const router = Router();
 
 router.get("/", [requireContext], getUsers);
 router.get("/profile", authenticate, getUserByToken); // Profile has higher priotity to uuid
-router.get("/:userId", [requireContext], getUser);
+router.get("/:userId", [], getUser);
 
 export default router;

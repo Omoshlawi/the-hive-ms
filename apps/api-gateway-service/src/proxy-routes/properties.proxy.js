@@ -55,6 +55,6 @@ module.exports = [
     prefix: "/properties",
     serviceVersion,
     serviceName,
-    authenticate:true
+    // authenticate:true
   },
 ]

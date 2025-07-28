@@ -30,7 +30,7 @@ module.exports = [
     prefix: "/users",
     serviceName,
     serviceVersion,
-    authenticate: true,
+    // authenticate: true,
   },
   {
     path: "/person",
